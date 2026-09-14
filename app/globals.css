@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+/* ============================================================
+   Clubhouse · Sistema de diseño (ÁREA A del documento)
+   Colores tomados exactamente del Manual de Marca (brand book).
+   ============================================================ */
+@theme {
+  /* Paleta oficial de marca */
+  --color-verde-calle: #1f3b2f; /* verde oscuro del ícono y fondos */
+  --color-verde-golf: #2e5b45; /* variante media para botones/links */
+  --color-champagne: #a98745; /* dorado oficial */
+  --color-crema: #f6f3ec; /* crema oficial */
+  --color-blanco-roto: #fdfcf9;
+  --color-arena: #e6ddc9;
+  --color-carbon: #1a1a1a;
+  --color-niebla: #5c6470;
+  --color-exito: #2e5b45;
+  --color-alerta: #9a3412;
+  --color-error: #8a1c1c;
+
+  /* Tipografía */
+  --font-serif: var(--font-fraunces), ui-serif, Georgia, serif;
+  --font-sans: var(--font-inter), -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  /* Radios */
+  --radius-control: 0.5rem;
+  --radius-card: 1rem;
+  --radius-panel: 1.5rem;
+
+  /* Sombras (máx. 2 niveles) */
+  --shadow-suave: 0 1px 2px rgb(0 0 0 / 0.06);
+  --shadow-elevada: 0 12px 32px -8px rgb(11 61 46 / 0.18);
+}
+
+:root {
+  color-scheme: light;
+}
+
+* {
+  border-color: var(--color-arena);
+}
+
+body {
+  background: var(--color-crema);
+  color: var(--color-carbon);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-serif);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+
+/* Foco visible global — WCAG 2.4.7 (nunca outline:none sin reemplazo) */
+:focus-visible {
+  outline: 2px solid var(--color-champagne);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Respeta prefers-reduced-motion — WCAG 2.3.3 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Fallback sólido donde no hay backdrop-filter */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass {
+    background: var(--color-blanco-roto) !important;
+  }
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
