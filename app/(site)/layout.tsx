@@ -3,7 +3,7 @@ import { fraunces, inter } from "@/lib/fonts";
 import { Header } from "@/components/site/header";
 import { Footer } from "@/components/site/footer";
 import { PageTransition } from "@/components/site/page-transition";
-import "./globals.css";
+import "../globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://clubhouse.co"),

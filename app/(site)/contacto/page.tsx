@@ -7,6 +7,34 @@ import { Button } from "@/components/ui/button";
 
 export default function ContactoPage() {
   const [enviado, setEnviado] = useState(false);
+  const [enviando, setEnviando] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function enviar(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setError(null);
+    setEnviando(true);
+
+    const form = new FormData(e.currentTarget);
+    const res = await fetch("/api/leads", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        nombre: form.get("nombre"),
+        email: form.get("email"),
+        telefono: form.get("telefono") || undefined,
+        mensaje: form.get("mensaje") || undefined,
+        fechaTentativa: form.get("fecha") || undefined,
+      }),
+    });
+
+    setEnviando(false);
+    if (res.ok) {
+      setEnviado(true);
+    } else {
+      setError("No pudimos enviar tu mensaje. Intenta de nuevo en un momento.");
+    }
+  }
 
   return (
     <Section>
@@ -24,17 +52,13 @@ export default function ContactoPage() {
               ¡Mensaje recibido!
             </p>
             <p className="mt-1 text-sm text-niebla">
-              Te contactamos muy pronto. (En la versión final esto crea el
-              contacto en el CRM y dispara el correo automático.)
+              Te contactamos muy pronto.
             </p>
           </div>
         ) : (
           <form
             className="grid gap-4 rounded-[var(--radius-panel)] border border-arena bg-blanco-roto p-6 sm:grid-cols-2"
-            onSubmit={(e) => {
-              e.preventDefault();
-              setEnviado(true);
-            }}
+            onSubmit={enviar}
           >
             <Input id="nombre" label="Nombre" required />
             <Input id="email" label="Correo" type="email" required />
@@ -43,13 +67,19 @@ export default function ContactoPage() {
             <label className="sm:col-span-2">
               <span className="block text-sm text-carbon">Mensaje</span>
               <textarea
+                name="mensaje"
                 required
                 rows={4}
                 className="mt-1 w-full rounded-[var(--radius-control)] border border-arena bg-crema px-3 py-2 text-sm outline-none focus:border-verde-golf"
               />
             </label>
-            <Button type="submit" className="sm:col-span-2">
-              Enviar mensaje
+            {error && (
+              <p role="status" className="text-sm text-error sm:col-span-2">
+                {error}
+              </p>
+            )}
+            <Button type="submit" disabled={enviando} className="sm:col-span-2">
+              {enviando ? "Enviando…" : "Enviar mensaje"}
             </Button>
           </form>
         )}

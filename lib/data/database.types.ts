@@ -52,32 +52,124 @@ export type Database = {
         Row: {
           created_at: string
           email: string
+          estado: Database["public"]["Enums"]["estado_contacto"]
           fecha_tentativa: string | null
           id: string
           mensaje: string | null
           nombre: string
+          notas: string | null
           origen: Database["public"]["Enums"]["origen_contacto"]
+          propietario_id: string | null
           telefono: string | null
+          updated_at: string
+          valor_estimado_cop: number | null
         }
         Insert: {
           created_at?: string
           email: string
+          estado?: Database["public"]["Enums"]["estado_contacto"]
           fecha_tentativa?: string | null
           id?: string
           mensaje?: string | null
           nombre: string
+          notas?: string | null
           origen: Database["public"]["Enums"]["origen_contacto"]
+          propietario_id?: string | null
           telefono?: string | null
+          updated_at?: string
+          valor_estimado_cop?: number | null
         }
         Update: {
           created_at?: string
           email?: string
+          estado?: Database["public"]["Enums"]["estado_contacto"]
           fecha_tentativa?: string | null
           id?: string
           mensaje?: string | null
           nombre?: string
+          notas?: string | null
           origen?: Database["public"]["Enums"]["origen_contacto"]
+          propietario_id?: string | null
           telefono?: string | null
+          updated_at?: string
+          valor_estimado_cop?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contactos_propietario_id_fkey"
+            columns: ["propietario_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      crm_eventos: {
+        Row: {
+          actor: string | null
+          contacto_id: string
+          created_at: string
+          estado_anterior: Database["public"]["Enums"]["estado_contacto"] | null
+          estado_nuevo: Database["public"]["Enums"]["estado_contacto"]
+          id: number
+          nota: string | null
+        }
+        Insert: {
+          actor?: string | null
+          contacto_id: string
+          created_at?: string
+          estado_anterior?: Database["public"]["Enums"]["estado_contacto"] | null
+          estado_nuevo: Database["public"]["Enums"]["estado_contacto"]
+          id?: number
+          nota?: string | null
+        }
+        Update: {
+          actor?: string | null
+          contacto_id?: string
+          created_at?: string
+          estado_anterior?: Database["public"]["Enums"]["estado_contacto"] | null
+          estado_nuevo?: Database["public"]["Enums"]["estado_contacto"]
+          id?: number
+          nota?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_eventos_actor_fkey"
+            columns: ["actor"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "crm_eventos_contacto_id_fkey"
+            columns: ["contacto_id"]
+            isOneToOne: false
+            referencedRelation: "contactos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      staff: {
+        Row: {
+          activo: boolean
+          created_at: string
+          nombre: string | null
+          rol: Database["public"]["Enums"]["staff_rol"]
+          user_id: string
+        }
+        Insert: {
+          activo?: boolean
+          created_at?: string
+          nombre?: string | null
+          rol?: Database["public"]["Enums"]["staff_rol"]
+          user_id: string
+        }
+        Update: {
+          activo?: boolean
+          created_at?: string
+          nombre?: string | null
+          rol?: Database["public"]["Enums"]["staff_rol"]
+          user_id?: string
         }
         Relationships: []
       }
@@ -422,12 +514,35 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      avanzar_estado_contacto: {
+        Args: {
+          p_contacto: string
+          p_nota?: string | null
+          p_nuevo: Database["public"]["Enums"]["estado_contacto"]
+        }
+        Returns: void
+      }
+      es_staff: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      marcar_reserva_pagada: {
+        Args: { p_pagada: boolean; p_reserva: string }
+        Returns: void
+      }
     }
     Enums: {
+      estado_contacto:
+        | "nuevo"
+        | "contactado"
+        | "cotizado"
+        | "confirmado"
+        | "viajo"
+        | "perdido"
       estado_cotizacion: "nueva" | "contactada" | "confirmada" | "cancelada"
       estado_pago: "pendiente" | "pagado" | "fallido" | "reembolsado"
       origen_contacto: "contacto" | "cotizador"
+      staff_rol: "admin" | "asesor"
       tipo_bloqueo: "bloqueo" | "temporada_alta" | "cupo"
       tipo_componente:
         | "fee_servicio"
@@ -564,9 +679,18 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      estado_contacto: [
+        "nuevo",
+        "contactado",
+        "cotizado",
+        "confirmado",
+        "viajo",
+        "perdido",
+      ],
       estado_cotizacion: ["nueva", "contactada", "confirmada", "cancelada"],
       estado_pago: ["pendiente", "pagado", "fallido", "reembolsado"],
       origen_contacto: ["contacto", "cotizador"],
+      staff_rol: ["admin", "asesor"],
       tipo_bloqueo: ["bloqueo", "temporada_alta", "cupo"],
       tipo_componente: [
         "fee_servicio",
