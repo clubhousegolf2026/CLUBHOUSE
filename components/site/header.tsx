@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AnimatePresence, LazyMotion, domAnimation, m } from "framer-motion";
-import { ArrowUpRight, Menu, X } from "lucide-react";
+import { ArrowUpRight, LayoutDashboard, Menu, X } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { Logo } from "@/components/site/logo";
 
@@ -74,16 +74,26 @@ export function Header() {
             })}
           </nav>
 
-          <Link
-            href="/cotizador"
-            className="group hidden items-center gap-1.5 rounded-full bg-crema px-5 py-2.5 text-sm font-semibold text-carbon transition-transform hover:scale-[1.03] md:inline-flex"
-          >
-            Cotizar ahora
-            <ArrowUpRight
-              size={15}
-              className="transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-            />
-          </Link>
+          <div className="hidden items-center gap-2 md:flex">
+            <Link
+              href="/admin/login"
+              aria-label="Panel de administración"
+              title="Panel de administración"
+              className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-crema/70 transition-colors hover:bg-crema/10 hover:text-crema"
+            >
+              <LayoutDashboard size={17} />
+            </Link>
+            <Link
+              href="/cotizador"
+              className="group inline-flex items-center gap-1.5 rounded-full bg-crema px-5 py-2.5 text-sm font-semibold text-carbon transition-transform hover:scale-[1.03]"
+            >
+              Cotizar ahora
+              <ArrowUpRight
+                size={15}
+                className="transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+              />
+            </Link>
+          </div>
 
           <button
             className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-crema/10 text-crema transition-colors hover:bg-crema/20 md:hidden"
@@ -128,6 +138,13 @@ export function Header() {
                 className="mt-1 flex items-center justify-center gap-1.5 rounded-2xl bg-crema px-5 py-3.5 text-base font-semibold text-carbon"
               >
                 Cotizar ahora <ArrowUpRight size={16} />
+              </Link>
+              <Link
+                href="/admin/login"
+                onClick={() => setAbierto(false)}
+                className="mt-1 flex items-center justify-center gap-1.5 rounded-2xl px-5 py-3 text-sm text-crema/60 hover:bg-crema/5"
+              >
+                <LayoutDashboard size={15} /> Panel de administración
               </Link>
             </m.nav>
           )}
