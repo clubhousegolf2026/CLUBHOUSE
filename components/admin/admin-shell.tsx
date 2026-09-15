@@ -1,11 +1,22 @@
 import Link from "next/link";
-import { LayoutDashboard, Users, CalendarCheck, LogOut } from "lucide-react";
+import {
+  LayoutDashboard,
+  Users,
+  CalendarCheck,
+  Package,
+  Tag,
+  CalendarRange,
+  LogOut,
+} from "lucide-react";
 import { signOut } from "@/app/admin/(panel)/actions";
 
 const NAV = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/crm", label: "CRM", icon: Users },
   { href: "/admin/reservas", label: "Reservas", icon: CalendarCheck },
+  { href: "/admin/paquetes", label: "Paquetes", icon: Package },
+  { href: "/admin/tarifas", label: "Tarifas", icon: Tag },
+  { href: "/admin/calendario", label: "Calendario", icon: CalendarRange },
 ] as const;
 
 export function AdminShell({

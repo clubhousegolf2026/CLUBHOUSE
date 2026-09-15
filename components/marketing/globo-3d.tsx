@@ -143,14 +143,22 @@ export function Globo3D({
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 1280px)");
     const mqLg = window.matchMedia("(min-width: 1024px)");
-    const aplicar = () =>
-      setTamano(mq.matches ? 660 : mqLg.matches ? 540 : 380);
+    // El tamaño respeta el ancho (breakpoint) pero nunca supera lo que cabe
+    // verticalmente en la ventana — así el globo nunca se corta arriba/abajo
+    // en pantallas anchas pero de poca altura.
+    const aplicar = () => {
+      const porAncho = mq.matches ? 660 : mqLg.matches ? 540 : 380;
+      const porAlto = Math.round(window.innerHeight * 0.62);
+      setTamano(Math.min(porAncho, porAlto));
+    };
     aplicar();
     mq.addEventListener("change", aplicar);
     mqLg.addEventListener("change", aplicar);
+    window.addEventListener("resize", aplicar);
     return () => {
       mq.removeEventListener("change", aplicar);
       mqLg.removeEventListener("change", aplicar);
+      window.removeEventListener("resize", aplicar);
     };
   }, []);
 
@@ -171,7 +179,7 @@ export function Globo3D({
     };
     controls.autoRotate = true;
     controls.autoRotateSpeed = 0.12;
-    controls.enableZoom = true;
+    controls.enableZoom = false;
     controls.enablePan = false;
     controls.minDistance = 190;
     controls.maxDistance = 420;

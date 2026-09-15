@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Loader2 } from "lucide-react";
 import { useCotizador } from "@/stores/cotizador-store";
 import { DesgloseLineas } from "@/components/cotizador/pasos";
 import { cop, fechaCo } from "@/lib/format";
@@ -13,14 +13,35 @@ export default function ResumenPage() {
   const { cotizacion, seleccion, hidratado } = useCotizador();
   const [enviado, setEnviado] = useState<null | "cotizacion" | "reserva">(null);
   const [form, setForm] = useState({ nombre: "", email: "", telefono: "" });
+  const [enviando, setEnviando] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const vacio = cotizacion.lineas.length === 0;
 
-  function enviar(tipo: "cotizacion" | "reserva") {
-    // Fase 1 sin backend: aquí irá POST /api/leads y POST /api/reservas.
-    // eslint-disable-next-line no-console
-    console.log("[mock] enviar", tipo, { form, seleccion, cotizacion });
-    setEnviado(tipo);
+  async function enviar(tipo: "cotizacion" | "reserva") {
+    if (!form.nombre.trim() || !form.email.trim()) {
+      setError("Escribe tu nombre y correo para continuar.");
+      return;
+    }
+    setError(null);
+    setEnviando(true);
+    try {
+      const res = await fetch("/api/reservas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tipo, ...form, seleccion }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "No pudimos procesar tu solicitud, intenta de nuevo.");
+        return;
+      }
+      setEnviado(tipo);
+    } catch {
+      setError("Fallo de conexión, intenta de nuevo.");
+    } finally {
+      setEnviando(false);
+    }
   }
 
   if (enviado) {
@@ -127,19 +148,35 @@ export default function ResumenPage() {
               />
             </div>
 
+            {error && (
+              <p className="mt-4 rounded-[var(--radius-control)] bg-error/10 px-3 py-2 text-sm text-error">
+                {error}
+              </p>
+            )}
+
             <Button
               className="mt-5 w-full"
               variante="oscuro"
+              disabled={enviando}
               onClick={() => enviar("reserva")}
             >
-              Reservar con {cop(Math.round(cotizacion.total * 0.3))}
+              {enviando ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : (
+                `Reservar con ${cop(Math.round(cotizacion.total * 0.3))}`
+              )}
             </Button>
             <Button
               className="mt-2 w-full"
               variante="contorno"
+              disabled={enviando}
               onClick={() => enviar("cotizacion")}
             >
-              Recibir cotización por correo
+              {enviando ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : (
+                "Recibir cotización por correo"
+              )}
             </Button>
           </aside>
         </div>
