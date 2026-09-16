@@ -82,7 +82,7 @@ export function Globo3D({
   const globoRef = useRef<GlobeMethods | null>(null);
   const contenedorRef = useRef<HTMLDivElement | null>(null);
   // Tamaño fijo por punto de quiebre (no escala continuamente con el contenedor).
-  const [tamano, setTamano] = useState(660);
+  const [tamano, setTamano] = useState(820);
   const [listo, setListo] = useState(false);
   const [Globe, setGlobe] = useState<GlobeComponent | null>(null);
   const [THREE, setTHREE] = useState<typeof ThreeNS | null>(null);
@@ -147,8 +147,8 @@ export function Globo3D({
     // verticalmente en la ventana — así el globo nunca se corta arriba/abajo
     // en pantallas anchas pero de poca altura.
     const aplicar = () => {
-      const porAncho = mq.matches ? 660 : mqLg.matches ? 540 : 380;
-      const porAlto = Math.round(window.innerHeight * 0.62);
+      const porAncho = mq.matches ? 820 : mqLg.matches ? 660 : 420;
+      const porAlto = Math.round(window.innerHeight * 0.78);
       setTamano(Math.min(porAncho, porAlto));
     };
     aplicar();
