@@ -26,6 +26,7 @@ export type Database = {
           fecha_inicio: string
           id: string
           nota: string | null
+          paquete_id: string | null
           tipo: Database["public"]["Enums"]["tipo_bloqueo"]
         }
         Insert: {
@@ -35,6 +36,7 @@ export type Database = {
           fecha_inicio: string
           id?: string
           nota?: string | null
+          paquete_id?: string | null
           tipo: Database["public"]["Enums"]["tipo_bloqueo"]
         }
         Update: {
@@ -44,9 +46,18 @@ export type Database = {
           fecha_inicio?: string
           id?: string
           nota?: string | null
+          paquete_id?: string | null
           tipo?: Database["public"]["Enums"]["tipo_bloqueo"]
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "bloqueos_calendario_paquete_id_fkey"
+            columns: ["paquete_id"]
+            isOneToOne: false
+            referencedRelation: "paquetes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       contactos: {
         Row: {
@@ -182,6 +193,7 @@ export type Database = {
           impuestos: number
           lineas: Json
           moneda: string
+          paquete_id: string | null
           por_persona: number
           seleccion: Json
           subtotal: number
@@ -197,6 +209,7 @@ export type Database = {
           impuestos: number
           lineas: Json
           moneda?: string
+          paquete_id?: string | null
           por_persona: number
           seleccion: Json
           subtotal: number
@@ -212,6 +225,7 @@ export type Database = {
           impuestos?: number
           lineas?: Json
           moneda?: string
+          paquete_id?: string | null
           por_persona?: number
           seleccion?: Json
           subtotal?: number
@@ -225,6 +239,13 @@ export type Database = {
             columns: ["contacto_id"]
             isOneToOne: false
             referencedRelation: "contactos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cotizaciones_paquete_id_fkey"
+            columns: ["paquete_id"]
+            isOneToOne: false
+            referencedRelation: "paquetes"
             referencedColumns: ["id"]
           },
         ]

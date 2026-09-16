@@ -203,12 +203,17 @@ export async function getDestinosConPaquetes(): Promise<
   }));
 }
 
+/** Bloqueos "generales" (paquete_id nulo) — los que aplican al itinerario
+ *  libre del cotizador. Cada paquete predefinido tiene además los suyos
+ *  propios (ver /admin/calendario), que no afectan a los demás ni al
+ *  cotizador de armado libre. */
 export async function getBloqueos(): Promise<BloqueoCalendario[]> {
   if (FUENTE === "mock") return BLOQUEOS_MOCK;
 
   const { data, error } = await getSupabase()
     .from("bloqueos_calendario")
     .select("*")
+    .is("paquete_id", null)
     .order("fecha_inicio");
   if (error) throw new Error(`getBloqueos: ${error.message}`);
   return (data ?? []).map(mapBloqueo);

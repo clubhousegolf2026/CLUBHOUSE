@@ -20,6 +20,10 @@ const bodySchema = z.object({
   email: z.string().trim().email().max(160),
   telefono: z.string().trim().max(40).optional(),
   seleccion: seleccionSchema,
+  // Presente solo cuando la reserva nace de un paquete predefinido (no de
+  // un itinerario armado a mano) — cada paquete es su propio "universo":
+  // su propio calendario y su propio libro de ventas.
+  paqueteId: z.string().trim().min(1).optional(),
 });
 
 /**
@@ -41,7 +45,7 @@ export async function POST(req: Request) {
       { status: 400 },
     );
   }
-  const { tipo, nombre, email, telefono, seleccion } = parsed.data;
+  const { tipo, nombre, email, telefono, seleccion, paqueteId } = parsed.data;
 
   const tarifas = await getTarifas();
   const catalogo = new Map(tarifas.map((t) => [t.codigo, t]));
@@ -77,6 +81,7 @@ export async function POST(req: Request) {
   const { error: errorCotizacion } = await supabase.from("cotizaciones").insert({
     id: cotizacionId,
     contacto_id: contactoId,
+    paquete_id: paqueteId ?? null,
     tipo,
     seleccion: JSON.parse(JSON.stringify(seleccion)),
     lineas: JSON.parse(JSON.stringify(cotizacionCalculada.lineas)),

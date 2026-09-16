@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { BloqueoForm } from "@/components/admin/bloqueo-form";
 import { EliminarBloqueoButton } from "@/components/admin/eliminar-bloqueo-button";
@@ -11,24 +12,59 @@ const ETIQUETA_TIPO: Record<string, { texto: string; tono: string }> = {
   cupo: { texto: "Cupo limitado", tono: "bg-verde-golf/10 text-verde-golf" },
 };
 
-export default async function CalendarioAdminPage() {
+export default async function CalendarioAdminPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ paquete?: string }>;
+}) {
+  const { paquete: paqueteSeleccionado } = await searchParams;
   const supabase = await createServerSupabase();
-  const { data: bloqueos } = await supabase
-    .from("bloqueos_calendario")
-    .select("*")
-    .order("fecha_inicio");
+
+  const [{ data: paquetes }, { data: bloqueos }] = await Promise.all([
+    supabase.from("paquetes").select("id, nombre").order("nombre"),
+    (() => {
+      let q = supabase.from("bloqueos_calendario").select("*").order("fecha_inicio");
+      q = paqueteSeleccionado ? q.eq("paquete_id", paqueteSeleccionado) : q.is("paquete_id", null);
+      return q;
+    })(),
+  ]);
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="font-serif text-2xl text-carbon">Calendario</h1>
         <p className="text-sm text-niebla">
-          Fechas bloqueadas, con cupo limitado o de temporada alta — controla lo
-          que ve el cotizador en el paso de fechas.
+          Cada paquete es su propio universo: fechas bloqueadas, cupo o
+          temporada alta que solo aplican a ese paquete (o al itinerario
+          libre del cotizador, en &quot;General&quot;).
         </p>
       </div>
 
-      <BloqueoForm />
+      <div className="flex flex-wrap gap-1.5 rounded-full bg-arena/30 p-1.5 w-fit">
+        <Link
+          href="/admin/calendario"
+          className={`rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors ${
+            !paqueteSeleccionado ? "bg-verde-calle text-crema" : "text-niebla hover:text-carbon"
+          }`}
+        >
+          General (itinerario libre)
+        </Link>
+        {(paquetes ?? []).map((p) => (
+          <Link
+            key={p.id}
+            href={`/admin/calendario?paquete=${p.id}`}
+            className={`rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors ${
+              paqueteSeleccionado === p.id
+                ? "bg-verde-calle text-crema"
+                : "text-niebla hover:text-carbon"
+            }`}
+          >
+            {p.nombre}
+          </Link>
+        ))}
+      </div>
+
+      <BloqueoForm paqueteId={paqueteSeleccionado ?? null} />
 
       <div className="overflow-hidden rounded-[var(--radius-panel)] border border-arena bg-blanco-roto">
         <table className="w-full text-sm">
@@ -64,7 +100,9 @@ export default async function CalendarioAdminPage() {
             {(bloqueos ?? []).length === 0 && (
               <tr>
                 <td colSpan={4} className="px-4 py-8 text-center text-niebla">
-                  No hay rangos configurados — el calendario está abierto todos los días.
+                  {paqueteSeleccionado
+                    ? "Este paquete no tiene fechas restringidas — está abierto todos los días."
+                    : "El itinerario libre no tiene fechas restringidas."}
                 </td>
               </tr>
             )}

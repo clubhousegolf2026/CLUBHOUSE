@@ -6,6 +6,7 @@ import {
   Package,
   Tag,
   CalendarRange,
+  Globe2,
   LogOut,
 } from "lucide-react";
 import { signOut } from "@/app/admin/(panel)/actions";
@@ -15,6 +16,7 @@ const NAV = [
   { href: "/admin/crm", label: "CRM", icon: Users },
   { href: "/admin/reservas", label: "Reservas", icon: CalendarCheck },
   { href: "/admin/paquetes", label: "Paquetes", icon: Package },
+  { href: "/admin/destinos", label: "Destinos", icon: Globe2 },
   { href: "/admin/tarifas", label: "Tarifas", icon: Tag },
   { href: "/admin/calendario", label: "Calendario", icon: CalendarRange },
 ] as const;

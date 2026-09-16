@@ -14,6 +14,7 @@ export async function crearBloqueo(datos: {
   tipo: "bloqueo" | "temporada_alta" | "cupo";
   nota: string | null;
   factorPrecio: number | null;
+  paqueteId: string | null;
 }) {
   const supabase = await createServerSupabase();
   const { error } = await supabase.from("bloqueos_calendario").insert({
@@ -22,6 +23,7 @@ export async function crearBloqueo(datos: {
     tipo: datos.tipo,
     nota: datos.nota,
     factor_precio: datos.tipo === "temporada_alta" ? datos.factorPrecio : null,
+    paquete_id: datos.paqueteId,
   });
   if (error) throw new Error(error.message);
   revalidarTodo();

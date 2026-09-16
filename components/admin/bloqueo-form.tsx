@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { crearBloqueo } from "@/app/admin/(panel)/calendario/actions";
 
-export function BloqueoForm() {
+export function BloqueoForm({ paqueteId }: { paqueteId: string | null }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -33,6 +33,7 @@ export function BloqueoForm() {
           tipo,
           nota: nota || null,
           factorPrecio: factor,
+          paqueteId,
         });
         setFechaInicio("");
         setFechaFin("");
