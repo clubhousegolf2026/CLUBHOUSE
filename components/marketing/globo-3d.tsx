@@ -84,6 +84,11 @@ export function Globo3D({
   // Tamaño fijo por punto de quiebre (no escala continuamente con el contenedor).
   const [tamano, setTamano] = useState(820);
   const [listo, setListo] = useState(false);
+  // El globo (three.js + WebGL) es lo más pesado de la página: no se carga
+  // hasta que su caja entra en pantalla Y el navegador está libre. Así el
+  // texto del hero pinta primero y en móvil (donde el globo queda bajo el
+  // pliegue) no compite con la carga inicial.
+  const [activar, setActivar] = useState(false);
   const [Globe, setGlobe] = useState<GlobeComponent | null>(null);
   const [THREE, setTHREE] = useState<typeof ThreeNS | null>(null);
   const [oceano, setOceano] = useState<string | null>(null);
@@ -98,8 +103,41 @@ export function Globo3D({
   // resolvió por objeto, se ignora el país/globo del mismo instante.
   const clicPorObjetoRef = useRef(0);
 
+  useEffect(() => {
+    const el = contenedorRef.current;
+    if (!el) return;
+    let cancelado = false;
+    let idle: number | undefined;
+    // Espera a que la página termine de cargar y un respiro extra: el
+    // globo es un extra visual, el texto y los botones deben quedar
+    // interactivos antes de que three.js ocupe el hilo principal.
+    const arrancar = () => {
+      const lanzar = () => {
+        idle = window.setTimeout(() => !cancelado && setActivar(true), 1500);
+      };
+      if (document.readyState === "complete") lanzar();
+      else window.addEventListener("load", lanzar, { once: true });
+    };
+    const obs = new IntersectionObserver(
+      ([entrada]) => {
+        if (entrada.isIntersecting) {
+          obs.disconnect();
+          arrancar();
+        }
+      },
+      { rootMargin: "300px" },
+    );
+    obs.observe(el);
+    return () => {
+      cancelado = true;
+      obs.disconnect();
+      if (idle !== undefined) window.clearTimeout(idle);
+    };
+  }, []);
+
   // Carga perezosa en el cliente: react-globe.gl y three tocan `window`/WebGL.
   useEffect(() => {
+    if (!activar) return;
     let activo = true;
     Promise.all([import("react-globe.gl"), import("three")]).then(
       ([globeMod, threeMod]) => {
@@ -112,11 +150,12 @@ export function Globo3D({
     return () => {
       activo = false;
     };
-  }, []);
+  }, [activar]);
 
   // Continentes como un único color plano, sin fronteras internas de país:
   // se generan a partir del mismo topojson mundial, con relleno uniforme.
   useEffect(() => {
+    if (!activar) return;
     let activo = true;
     Promise.all([
       import("topojson-client"),
@@ -138,7 +177,7 @@ export function Globo3D({
     return () => {
       activo = false;
     };
-  }, []);
+  }, [activar]);
 
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 1280px)");
@@ -345,6 +384,22 @@ export function Globo3D({
       className="relative mx-auto"
       style={{ width: tamano, height: tamano }}
     >
+      {!(Globe && oceano && THREE) && (
+        <div
+          aria-hidden="true"
+          className="absolute rounded-full"
+          style={{
+            width: tamano * 0.78,
+            height: tamano * 0.78,
+            left: "50%",
+            top: "50%",
+            transform: "translate(-50%, -50%)",
+            background:
+              "radial-gradient(circle at 35% 30%, #12382d, #07231b 70%)",
+            boxShadow: "0 0 60px 8px rgba(198,166,100,0.16)",
+          }}
+        />
+      )}
       {Globe && oceano && THREE && (
         <Globe
           ref={globoRef}
