@@ -7,19 +7,14 @@ import type { PaquetePredefinido, Destino } from "@/lib/data/types";
 
 type DestinoConPaquetes = Destino & { paquetes: PaquetePredefinido[] };
 
-const RANGOS_NOCHES = [
-  { id: "todas", etiqueta: "Cualquier duración", min: 0, max: Infinity },
-  { id: "1-2", etiqueta: "1 a 2 noches", min: 1, max: 2 },
-  { id: "3-4", etiqueta: "3 a 4 noches", min: 3, max: 4 },
-  { id: "5+", etiqueta: "5 noches o más", min: 5, max: Infinity },
-];
+const PASO_PRESUPUESTO = 500_000;
 
-const PRESUPUESTOS = [
-  { id: "todos", etiqueta: "Cualquier precio", max: Infinity },
-  { id: "1500000", etiqueta: "Hasta $ 1.500.000", max: 1_500_000 },
-  { id: "3000000", etiqueta: "Hasta $ 3.000.000", max: 3_000_000 },
-  { id: "5000000", etiqueta: "Hasta $ 5.000.000", max: 5_000_000 },
-];
+const fmtCop = (n: number) =>
+  new Intl.NumberFormat("es-CO", {
+    style: "currency",
+    currency: "COP",
+    maximumFractionDigits: 0,
+  }).format(n);
 
 const ORDENES = [
   { id: "destacados", etiqueta: "Más elegidos" },
@@ -75,6 +70,24 @@ export function FiltroPaquetes({
   const resultadosRef = useRef<HTMLDivElement>(null);
 
   const destinosConPlanes = destinos.filter((d) => d.paquetes.length > 0);
+  // Las opciones salen de los planes reales: solo se ofrecen duraciones que
+  // existen y topes de precio cercanos a lo que de verdad cuesta cada plan.
+  const opcionesNoches = useMemo(
+    () => [...new Set(paquetes.map((p) => p.noches))].sort((a, b) => a - b),
+    [paquetes],
+  );
+  const topesPresupuesto = useMemo(() => {
+    const techos = [
+      ...new Set(
+        paquetes.map(
+          (p) => Math.ceil(p.precioDesdeCop / PASO_PRESUPUESTO) * PASO_PRESUPUESTO,
+        ),
+      ),
+    ].sort((a, b) => a - b);
+    return techos.length > 5
+      ? techos.filter((_, i) => i % Math.ceil(techos.length / 5) === 0 || i === techos.length - 1)
+      : techos;
+  }, [paquetes]);
   const campos = useMemo(
     () => [...new Set(paquetes.flatMap((p) => p.camposIncluidos))].sort(),
     [paquetes],
@@ -87,14 +100,13 @@ export function FiltroPaquetes({
         : new Set(
             destinos.find((d) => d.id === destino)?.paquetes.map((p) => p.id),
           );
-    const rango = RANGOS_NOCHES.find((r) => r.id === noches)!;
-    const tope = PRESUPUESTOS.find((r) => r.id === presupuesto)!.max;
+    const nochesElegidas = noches === "todas" ? null : Number(noches);
+    const tope = presupuesto === "todos" ? Infinity : Number(presupuesto);
 
     const filtrados = paquetes.filter(
       (p) =>
         (!idsDestino || idsDestino.has(p.id)) &&
-        p.noches >= rango.min &&
-        p.noches <= rango.max &&
+        (nochesElegidas === null || p.noches === nochesElegidas) &&
         p.precioDesdeCop <= tope &&
         (campo === "todos" || p.camposIncluidos.includes(campo)) &&
         (!soloDestacados || p.destacado),
@@ -160,16 +172,18 @@ export function FiltroPaquetes({
             ))}
           </Selector>
           <Selector icono={<Moon size={18} />} etiqueta="Duración" valor={noches} onChange={setNoches}>
-            {RANGOS_NOCHES.map((r) => (
-              <option key={r.id} value={r.id}>
-                {r.etiqueta}
+            <option value="todas">Cualquier duración</option>
+            {opcionesNoches.map((n) => (
+              <option key={n} value={n}>
+                {n} {n === 1 ? "noche" : "noches"}
               </option>
             ))}
           </Selector>
           <Selector icono={<Wallet size={18} />} etiqueta="Presupuesto" valor={presupuesto} onChange={setPresupuesto}>
-            {PRESUPUESTOS.map((r) => (
-              <option key={r.id} value={r.id}>
-                {r.etiqueta}
+            <option value="todos">Cualquier precio</option>
+            {topesPresupuesto.map((t) => (
+              <option key={t} value={t}>
+                Hasta {fmtCop(t)}
               </option>
             ))}
           </Selector>

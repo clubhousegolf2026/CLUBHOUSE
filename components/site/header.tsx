@@ -9,11 +9,15 @@ import { cn } from "@/lib/cn";
 import { Logo } from "@/components/site/logo";
 
 const NAV = [
+  { href: "/", label: "Inicio" },
   { href: "/paquetes", label: "Paquetes" },
   { href: "/cotizador", label: "Arma tu viaje" },
   { href: "/nosotros", label: "Nosotros" },
   { href: "/contacto", label: "Contacto" },
 ];
+
+const esActivo = (pathname: string, href: string) =>
+  href === "/" ? pathname === "/" : pathname.startsWith(href);
 
 export function Header() {
   const pathname = usePathname();
@@ -49,7 +53,7 @@ export function Header() {
             aria-label="Principal"
           >
             {NAV.map((item) => {
-              const activo = pathname.startsWith(item.href);
+              const activo = esActivo(pathname, item.href);
               return (
                 <Link
                   key={item.href}
@@ -124,7 +128,7 @@ export function Header() {
                   onClick={() => setAbierto(false)}
                   className={cn(
                     "block rounded-2xl px-5 py-3.5 text-center text-lg font-medium transition-colors",
-                    pathname.startsWith(item.href)
+                    esActivo(pathname, item.href)
                       ? "bg-crema/10 text-champagne"
                       : "text-crema/85 hover:bg-crema/5",
                   )}
