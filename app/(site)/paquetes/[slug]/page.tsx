@@ -64,7 +64,7 @@ export default async function PaqueteDetallePage({
               )}
             </div>
             {p.galeria.length > 1 && (
-              <div className="mt-3 grid grid-cols-3 gap-3">
+              <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {p.galeria.slice(1).map((g) => (
                   <div
                     key={g.url}

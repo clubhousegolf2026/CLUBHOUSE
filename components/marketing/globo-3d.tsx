@@ -149,7 +149,19 @@ export function Globo3D({
     const aplicar = () => {
       const porAncho = mq.matches ? 820 : mqLg.matches ? 660 : 420;
       const porAlto = Math.round(window.innerHeight * 0.78);
-      setTamano(Math.min(porAncho, porAlto));
+      // En móviles angostos el ancho disponible real es menor que el
+      // tamaño "por ancho" del breakpoint (p. ej. 360px de pantalla) — sin
+      // este tope el globo se desborda de su caja en vez de encogerse con
+      // ella. No se mide ningún ancestro en el DOM: en el primer render el
+      // contenedor ya se pinta con el `tamano` inicial (820), así que
+      // cualquier medición de un padre en ese instante reflejaría ese
+      // ancho inflado en vez del espacio real disponible (circular). Se
+      // resta el padding horizontal del hero (`px-6`/`sm:px-10` en
+      // hero.tsx, únicos anchos relevantes por debajo de `lg`, donde el
+      // globo pasa a una columna aparte con su propio espacio).
+      const padding = window.innerWidth < 640 ? 24 : 40;
+      const disponible = window.innerWidth - padding * 2;
+      setTamano(Math.min(porAncho, porAlto, disponible));
     };
     aplicar();
     mq.addEventListener("change", aplicar);
