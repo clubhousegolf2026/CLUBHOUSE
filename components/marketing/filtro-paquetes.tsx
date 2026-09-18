@@ -37,10 +37,10 @@ function Selector({
   children: React.ReactNode;
 }) {
   return (
-    <label className="block rounded-[var(--radius-card)] border border-arena bg-blanco-roto px-4 py-3 transition-colors focus-within:border-verde-golf/60">
-      <span className="text-xs text-niebla">{etiqueta}</span>
-      <span className="mt-1 flex items-center gap-2 text-carbon">
-        <span className="shrink-0 text-verde-golf">{icono}</span>
+    <label className="group block rounded-2xl border border-arena/80 bg-white px-4 py-3 transition-all hover:-translate-y-0.5 hover:border-verde-golf/40 hover:shadow-lg hover:shadow-verde-golf/10 focus-within:border-verde-golf/60 focus-within:ring-4 focus-within:ring-verde-golf/10">
+      <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-niebla">{etiqueta}</span>
+      <span className="mt-1.5 flex items-center gap-2.5 text-carbon">
+        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-verde-golf/10 text-verde-golf transition-colors group-hover:bg-verde-golf group-hover:text-crema">{icono}</span>
         <select
           value={valor}
           onChange={(e) => onChange(e.target.value)}
@@ -138,7 +138,7 @@ export function FiltroPaquetes({
 
   return (
     <>
-      <div className="rounded-[var(--radius-panel)] border border-arena bg-blanco-roto p-4 shadow-[var(--shadow-suave)] sm:p-6">
+      <div className="rounded-[2rem] border border-white/80 bg-white/70 p-4 shadow-[0_30px_80px_-30px_rgba(11,43,33,0.35)] ring-1 ring-arena/60 backdrop-blur-xl sm:p-6">
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-carbon">
           <label className="flex cursor-pointer items-center gap-2">
             <input
@@ -200,7 +200,7 @@ export function FiltroPaquetes({
             onClick={() =>
               resultadosRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
             }
-            className="inline-flex min-h-14 items-center justify-center gap-2 rounded-[var(--radius-control)] bg-verde-golf px-8 text-sm font-medium text-crema transition-colors hover:bg-verde-golf/90 sm:col-span-2 lg:col-span-1"
+            className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-verde-golf to-verde-calle px-8 text-sm font-semibold text-crema shadow-lg shadow-verde-calle/30 transition-all hover:-translate-y-0.5 hover:shadow-xl sm:col-span-2 lg:col-span-1"
           >
             <Search size={16} /> Buscar
           </button>
@@ -244,7 +244,7 @@ export function FiltroPaquetes({
       </div>
 
       {resultados.length > 0 ? (
-        <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:gap-8">
           {resultados.map((p) => (
             <PackageCard key={p.id} paquete={p} />
           ))}

@@ -87,7 +87,9 @@ h4 {
   font-variant-numeric: tabular-nums;
 }
 
-/* Fondo del hero: degradado verde/dorado que se desplaza lentamente. */
+/* Fondo del hero: degradado verde/dorado. En pantallas grandes se desplaza
+   despacio; en móvil queda estático (animar background-position repinta en
+   el hilo principal y ahí pesa más). */
 .hero-degradado {
   background-color: #093226;
   background-image:
@@ -96,7 +98,11 @@ h4 {
     radial-gradient(circle at 60% 85%, rgba(63, 163, 119, 0.4), transparent 48%),
     linear-gradient(135deg, #0b3d2e, #093226 50%, #0d4a37);
   background-size: 180% 180%, 160% 160%, 170% 170%, 100% 100%;
-  animation: hero-degradado-mover 18s ease-in-out infinite alternate;
+}
+@media (min-width: 768px) {
+  .hero-degradado {
+    animation: hero-degradado-mover 18s ease-in-out infinite alternate;
+  }
 }
 
 @keyframes hero-degradado-mover {
@@ -238,4 +244,195 @@ h4 {
   transform: none;
   border-color: rgb(230 221 201 / 0.9);
   box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 8px 24px -12px rgb(11 61 46 / 0.18);
+}
+
+/* ───────────────────────── Sitio público · estilo "deluxe" ───────────────────────── */
+
+html {
+  scroll-behavior: smooth;
+}
+::selection {
+  background: rgba(198, 166, 100, 0.35);
+  color: #0b2b21;
+}
+
+/* Texto con degradado dorado metálico. */
+.texto-oro {
+  background-image: linear-gradient(100deg, #f3dfa8 0%, #d9b96a 35%, #b8913f 60%, #ecd396 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+@keyframes oro-desliza {
+  from { background-position: 0% 0; }
+  to { background-position: 100% 0; }
+}
+
+/* Grano fino sobre fondos oscuros: quita el aspecto "plano" del degradado. */
+.grano {
+  position: relative;
+}
+.grano::after {
+  content: none;
+}
+@media (min-width: 1024px) {
+.grano::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+}
+
+/* Botones de lujo. */
+.boton-oro {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background-image: linear-gradient(120deg, #e9d29a, #c6a664 45%, #a98745);
+  color: #14251d;
+  box-shadow: 0 10px 30px -10px rgba(198, 166, 100, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.boton-oro::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.6) 50%, transparent 70%);
+  transform: translateX(-120%);
+  transition: transform 0.7s ease;
+}
+.boton-oro:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 38px -10px rgba(198, 166, 100, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+.boton-oro:hover::before {
+  transform: translateX(120%);
+}
+.boton-cristal {
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(10px);
+  color: #f6f3ec;
+  transition: background-color 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+}
+.boton-cristal:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+}
+
+/* Marquesina infinita (nombres de campos de golf). */
+.marquesina {
+  display: flex;
+  width: max-content;
+  animation: marquesina 48s linear infinite;
+}
+.marquesina:hover {
+  animation-play-state: paused;
+}
+@keyframes marquesina {
+  to { transform: translateX(-50%); }
+}
+
+/* Anillos orbitales decorativos detrás del globo. */
+.orbita {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border-radius: 9999px;
+  border: 1px solid rgba(198, 166, 100, 0.22);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.orbita::after {
+  content: "";
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: #e8d3a0;
+  box-shadow: 0 0 14px 3px rgba(232, 211, 160, 0.8);
+}
+.orbita-gira {
+  animation: orbita-gira 60s linear infinite;
+}
+.orbita-gira-inversa {
+  animation: orbita-gira 90s linear infinite reverse;
+}
+@keyframes orbita-gira {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Indicador de scroll. */
+.scroll-raton::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 8px;
+  width: 3px;
+  height: 8px;
+  margin-left: -1.5px;
+  border-radius: 9999px;
+  background: #e8d3a0;
+  animation: scroll-raton 1.8s ease-in-out infinite;
+}
+@keyframes scroll-raton {
+  0% { opacity: 0; transform: translateY(0); }
+  30% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(14px); }
+}
+
+/* Latido para el punto "en vivo" (solo transform/opacity: acelerado por GPU). */
+.punto-vivo {
+  position: relative;
+}
+.punto-vivo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: rgba(232, 211, 160, 0.7);
+  animation: punto-vivo 2s ease-out infinite;
+}
+@keyframes punto-vivo {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(3.2); opacity: 0; }
+}
+
+/* Tarjeta con "foco" que sigue al cursor (variables --mx/--my desde JS). */
+.tarjeta-luz {
+  position: relative;
+}
+.tarjeta-luz::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgba(232, 211, 160, 0.22), transparent 45%);
+}
+.tarjeta-luz:hover::before {
+  opacity: 1;
+}
+
+/* Entrada del hero: solo desplazamiento (sin opacidad 0) para no retrasar
+   el LCP — el texto está visible desde el primer pintado. */
+.entra-hero {
+  animation: hero-entra 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--i, 0) * 80ms);
+}
+@keyframes hero-entra {
+  from { transform: translateY(18px); }
+  to { transform: none; }
 }

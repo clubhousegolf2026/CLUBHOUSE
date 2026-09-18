@@ -23,6 +23,14 @@ export function Header() {
   const pathname = usePathname();
   const [abierto, setAbierto] = useState(false);
   const [hover, setHover] = useState<string | null>(null);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const alScroll = () => setScrolled(window.scrollY > 24);
+    alScroll();
+    window.addEventListener("scroll", alScroll, { passive: true });
+    return () => window.removeEventListener("scroll", alScroll);
+  }, []);
 
   // Cierra el menú móvil si la ventana crece hasta el breakpoint de escritorio.
   useEffect(() => {
@@ -38,7 +46,14 @@ export function Header() {
           resoluciones — la marca vive siempre sobre el mismo fondo carbón,
           sin depender del contenido que haya detrás. */}
       <header className="sticky top-0 z-50 bg-transparent px-3 pt-3 sm:px-5 sm:pt-4">
-        <div className="mx-auto flex h-16 max-w-[1600px] items-center justify-between rounded-full bg-verde-golf pl-2 pr-2 shadow-[0_16px_40px_-16px_rgba(0,0,0,0.5)] sm:pl-3 sm:pr-3">
+        <div
+          className={cn(
+            "mx-auto flex h-16 max-w-[1600px] items-center justify-between rounded-full border pl-2 pr-2 backdrop-blur-xl transition-all duration-500 sm:pl-3 sm:pr-3",
+            scrolled
+              ? "border-white/15 bg-[#0a2a20]/90 shadow-[0_18px_50px_-14px_rgba(0,0,0,0.65)]"
+              : "border-white/10 bg-[#0a2a20]/60 shadow-[0_10px_30px_-16px_rgba(0,0,0,0.4)]",
+          )}
+        >
           <Link
             href="/"
             aria-label="Clubhouse · inicio"
@@ -61,15 +76,14 @@ export function Header() {
                   onMouseEnter={() => setHover(item.href)}
                   className={cn(
                     "relative rounded-full px-4 py-2 text-sm font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-champagne/70",
-                    "[text-shadow:0_0_12px_rgba(255,208,110,0.5)]",
-                    activo ? "text-[#ffd76e]" : "text-[#ffd76e]/85 hover:text-[#ffd76e]",
+                    activo ? "text-[#ecd396]" : "text-crema/75 hover:text-white",
                   )}
                 >
                   {(hover === item.href || (!hover && activo)) && (
                     <m.span
                       layoutId="nav-halo"
                       transition={{ type: "spring", stiffness: 420, damping: 34 }}
-                      className="absolute inset-0 -z-10 rounded-full bg-crema/10"
+                      className="absolute inset-0 -z-10 rounded-full bg-white/10 ring-1 ring-white/10"
                     />
                   )}
                   {item.label}
@@ -89,7 +103,7 @@ export function Header() {
             </Link>
             <Link
               href="/cotizador"
-              className="group inline-flex items-center gap-1.5 rounded-full bg-crema px-5 py-2.5 text-sm font-semibold text-carbon transition-transform hover:scale-[1.03]"
+              className="boton-oro group inline-flex items-center gap-1.5 rounded-full px-5 py-2.5 text-sm font-semibold"
             >
               Cotizar ahora
               <ArrowUpRight
@@ -119,7 +133,7 @@ export function Header() {
               exit={{ opacity: 0, y: -10, scale: 0.96 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
               aria-label="Móvil"
-              className="mx-auto mt-2 max-w-[1600px] overflow-hidden rounded-3xl bg-verde-golf p-2 shadow-[0_16px_40px_-16px_rgba(0,0,0,0.5)] md:hidden"
+              className="mx-auto mt-2 max-w-[1600px] overflow-hidden rounded-3xl border border-white/10 bg-[#0a2a20]/95 p-2 shadow-[0_16px_40px_-16px_rgba(0,0,0,0.5)] backdrop-blur-xl md:hidden"
             >
               {NAV.map((item) => (
                 <Link
@@ -139,7 +153,7 @@ export function Header() {
               <Link
                 href="/cotizador"
                 onClick={() => setAbierto(false)}
-                className="mt-1 flex items-center justify-center gap-1.5 rounded-2xl bg-crema px-5 py-3.5 text-base font-semibold text-carbon"
+                className="boton-oro mt-1 flex items-center justify-center gap-1.5 rounded-2xl px-5 py-3.5 text-base font-semibold"
               >
                 Cotizar ahora <ArrowUpRight size={16} />
               </Link>

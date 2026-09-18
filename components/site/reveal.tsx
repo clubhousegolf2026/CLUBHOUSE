@@ -20,14 +20,11 @@ export function Reveal({
     offset: ["start 100%", "start 25%"],
   });
 
-  const opacity = useTransform(scrollYProgress, [0, 0.8], [0, 1]);
-  const y = useTransform(scrollYProgress, [0, 1], [160, 0]);
-  const scale = useTransform(scrollYProgress, [0, 1], [0.88, 1]);
-  const blur = useTransform(scrollYProgress, [0, 0.7], [8, 0]);
-  const filter = useTransform(blur, (b) => `blur(${b}px)`);
+  const opacity = useTransform(scrollYProgress, [0, 0.7], [0, 1]);
+  const y = useTransform(scrollYProgress, [0, 1], [70, 0]);
 
   return (
-    <motion.div ref={ref} style={{ opacity, y, scale, filter }} className={className}>
+    <motion.div ref={ref} style={{ opacity, y }} className={className}>
       {children}
     </motion.div>
   );
