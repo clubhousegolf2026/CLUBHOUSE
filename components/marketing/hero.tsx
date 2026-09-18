@@ -64,13 +64,7 @@ export function Hero({ destinos }: { destinos: DestinoConPaquetes[] }) {
   return (
     <LazyMotion features={domAnimation}>
       <section className="relative isolate -mt-20 flex min-h-dvh flex-col justify-center overflow-hidden bg-verde-calle pt-20 text-crema">
-        <div
-          className="-z-10 absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(circle at 78% 35%, rgba(198,166,100,.12), transparent 55%), linear-gradient(180deg, #0b3d2e 0%, #093226 100%)",
-          }}
-        />
+        <div className="hero-degradado -z-10 absolute inset-0" />
 
         {/* Ancho completo de la página (no el max-w-6xl del resto del sitio):
             en pantallas grandes el hero usa casi todo el viewport. */}
