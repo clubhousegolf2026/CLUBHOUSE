@@ -77,7 +77,7 @@ export function Globo3D({
   destinos: DestinoConPaquetes[];
   seleccionId?: string | null;
   onSeleccion: (d: DestinoConPaquetes | null) => void;
-  onAbrirLista: () => void;
+  onAbrirLista: (lat: number, lng: number) => void;
 }) {
   const globoRef = useRef<GlobeMethods | null>(null);
   const contenedorRef = useRef<HTMLDivElement | null>(null);
@@ -311,7 +311,7 @@ export function Globo3D({
     const g = globoRef.current;
     const DURACION_ZOOM = 550;
     if (g) g.pointOfView({ lat, lng, altitude: 0.75 }, DURACION_ZOOM);
-    window.setTimeout(() => onAbrirLista(), DURACION_ZOOM + 80);
+    window.setTimeout(() => onAbrirLista(lat, lng), DURACION_ZOOM + 80);
   }
 
   // OJO: no se usa el `d` (dato) que entrega onObjectClick para identificar

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { geoDistance } from "d3-geo";
 import { AnimatePresence, LazyMotion, domAnimation, m } from "framer-motion";
 import { ButtonLink } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
@@ -20,6 +21,21 @@ export function Hero({ destinos }: { destinos: DestinoConPaquetes[] }) {
   const [abierto, setAbierto] = useState(false);
   const [vista, setVista] = useState<"lista" | "detalle">("detalle");
 
+  // Punto tocado en el globo: la lista se ordena de más cerca a más lejos,
+  // así al tocar Colombia salen primero los destinos colombianos.
+  const [centro, setCentro] = useState<[number, number] | null>(null);
+  const ordenados = useMemo(
+    () =>
+      centro
+        ? [...destinos].sort(
+            (a, b) =>
+              geoDistance(centro, a.coordenadas) -
+              geoDistance(centro, b.coordenadas),
+          )
+        : destinos,
+    [destinos, centro],
+  );
+
   function cerrarTodo() {
     setAbierto(false);
     setSeleccion(null);
@@ -32,7 +48,8 @@ export function Hero({ destinos }: { destinos: DestinoConPaquetes[] }) {
     setAbierto(true);
   }
 
-  function abrirLista() {
+  function abrirLista(lat: number, lng: number) {
+    setCentro([lng, lat]);
     setVista("lista");
     setAbierto(true);
   }
@@ -122,7 +139,7 @@ export function Hero({ destinos }: { destinos: DestinoConPaquetes[] }) {
                       className="max-h-[80vh] overflow-y-auto"
                     >
                       <ListaDestinos
-                        destinos={destinos}
+                        destinos={ordenados}
                         onElegir={elegirDestino}
                         onCerrar={cerrarTodo}
                       />
