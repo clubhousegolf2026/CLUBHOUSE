@@ -6,6 +6,7 @@ import { seleccionSchema } from "@/lib/pricing/types";
 import { getTarifas } from "@/lib/data";
 import { getSupabase } from "@/lib/data/supabase";
 import { rateLimit } from "@/lib/rate-limit";
+import { esBot, ipDe } from "@/lib/anti-spam";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -33,12 +34,14 @@ const bodySchema = z.object({
  * "reserva" también la fila de reserva con su anticipo del 30%.
  */
 export async function POST(req: Request) {
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "anon";
-  if (!rateLimit(`reservas:${ip}`, 5, 60)) {
+  if (!rateLimit(`reservas:${ipDe(req)}`, 5, 60)) {
     return NextResponse.json({ error: "Demasiadas solicitudes" }, { status: 429 });
   }
 
-  const parsed = bodySchema.safeParse(await req.json().catch(() => null));
+  const body = await req.json().catch(() => null);
+  if (esBot(body)) return NextResponse.json({ ok: true });
+
+  const parsed = bodySchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
       { error: "Datos inválidos", detalles: parsed.error.flatten() },

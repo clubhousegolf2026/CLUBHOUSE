@@ -13,6 +13,8 @@ export default function ResumenPage() {
   const { cotizacion, seleccion, hidratado } = useCotizador();
   const [enviado, setEnviado] = useState<null | "cotizacion" | "reserva">(null);
   const [form, setForm] = useState({ nombre: "", email: "", telefono: "" });
+  const [t] = useState(() => Date.now());
+  const [website, setWebsite] = useState("");
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,7 +31,7 @@ export default function ResumenPage() {
       const res = await fetch("/api/reservas", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tipo, ...form, seleccion }),
+        body: JSON.stringify({ tipo, ...form, seleccion, website, t }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -127,6 +129,15 @@ export default function ResumenPage() {
               Los usamos solo para enviarte la cotización o gestionar la reserva.
             </p>
             <div className="mt-4 space-y-3">
+              <input
+                type="text"
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+                value={website}
+                onChange={(e) => setWebsite(e.target.value)}
+                className="absolute -left-[9999px] h-0 w-0 opacity-0"
+              />
               <Campo
                 id="nombre"
                 label="Nombre completo"

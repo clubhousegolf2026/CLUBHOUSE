@@ -9,6 +9,7 @@ export default function ContactoPage() {
   const [enviado, setEnviado] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [t] = useState(() => Date.now());
 
   async function enviar(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -25,6 +26,8 @@ export default function ContactoPage() {
         telefono: form.get("telefono") || undefined,
         mensaje: form.get("mensaje") || undefined,
         fechaTentativa: form.get("fecha") || undefined,
+        website: form.get("website") || undefined,
+        t,
       }),
     });
 
@@ -60,6 +63,14 @@ export default function ContactoPage() {
             className="grid gap-4 rounded-[var(--radius-panel)] border border-arena bg-blanco-roto p-6 sm:grid-cols-2"
             onSubmit={enviar}
           >
+            <input
+              name="website"
+              type="text"
+              tabIndex={-1}
+              autoComplete="off"
+              aria-hidden="true"
+              className="absolute -left-[9999px] h-0 w-0 opacity-0"
+            />
             <Input id="nombre" label="Nombre" required />
             <Input id="email" label="Correo" type="email" required />
             <Input id="telefono" label="Teléfono / WhatsApp" />

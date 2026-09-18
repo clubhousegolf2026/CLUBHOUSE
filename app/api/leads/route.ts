@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getSupabase } from "@/lib/data/supabase";
 import { rateLimit } from "@/lib/rate-limit";
+import { esBot, ipDe } from "@/lib/anti-spam";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -15,12 +16,15 @@ const leadSchema = z.object({
 });
 
 export async function POST(req: Request) {
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "anon";
-  if (!rateLimit(`leads:${ip}`, 5, 60)) {
+  if (!rateLimit(`leads:${ipDe(req)}`, 5, 60)) {
     return NextResponse.json({ error: "Demasiadas solicitudes" }, { status: 429 });
   }
 
-  const parsed = leadSchema.safeParse(await req.json().catch(() => null));
+  const body = await req.json().catch(() => null);
+  // A los bots se les responde "ok" sin guardar nada, para no darles pista.
+  if (esBot(body)) return NextResponse.json({ ok: true });
+
+  const parsed = leadSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
       { error: "Datos inválidos", detalles: parsed.error.flatten() },

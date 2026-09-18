@@ -2,7 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Trash2 } from "lucide-react";
+import { ArrowUp, Plus, Trash2 } from "lucide-react";
+import { SubirFotos } from "@/components/admin/subir-fotos";
 import { Button } from "@/components/ui/button";
 import {
   crearPaquete,
@@ -224,7 +225,18 @@ export function PaqueteForm({
         <span className="text-sm font-medium text-carbon">Galería</span>
         <div className="mt-2 space-y-2">
           {galeria.map((foto, i) => (
-            <div key={i} className="flex gap-2">
+            <div key={i} className="flex items-center gap-2">
+              <div className="relative h-11 w-16 shrink-0 overflow-hidden rounded-[var(--radius-control)] bg-arena">
+                {foto.url && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={foto.url} alt="" className="h-full w-full object-cover" />
+                )}
+                {i === 0 && foto.url && (
+                  <span className="absolute inset-x-0 bottom-0 bg-carbon/70 text-center text-[9px] leading-4 text-crema">
+                    Portada
+                  </span>
+                )}
+              </div>
               <input
                 placeholder="URL de la imagen"
                 value={foto.url}
@@ -233,7 +245,7 @@ export function PaqueteForm({
                   copia[i] = { ...copia[i], url: e.target.value };
                   setGaleria(copia);
                 }}
-                className={`${estiloInput} flex-[2]`}
+                className={`${estiloInput} !mt-0 flex-[2]`}
               />
               <input
                 placeholder="Texto alternativo"
@@ -243,8 +255,21 @@ export function PaqueteForm({
                   copia[i] = { ...copia[i], alt: e.target.value };
                   setGaleria(copia);
                 }}
-                className={`${estiloInput} flex-[1]`}
+                className={`${estiloInput} !mt-0 flex-[1]`}
               />
+              <button
+                type="button"
+                disabled={i === 0}
+                onClick={() => {
+                  const copia = [...galeria];
+                  [copia[i - 1], copia[i]] = [copia[i], copia[i - 1]];
+                  setGaleria(copia);
+                }}
+                className="grid h-11 w-11 shrink-0 place-items-center rounded-[var(--radius-control)] text-niebla hover:bg-arena/60 disabled:opacity-30"
+                aria-label="Subir posición (la primera es la portada)"
+              >
+                <ArrowUp size={16} />
+              </button>
               <button
                 type="button"
                 onClick={() => setGaleria(galeria.filter((_, j) => j !== i))}
@@ -256,13 +281,22 @@ export function PaqueteForm({
             </div>
           ))}
         </div>
-        <button
-          type="button"
-          onClick={() => setGaleria([...galeria, { url: "", alt: "" }])}
-          className="mt-2 inline-flex items-center gap-1.5 text-sm text-verde-golf hover:underline"
-        >
-          <Plus size={15} /> Agregar foto
-        </button>
+        <div className="mt-3 flex flex-wrap items-center gap-4">
+          <SubirFotos
+            carpeta={slug}
+            alt={nombre}
+            onSubidas={(nuevas) =>
+              setGaleria((actual) => [...actual.filter((g) => g.url.trim()), ...nuevas])
+            }
+          />
+          <button
+            type="button"
+            onClick={() => setGaleria([...galeria, { url: "", alt: "" }])}
+            className="inline-flex items-center gap-1.5 text-sm text-verde-golf hover:underline"
+          >
+            <Plus size={15} /> Agregar por URL
+          </button>
+        </div>
       </div>
 
       <div className="grid gap-6 sm:grid-cols-2">

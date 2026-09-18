@@ -7,6 +7,8 @@ import { Container } from "@/components/ui/container";
 import { ButtonLink } from "@/components/ui/button";
 import { cop } from "@/lib/format";
 import { getPaquetes, getPaquetePorSlug } from "@/lib/data";
+import { JsonLd } from "@/components/site/json-ld";
+import { SITE_URL } from "@/lib/site";
 
 export const revalidate = 3600;
 
@@ -25,6 +27,7 @@ export async function generateMetadata({
   return {
     title: p.nombre,
     description: p.descripcion,
+    alternates: { canonical: `/paquetes/${p.slug}` },
     openGraph: {
       images: p.galeria[0] ? [p.galeria[0].url] : [],
       title: p.nombre,
@@ -44,6 +47,24 @@ export default async function PaqueteDetallePage({
 
   return (
     <article className="py-10">
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "Product",
+          name: p.nombre,
+          description: p.descripcion,
+          image: p.galeria.map((g) => g.url),
+          url: `${SITE_URL}/paquetes/${p.slug}`,
+          brand: { "@type": "Brand", name: "Clubhouse" },
+          offers: {
+            "@type": "Offer",
+            priceCurrency: "COP",
+            price: p.precioDesdeCop,
+            availability: "https://schema.org/InStock",
+            url: `${SITE_URL}/paquetes/${p.slug}`,
+          },
+        }}
+      />
       <Container>
         <Link href="/paquetes" className="text-sm text-niebla hover:text-carbon">
           ← Todos los paquetes
