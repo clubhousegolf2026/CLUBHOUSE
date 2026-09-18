@@ -82,7 +82,7 @@ export function Hero({ destinos }: { destinos: DestinoConPaquetes[] }) {
           </div>
 
           {/* Globo 3D — a mano derecha del titular. Arrástralo para girarlo. */}
-          <div className="flex w-full justify-center lg:justify-end">
+          <div className="flex w-full min-w-0 justify-center lg:justify-end">
             <Globo3D
               destinos={destinos}
               seleccionId={seleccion?.id ?? null}

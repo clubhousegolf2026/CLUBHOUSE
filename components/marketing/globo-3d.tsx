@@ -159,6 +159,13 @@ export function Globo3D({
       // resta el padding horizontal del hero (`px-6`/`sm:px-10` en
       // hero.tsx, únicos anchos relevantes por debajo de `lg`, donde el
       // globo pasa a una columna aparte con su propio espacio).
+      // En móvil el globo es protagonista: se deja más ancho que la pantalla
+      // (el hero recorta el desborde con overflow-hidden y flex lo centra),
+      // porque el disco visible es bastante menor que el lienzo.
+      if (!mqLg.matches) {
+        setTamano(Math.min(Math.round(window.innerWidth * 1.3), porAlto));
+        return;
+      }
       const padding = window.innerWidth < 640 ? 24 : 40;
       const disponible = window.innerWidth - padding * 2;
       setTamano(Math.min(porAncho, porAlto, disponible));
