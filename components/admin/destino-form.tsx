@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
+import { SubirFotos } from "@/components/admin/subir-fotos";
 import { MapaMundoPicker } from "@/components/admin/mapa-mundo-picker";
 import {
   crearDestino,
@@ -31,6 +32,7 @@ export function DestinoForm({ destino }: { destino?: DatosDestino }) {
   const [resumen, setResumen] = useState(destino?.resumen ?? "");
   const [disponible, setDisponible] = useState(destino?.disponible ?? false);
   const [orden, setOrden] = useState(destino?.orden ?? 0);
+  const [fotoUrl, setFotoUrl] = useState(destino?.fotoUrl ?? "");
 
   function alGuardar() {
     setError(null);
@@ -44,6 +46,7 @@ export function DestinoForm({ destino }: { destino?: DatosDestino }) {
       resumen,
       disponible,
       orden,
+      fotoUrl: fotoUrl.trim() || null,
     };
     if (!datos.nombre || !datos.region || !datos.pais || !datos.resumen) {
       setError("Nombre, región, país y resumen son obligatorios.");
@@ -133,6 +136,32 @@ export function DestinoForm({ destino }: { destino?: DatosDestino }) {
           <div className="mt-1.5">
             <MapaMundoPicker lat={lat} lng={lng} onCambiar={(la, lo) => { setLat(la); setLng(lo); }} />
           </div>
+        </div>
+      </div>
+
+      <div>
+        <span className="text-sm font-medium text-carbon">Foto del destino</span>
+        <div className="mt-2 flex flex-wrap items-center gap-3">
+          <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-[var(--radius-control)] bg-arena">
+            {fotoUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={fotoUrl} alt="" className="h-full w-full object-cover" />
+            )}
+          </div>
+          <SubirFotos
+            carpeta={`destinos/${slugificar(nombre) || "nuevo"}`}
+            alt={nombre}
+            onSubidas={(fotos) => setFotoUrl(fotos[fotos.length - 1].url)}
+          />
+          {fotoUrl && (
+            <button
+              type="button"
+              onClick={() => setFotoUrl("")}
+              className="text-sm text-error hover:underline"
+            >
+              Quitar
+            </button>
+          )}
         </div>
       </div>
 

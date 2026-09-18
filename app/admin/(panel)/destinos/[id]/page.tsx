@@ -32,6 +32,7 @@ export default async function EditarDestinoPage({
     resumen: destino.resumen,
     disponible: destino.disponible,
     orden: destino.orden,
+    fotoUrl: destino.foto_url,
   };
 
   return (

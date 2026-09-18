@@ -80,6 +80,7 @@ function mapDestino(
     campos,
     slugsPaquetes,
     disponible: fila.disponible,
+    foto: fila.foto_url ?? undefined,
   };
 }
 

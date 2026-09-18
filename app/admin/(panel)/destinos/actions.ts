@@ -14,6 +14,7 @@ export interface DatosDestino {
   resumen: string;
   disponible: boolean;
   orden: number;
+  fotoUrl: string | null;
 }
 
 function revalidarTodo(id?: string) {
@@ -35,6 +36,7 @@ export async function crearDestino(datos: DatosDestino) {
     resumen: datos.resumen,
     disponible: datos.disponible,
     orden: datos.orden,
+    foto_url: datos.fotoUrl,
   });
   if (error) throw new Error(error.message);
   revalidarTodo();
@@ -54,6 +56,7 @@ export async function actualizarDestino(datos: DatosDestino) {
       resumen: datos.resumen,
       disponible: datos.disponible,
       orden: datos.orden,
+      foto_url: datos.fotoUrl,
     })
     .eq("id", datos.id);
   if (error) throw new Error(error.message);

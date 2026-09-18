@@ -46,4 +46,5 @@ export interface Destino {
   campos: string[];
   slugsPaquetes: string[];
   disponible: boolean;
+  foto?: string;
 }

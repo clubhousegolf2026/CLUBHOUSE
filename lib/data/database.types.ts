@@ -284,6 +284,7 @@ export type Database = {
         Row: {
           created_at: string
           disponible: boolean
+          foto_url: string | null
           id: string
           lat: number
           lng: number
@@ -297,6 +298,7 @@ export type Database = {
         Insert: {
           created_at?: string
           disponible?: boolean
+          foto_url?: string | null
           id: string
           lat: number
           lng: number
@@ -310,6 +312,7 @@ export type Database = {
         Update: {
           created_at?: string
           disponible?: boolean
+          foto_url?: string | null
           id?: string
           lat?: number
           lng?: number

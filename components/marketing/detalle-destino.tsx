@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { m } from "framer-motion";
 import { MapPin, X, ArrowRight, ArrowLeft } from "lucide-react";
@@ -54,6 +55,18 @@ export function DetalleDestino({
           <X size={18} />
         </button>
       </div>
+
+      {destino.foto && (
+        <div className="relative mt-4 aspect-[16/7] overflow-hidden rounded-[var(--radius-card)] bg-arena">
+          <Image
+            src={destino.foto}
+            alt={destino.nombre}
+            fill
+            sizes="(max-width: 768px) 100vw, 640px"
+            className="object-cover"
+          />
+        </div>
+      )}
 
       <div className="mt-4 grid gap-6 md:grid-cols-2">
         <div>
