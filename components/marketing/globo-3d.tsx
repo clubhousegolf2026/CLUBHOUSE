@@ -241,7 +241,7 @@ export function Globo3D({
     const tick = () => {
       const t = (performance.now() - inicio) / 1000;
       banderasRef.current.forEach((b) => {
-        dibujarBandera(b.ctx, b.color, t);
+        dibujarBandera(b.ctx, b.color, b.pais, t);
         b.texture.needsUpdate = true;
       });
       raf = requestAnimationFrame(tick);
@@ -385,10 +385,85 @@ export function Globo3D({
   );
 }
 
+type DibujoBandera = (
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+) => void;
+
+const normalizarPais = (p: string) =>
+  p.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+
+function franjas(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  colores: [string, number][],
+  vertical = false,
+) {
+  const total = colores.reduce((a, [, p]) => a + p, 0);
+  let acum = 0;
+  for (const [color, peso] of colores) {
+    ctx.fillStyle = color;
+    const f = peso / total;
+    if (vertical) ctx.fillRect(x + acum * w, y, f * w + 0.5, h);
+    else ctx.fillRect(x, y + acum * h, w, f * h + 0.5);
+    acum += f;
+  }
+}
+
+// Banderas dibujadas en código (sin imágenes externas): las de los países
+// que hoy tienen destinos en el catálogo.
+const BANDERAS: Record<string, DibujoBandera> = {
+  colombia: (ctx, x, y, w, h) =>
+    franjas(ctx, x, y, w, h, [["#fcd116", 2], ["#003893", 1], ["#ce1126", 1]]),
+  mexico: (ctx, x, y, w, h) => {
+    franjas(ctx, x, y, w, h, [["#006847", 1], ["#ffffff", 1], ["#ce1126", 1]], true);
+    ctx.fillStyle = "#8c6b2f";
+    ctx.beginPath();
+    ctx.arc(x + w / 2, y + h / 2, h * 0.14, 0, Math.PI * 2);
+    ctx.fill();
+  },
+  "costa rica": (ctx, x, y, w, h) =>
+    franjas(ctx, x, y, w, h, [
+      ["#002b7f", 1],
+      ["#ffffff", 1],
+      ["#ce1126", 2],
+      ["#ffffff", 1],
+      ["#002b7f", 1],
+    ]),
+  espana: (ctx, x, y, w, h) =>
+    franjas(ctx, x, y, w, h, [["#aa151b", 1], ["#f1bf00", 2], ["#aa151b", 1]]),
+  "republica dominicana": (ctx, x, y, w, h) => {
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = "#002d62";
+    ctx.fillRect(x, y, w * 0.42, h * 0.42);
+    ctx.fillRect(x + w * 0.58, y + h * 0.58, w * 0.42, h * 0.42);
+    ctx.fillStyle = "#ce1126";
+    ctx.fillRect(x + w * 0.58, y, w * 0.42, h * 0.42);
+    ctx.fillRect(x, y + h * 0.58, w * 0.42, h * 0.42);
+  },
+  eeuu: (ctx, x, y, w, h) => {
+    const rayas: [string, number][] = Array.from({ length: 7 }, (_, i) => [
+      i % 2 === 0 ? "#b22234" : "#ffffff",
+      1,
+    ]);
+    franjas(ctx, x, y, w, h, rayas);
+    ctx.fillStyle = "#3c3b6e";
+    ctx.fillRect(x, y, w * 0.45, h * 0.55);
+  },
+};
+
 interface BanderaAnimada {
   ctx: CanvasRenderingContext2D;
   texture: ThreeNS.CanvasTexture;
   color: string;
+  pais: string;
 }
 
 const BANDERA_W = 96;
@@ -399,6 +474,7 @@ const BANDERA_H = 128;
 function dibujarBandera(
   ctx: CanvasRenderingContext2D,
   colorBandera: string,
+  pais: string,
   t: number,
 ) {
   const W = BANDERA_W;
@@ -455,16 +531,31 @@ function dibujarBandera(
     puntosAbajo.push([x, bottomPole + f * (tipY - bottomPole) + onda]);
   }
 
-  ctx.fillStyle = colorBandera;
+  const trazarTela = () => {
+    ctx.beginPath();
+    puntosArriba.forEach(([x, y], i) => (i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y)));
+    for (let i = puntosAbajo.length - 1; i >= 0; i--) {
+      ctx.lineTo(puntosAbajo[i][0], puntosAbajo[i][1]);
+    }
+    ctx.closePath();
+  };
+
+  // La tela ondulante recorta el dibujo de la bandera del país.
+  ctx.save();
+  trazarTela();
+  ctx.clip();
+  const dibujo = BANDERAS[normalizarPais(pais)];
+  if (dibujo) {
+    dibujo(ctx, cx, topPole - 6, largo, bottomPole - topPole + 12);
+  } else {
+    ctx.fillStyle = colorBandera;
+    ctx.fillRect(cx, topPole - 6, largo, bottomPole - topPole + 12);
+  }
+  ctx.restore();
+
   ctx.strokeStyle = "#0b3d2e";
   ctx.lineWidth = 1.5;
-  ctx.beginPath();
-  puntosArriba.forEach(([x, y], i) => (i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y)));
-  for (let i = puntosAbajo.length - 1; i >= 0; i--) {
-    ctx.lineTo(puntosAbajo[i][0], puntosAbajo[i][1]);
-  }
-  ctx.closePath();
-  ctx.fill();
+  trazarTela();
   ctx.stroke();
 }
 
@@ -490,11 +581,16 @@ function crearBanderaSprite(
   canvas.height = H * 2;
   const ctx = canvas.getContext("2d")!;
   ctx.scale(2, 2);
-  dibujarBandera(ctx, colorBandera, 0);
+  dibujarBandera(ctx, colorBandera, d.destino.pais, 0);
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.needsUpdate = true;
-  registro.set(d.destino.id, { ctx, texture, color: colorBandera });
+  registro.set(d.destino.id, {
+    ctx,
+    texture,
+    color: colorBandera,
+    pais: d.destino.pais,
+  });
 
   const material = new THREE.SpriteMaterial({
     map: texture,
@@ -503,7 +599,7 @@ function crearBanderaSprite(
   });
   const sprite = new THREE.Sprite(material);
 
-  const escala = activo ? 13 : 9.5;
+  const escala = activo ? 17 : 13;
   sprite.scale.set(escala * (W / H), escala, 1);
   // El ancla queda en la base del asta (donde toca el globo), no al centro.
   sprite.center.set(0.5, (H - (H - 16) + 6) / H);
