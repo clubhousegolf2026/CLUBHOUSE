@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Hero } from "@/components/marketing/hero";
-import { PackageCard } from "@/components/marketing/package-card";
+import { FiltroPaquetes } from "@/components/marketing/filtro-paquetes";
 import { Testimonios } from "@/components/marketing/testimonios";
 import { Section, SectionHead } from "@/components/ui/section";
 import { ButtonLink } from "@/components/ui/button";
@@ -9,16 +9,16 @@ import { Container } from "@/components/ui/container";
 import { Reveal } from "@/components/site/reveal";
 import {
   getDestinosConPaquetes,
-  getPaquetesDestacados,
+  getPaquetes,
   getTestimonios,
 } from "@/lib/data";
 
 export const revalidate = 300;
 
 export default async function HomePage() {
-  const [destinos, destacados, testimonios] = await Promise.all([
+  const [destinos, paquetes, testimonios] = await Promise.all([
     getDestinosConPaquetes(),
-    getPaquetesDestacados(),
+    getPaquetes(),
     getTestimonios(),
   ]);
 
@@ -30,20 +30,12 @@ export default async function HomePage() {
         <Section
           containerClassName="max-w-[1920px] px-6 sm:px-10 lg:px-16 xl:px-24"
         >
-          <div className="mb-10 flex items-end justify-between gap-4">
-            <SectionHead
-              eyebrow="Listos para reservar"
-              titulo="Paquetes más elegidos"
-            />
-            <ButtonLink href="/paquetes" variante="fantasma" className="hidden sm:inline-flex">
-              Ver todos <ArrowRight size={16} />
-            </ButtonLink>
-          </div>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {destacados.map((p) => (
-              <PackageCard key={p.id} paquete={p} />
-            ))}
-          </div>
+          <SectionHead
+            eyebrow="Listos para reservar"
+            titulo="Encuentra tu plan"
+            descripcion="Filtra por destino, duración, presupuesto o campo de golf."
+          />
+          <FiltroPaquetes paquetes={paquetes} destinos={destinos} />
         </Section>
       </Reveal>
 
