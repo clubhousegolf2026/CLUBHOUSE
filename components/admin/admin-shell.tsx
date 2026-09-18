@@ -30,7 +30,7 @@ export function AdminShell({
 }) {
   return (
     <div className="min-h-screen bg-crema lg:grid lg:grid-cols-[220px_1fr]">
-      <aside className="flex flex-col justify-between border-b border-arena bg-verde-calle px-4 py-5 lg:min-h-screen lg:border-b-0 lg:border-r">
+      <aside className="flex flex-col justify-between border-b border-arena bg-verde-calle px-4 py-5 lg:sticky lg:top-0 lg:h-screen lg:self-start lg:overflow-y-auto lg:border-b-0 lg:border-r">
         <div>
           <Link href="/admin" className="block font-serif text-lg text-crema">
             Club House
