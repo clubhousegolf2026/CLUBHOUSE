@@ -39,7 +39,7 @@ export function Hero({ destinos }: { destinos: DestinoConPaquetes[] }) {
 
   return (
     <LazyMotion features={domAnimation}>
-      <section className="relative isolate -mt-20 overflow-hidden bg-verde-calle pt-20 text-crema">
+      <section className="relative isolate -mt-20 flex min-h-dvh flex-col justify-center overflow-hidden bg-verde-calle pt-20 text-crema">
         <div
           className="-z-10 absolute inset-0"
           style={{
@@ -50,7 +50,7 @@ export function Hero({ destinos }: { destinos: DestinoConPaquetes[] }) {
 
         {/* Ancho completo de la página (no el max-w-6xl del resto del sitio):
             en pantallas grandes el hero usa casi todo el viewport. */}
-        <div className="mx-auto grid w-full max-w-[1920px] items-start gap-6 px-6 sm:px-10 lg:grid-cols-[3fr_2fr] lg:gap-10 lg:px-16 xl:px-24">
+        <div className="mx-auto grid w-full max-w-[1920px] items-center gap-6 px-6 sm:px-10 lg:grid-cols-[3fr_2fr] lg:gap-10 lg:px-16 xl:px-24">
           <div className="pt-16 pb-16 lg:pt-28 lg:pb-24">
             <span className="text-sm uppercase tracking-[0.2em] text-champagne">
               Turismo de golf en Colombia y el mundo
