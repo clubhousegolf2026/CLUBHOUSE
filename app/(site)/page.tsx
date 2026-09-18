@@ -28,7 +28,6 @@ export default async function HomePage() {
 
       <Reveal>
         <Section
-          className="bg-blanco-roto"
           containerClassName="max-w-[1920px] px-6 sm:px-10 lg:px-16 xl:px-24"
         >
           <div className="mb-10 flex items-end justify-between gap-4">
