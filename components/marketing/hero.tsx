@@ -21,20 +21,26 @@ export function Hero({ destinos }: { destinos: DestinoConPaquetes[] }) {
   const [abierto, setAbierto] = useState(false);
   const [vista, setVista] = useState<"lista" | "detalle">("detalle");
 
-  // Punto tocado en el globo: la lista se ordena de más cerca a más lejos,
-  // así al tocar Colombia salen primero los destinos colombianos.
+  // Punto tocado en el globo: si cae cerca de algún destino, la lista se
+  // limita a los destinos de ese mismo país (con opción de ver todos);
+  // si cae lejos de todos (océano), se muestran todos ordenados por cercanía.
   const [centro, setCentro] = useState<[number, number] | null>(null);
-  const ordenados = useMemo(
-    () =>
-      centro
-        ? [...destinos].sort(
-            (a, b) =>
-              geoDistance(centro, a.coordenadas) -
-              geoDistance(centro, b.coordenadas),
-          )
-        : destinos,
-    [destinos, centro],
-  );
+  const [verTodos, setVerTodos] = useState(false);
+  const { ordenados, pais } = useMemo(() => {
+    if (!centro) return { ordenados: destinos, pais: null as string | null };
+    const porCercania = [...destinos].sort(
+      (a, b) =>
+        geoDistance(centro, a.coordenadas) - geoDistance(centro, b.coordenadas),
+    );
+    const cercano = porCercania[0];
+    const cerca =
+      cercano && geoDistance(centro, cercano.coordenadas) < 0.5;
+    if (!cerca || verTodos) return { ordenados: porCercania, pais: null };
+    return {
+      ordenados: porCercania.filter((d) => d.pais === cercano.pais),
+      pais: cercano.pais,
+    };
+  }, [destinos, centro, verTodos]);
 
   function cerrarTodo() {
     setAbierto(false);
@@ -50,6 +56,7 @@ export function Hero({ destinos }: { destinos: DestinoConPaquetes[] }) {
 
   function abrirLista(lat: number, lng: number) {
     setCentro([lng, lat]);
+    setVerTodos(false);
     setVista("lista");
     setAbierto(true);
   }
@@ -140,6 +147,8 @@ export function Hero({ destinos }: { destinos: DestinoConPaquetes[] }) {
                     >
                       <ListaDestinos
                         destinos={ordenados}
+                        pais={pais}
+                        onVerTodos={() => setVerTodos(true)}
                         onElegir={elegirDestino}
                         onCerrar={cerrarTodo}
                       />

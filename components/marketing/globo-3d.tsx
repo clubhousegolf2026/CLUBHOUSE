@@ -512,14 +512,13 @@ function dibujarBandera(
   // (f=0, sin movimiento — está cosida al palo) y la punta libre (f=1,
   // máxima amplitud), como una tela real que ondea con el viento.
   const N = 10;
-  const largo = 42; // alcance horizontal de la tela
-  const amplitudMax = 4.5;
+  const largo = 44; // alcance horizontal de la tela
+  const amplitudMax = 3;
   const velocidad = 3.2;
   const frecuencia = 5.5;
 
   const topPole = 8;
   const bottomPole = 40;
-  const tipY = 24;
 
   const puntosArriba: [number, number][] = [];
   const puntosAbajo: [number, number][] = [];
@@ -527,8 +526,8 @@ function dibujarBandera(
     const f = i / N;
     const x = cx + f * largo;
     const onda = amplitudMax * f * Math.sin(t * velocidad - f * frecuencia);
-    puntosArriba.push([x, topPole + f * (tipY - topPole) + onda]);
-    puntosAbajo.push([x, bottomPole + f * (tipY - bottomPole) + onda]);
+    puntosArriba.push([x, topPole + onda]);
+    puntosAbajo.push([x, bottomPole + onda]);
   }
 
   const trazarTela = () => {
@@ -546,10 +545,10 @@ function dibujarBandera(
   ctx.clip();
   const dibujo = BANDERAS[normalizarPais(pais)];
   if (dibujo) {
-    dibujo(ctx, cx, topPole - 6, largo, bottomPole - topPole + 12);
+    dibujo(ctx, cx, topPole - 3, largo, bottomPole - topPole + 6);
   } else {
     ctx.fillStyle = colorBandera;
-    ctx.fillRect(cx, topPole - 6, largo, bottomPole - topPole + 12);
+    ctx.fillRect(cx, topPole - 3, largo, bottomPole - topPole + 6);
   }
   ctx.restore();
 

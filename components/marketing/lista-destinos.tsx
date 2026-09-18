@@ -13,7 +13,11 @@ export function ListaDestinos({
   destinos,
   onElegir,
   onCerrar,
+  pais,
+  onVerTodos,
 }: {
+  pais?: string | null;
+  onVerTodos?: () => void;
   destinos: DestinoConPaquetes[];
   onElegir: (d: DestinoConPaquetes) => void;
   onCerrar: () => void;
@@ -29,7 +33,7 @@ export function ListaDestinos({
       <div className="flex items-start justify-between gap-3">
         <div>
           <span className="text-xs uppercase tracking-wide text-champagne">
-            Elige una ciudad
+            {pais ? `Destinos en ${pais}` : "Elige una ciudad"}
           </span>
           <h3 className="mt-1 font-serif text-2xl text-carbon">
             ¿A dónde quieres jugar?
@@ -71,6 +75,14 @@ export function ListaDestinos({
           </li>
         ))}
       </ul>
+      {pais && onVerTodos && (
+        <button
+          onClick={onVerTodos}
+          className="mt-4 text-sm text-verde-golf underline-offset-4 hover:underline"
+        >
+          Ver destinos de todos los países
+        </button>
+      )}
     </m.div>
   );
 }
