@@ -14,13 +14,19 @@ export default async function EditarDestinoPage({
 }) {
   const { id } = await params;
   const supabase = await createServerSupabase();
-  const { data: destino } = await supabase
-    .from("destinos")
-    .select("*")
-    .eq("id", id)
-    .maybeSingle();
+  const [{ data: destino }, { data: todos }] = await Promise.all([
+    supabase.from("destinos").select("*").eq("id", id).maybeSingle(),
+    supabase.from("destinos").select("id, nombre, lat, lng").neq("id", id),
+  ]);
 
   if (!destino) notFound();
+
+  const ciudades = (todos ?? []).map((d) => ({
+    id: d.id,
+    nombre: d.nombre,
+    lat: d.lat,
+    lng: d.lng,
+  }));
 
   const datos: DatosDestino = {
     id: destino.id,
@@ -44,7 +50,7 @@ export default async function EditarDestinoPage({
         <ArrowLeft size={15} /> Todos los destinos
       </Link>
       <h1 className="font-serif text-2xl text-carbon">Editar destino</h1>
-      <DestinoForm destino={datos} />
+      <DestinoForm destino={datos} ciudades={ciudades} />
     </div>
   );
 }

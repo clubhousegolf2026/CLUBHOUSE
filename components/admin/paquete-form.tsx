@@ -2,9 +2,17 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowUp, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, Check, ImageIcon, Link2, MapPinned, Rocket, Trash2, Wallet, X, FileText } from "lucide-react";
 import { SubirFotos } from "@/components/admin/subir-fotos";
-import { Button } from "@/components/ui/button";
+import {
+  AreaTexto,
+  BarraGuardar,
+  Campo,
+  Chip,
+  Entrada,
+  Interruptor,
+  Seccion,
+} from "@/components/admin/form-ui";
 import {
   crearPaquete,
   actualizarPaquete,
@@ -112,275 +120,228 @@ export function PaqueteForm({
     });
   }
 
+  function mover(i: number, delta: number) {
+    const j = i + delta;
+    if (j < 0 || j >= galeria.length) return;
+    const copia = [...galeria];
+    [copia[i], copia[j]] = [copia[j], copia[i]];
+    setGaleria(copia);
+  }
+
+  function alternar(lista: string[], set: (v: string[]) => void, id: string) {
+    set(lista.includes(id) ? lista.filter((x) => x !== id) : [...lista, id]);
+  }
+
   return (
-    <div className="space-y-6">
-      {error && (
-        <p className="rounded-[var(--radius-control)] bg-error/10 px-3 py-2 text-sm text-error">
-          {error}
-        </p>
-      )}
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Campo label="Nombre">
-          <input
-            value={nombre}
-            onChange={(e) => {
-              setNombre(e.target.value);
-              if (!slugTocado) setSlug(slugificar(e.target.value));
-            }}
-            className={estiloInput}
-          />
-        </Campo>
-        <Campo label="Slug (URL)">
-          <input
-            value={slug}
-            onChange={(e) => {
-              setSlugTocado(true);
-              setSlug(slugificar(e.target.value));
-            }}
-            className={estiloInput}
-          />
-        </Campo>
-      </div>
-
-      <Campo label="Descripción">
-        <textarea
-          rows={3}
-          value={descripcion}
-          onChange={(e) => setDescripcion(e.target.value)}
-          className={estiloInput}
-        />
-      </Campo>
-
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Campo label="Noches">
-          <input
-            type="number"
-            min={0}
-            value={noches}
-            onChange={(e) => setNoches(Number(e.target.value))}
-            className={estiloInput}
-          />
-        </Campo>
-        <Campo label="Días">
-          <input
-            type="number"
-            min={1}
-            value={dias}
-            onChange={(e) => setDias(Number(e.target.value))}
-            className={estiloInput}
-          />
-        </Campo>
-        <Campo label="Precio desde (COP)">
-          <input
-            type="number"
-            min={0}
-            step={1000}
-            value={precio}
-            onChange={(e) => setPrecio(Number(e.target.value))}
-            className={estiloInput}
-          />
-        </Campo>
-      </div>
-
-      <div className="flex flex-wrap gap-6">
-        <label className="flex items-center gap-2 text-sm text-carbon">
-          <input
-            type="checkbox"
-            checked={destacado}
-            onChange={(e) => setDestacado(e.target.checked)}
-          />
-          Destacado (aparece en portada)
-        </label>
-        <label className="flex items-center gap-2 text-sm text-carbon">
-          <input
-            type="checkbox"
-            checked={activo}
-            onChange={(e) => setActivo(e.target.checked)}
-          />
-          Publicado (visible en el sitio)
-        </label>
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Campo label="Incluye (uno por línea)">
-          <textarea
-            rows={4}
-            value={incluye}
-            onChange={(e) => setIncluye(e.target.value)}
-            className={estiloInput}
-          />
-        </Campo>
-        <Campo label="No incluye (uno por línea)">
-          <textarea
-            rows={4}
-            value={noIncluye}
-            onChange={(e) => setNoIncluye(e.target.value)}
-            className={estiloInput}
-          />
-        </Campo>
-      </div>
-
-      <div>
-        <span className="text-sm font-medium text-carbon">Galería</span>
-        <div className="mt-2 space-y-2">
-          {galeria.map((foto, i) => (
-            <div key={i} className="flex items-center gap-2">
-              <div className="relative h-11 w-16 shrink-0 overflow-hidden rounded-[var(--radius-control)] bg-arena">
-                {foto.url && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={foto.url} alt="" className="h-full w-full object-cover" />
-                )}
-                {i === 0 && foto.url && (
-                  <span className="absolute inset-x-0 bottom-0 bg-carbon/70 text-center text-[9px] leading-4 text-crema">
-                    Portada
-                  </span>
-                )}
-              </div>
-              <input
-                placeholder="URL de la imagen"
-                value={foto.url}
-                onChange={(e) => {
-                  const copia = [...galeria];
-                  copia[i] = { ...copia[i], url: e.target.value };
-                  setGaleria(copia);
-                }}
-                className={`${estiloInput} !mt-0 flex-[2]`}
-              />
-              <input
-                placeholder="Texto alternativo"
-                value={foto.alt}
-                onChange={(e) => {
-                  const copia = [...galeria];
-                  copia[i] = { ...copia[i], alt: e.target.value };
-                  setGaleria(copia);
-                }}
-                className={`${estiloInput} !mt-0 flex-[1]`}
-              />
-              <button
-                type="button"
-                disabled={i === 0}
-                onClick={() => {
-                  const copia = [...galeria];
-                  [copia[i - 1], copia[i]] = [copia[i], copia[i - 1]];
-                  setGaleria(copia);
-                }}
-                className="grid h-11 w-11 shrink-0 place-items-center rounded-[var(--radius-control)] text-niebla hover:bg-arena/60 disabled:opacity-30"
-                aria-label="Subir posición (la primera es la portada)"
-              >
-                <ArrowUp size={16} />
-              </button>
-              <button
-                type="button"
-                onClick={() => setGaleria(galeria.filter((_, j) => j !== i))}
-                className="grid h-11 w-11 shrink-0 place-items-center rounded-[var(--radius-control)] text-error hover:bg-error/10"
-                aria-label="Quitar foto"
-              >
-                <Trash2 size={16} />
-              </button>
+    <div className="space-y-5">
+      <div className="grid items-start gap-5 lg:grid-cols-[1fr_300px]">
+        <div className="space-y-5">
+          <Seccion
+            icono={<FileText size={18} />}
+            titulo="Información general"
+            descripcion="El nombre y la descripción que verá el viajero."
+          >
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Campo label="Nombre">
+                <Entrada
+                  value={nombre}
+                  placeholder="Sabana Clásica"
+                  onChange={(e) => {
+                    setNombre(e.target.value);
+                    if (!slugTocado) setSlug(slugificar(e.target.value));
+                  }}
+                />
+              </Campo>
+              <Campo label="Dirección web" ayuda="Se genera sola a partir del nombre.">
+                <Entrada
+                  prefijo="/paquetes/"
+                  className="pl-[92px]"
+                  value={slug}
+                  onChange={(e) => {
+                    setSlugTocado(true);
+                    setSlug(slugificar(e.target.value));
+                  }}
+                />
+              </Campo>
             </div>
-          ))}
-        </div>
-        <div className="mt-3 flex flex-wrap items-center gap-4">
-          <SubirFotos
-            carpeta={slug}
-            alt={nombre}
-            onSubidas={(nuevas) =>
-              setGaleria((actual) => [...actual.filter((g) => g.url.trim()), ...nuevas])
-            }
-          />
-          <button
-            type="button"
-            onClick={() => setGaleria([...galeria, { url: "", alt: "" }])}
-            className="inline-flex items-center gap-1.5 text-sm text-verde-golf hover:underline"
-          >
-            <Plus size={15} /> Agregar por URL
-          </button>
-        </div>
-      </div>
+            <Campo label="Descripción">
+              <AreaTexto rows={4} value={descripcion} onChange={(e) => setDescripcion(e.target.value)} />
+            </Campo>
+          </Seccion>
 
-      <div className="grid gap-6 sm:grid-cols-2">
-        <div>
-          <span className="text-sm font-medium text-carbon">
-            Campos de golf incluidos
-          </span>
-          <div className="mt-2 max-h-48 space-y-1.5 overflow-y-auto rounded-[var(--radius-control)] border border-arena p-3">
-            {campos.length === 0 && (
-              <p className="text-xs text-niebla">
-                No hay campos de golf en el catálogo todavía.
-              </p>
+          <Seccion
+            icono={<Wallet size={18} />}
+            titulo="Duración y precio"
+            descripcion="El precio “desde” es por persona con base en 2 pasajeros."
+          >
+            <div className="grid gap-4 sm:grid-cols-3">
+              <Campo label="Noches">
+                <Entrada type="number" min={0} sufijo="noches" value={noches} onChange={(e) => setNoches(Number(e.target.value))} />
+              </Campo>
+              <Campo label="Días">
+                <Entrada type="number" min={1} sufijo="días" value={dias} onChange={(e) => setDias(Number(e.target.value))} />
+              </Campo>
+              <Campo label="Precio desde">
+                <Entrada type="number" min={0} step={1000} prefijo="$" sufijo="COP" value={precio} onChange={(e) => setPrecio(Number(e.target.value))} />
+              </Campo>
+            </div>
+          </Seccion>
+
+          <Seccion
+            icono={<Check size={18} />}
+            titulo="Qué incluye"
+            descripcion="Una línea por elemento."
+          >
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Campo label="Incluye">
+                <AreaTexto rows={6} value={incluye} onChange={(e) => setIncluye(e.target.value)} placeholder={"3 green fees\n4 noches en hotel"} />
+              </Campo>
+              <Campo label="No incluye">
+                <AreaTexto rows={6} value={noIncluye} onChange={(e) => setNoIncluye(e.target.value)} placeholder={"Tiquetes aéreos\nCenas"} />
+              </Campo>
+            </div>
+          </Seccion>
+
+          <Seccion
+            icono={<ImageIcon size={18} />}
+            titulo="Galería de fotos"
+            descripcion="La primera foto es la portada. Puedes reordenarlas."
+          >
+            <SubirFotos
+              carpeta={slug}
+              alt={nombre}
+              onSubidas={(nuevas) =>
+                setGaleria((actual) => [...actual.filter((g) => g.url.trim()), ...nuevas])
+              }
+            />
+            {galeria.length > 0 && (
+              <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                {galeria.map((foto, i) => (
+                  <li key={i} className="overflow-hidden rounded-2xl border border-arena bg-white">
+                    <div className="group relative aspect-[4/3] bg-arena">
+                      {foto.url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={foto.url} alt={foto.alt} className="h-full w-full object-cover" />
+                      ) : (
+                        <div className="grid h-full place-items-center px-4">
+                          <Entrada
+                            placeholder="Pega la URL de la imagen"
+                            value={foto.url}
+                            onChange={(e) => {
+                              const copia = [...galeria];
+                              copia[i] = { ...copia[i], url: e.target.value };
+                              setGaleria(copia);
+                            }}
+                          />
+                        </div>
+                      )}
+                      {i === 0 && foto.url && (
+                        <span className="absolute left-2 top-2 rounded-full bg-carbon/75 px-2.5 py-1 text-[11px] font-medium text-crema backdrop-blur">
+                          Portada
+                        </span>
+                      )}
+                      <div className="absolute right-2 top-2 flex gap-1 opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100">
+                        <button
+                          type="button"
+                          disabled={i === 0}
+                          onClick={() => mover(i, -1)}
+                          aria-label="Mover antes (la primera es la portada)"
+                          className="grid h-8 w-8 place-items-center rounded-lg bg-carbon/70 text-crema backdrop-blur hover:bg-carbon disabled:opacity-30"
+                        >
+                          <ArrowLeft size={14} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setGaleria(galeria.filter((_, j) => j !== i))}
+                          aria-label="Quitar foto"
+                          className="grid h-8 w-8 place-items-center rounded-lg bg-carbon/70 text-crema backdrop-blur hover:bg-error"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="p-2.5">
+                      <Entrada
+                        placeholder="Descripción de la foto"
+                        className="h-9 text-xs"
+                        value={foto.alt}
+                        onChange={(e) => {
+                          const copia = [...galeria];
+                          copia[i] = { ...copia[i], alt: e.target.value };
+                          setGaleria(copia);
+                        }}
+                      />
+                    </div>
+                  </li>
+                ))}
+              </ul>
             )}
-            {campos.map((c) => (
-              <label key={c.codigo} className="flex items-center gap-2 text-sm text-carbon">
-                <input
-                  type="checkbox"
-                  checked={camposIds.includes(c.codigo)}
-                  onChange={(e) =>
-                    setCamposIds(
-                      e.target.checked
-                        ? [...camposIds, c.codigo]
-                        : camposIds.filter((x) => x !== c.codigo),
-                    )
-                  }
-                />
-                {c.nombre}
-              </label>
-            ))}
-          </div>
-        </div>
+            <button
+              type="button"
+              onClick={() => setGaleria([...galeria, { url: "", alt: "" }])}
+              className="inline-flex items-center gap-1.5 text-sm text-verde-golf hover:underline"
+            >
+              <Link2 size={14} /> Agregar una foto por URL
+            </button>
+          </Seccion>
 
-        <div>
-          <span className="text-sm font-medium text-carbon">
-            Destinos donde aparece
-          </span>
-          <div className="mt-2 max-h-48 space-y-1.5 overflow-y-auto rounded-[var(--radius-control)] border border-arena p-3">
-            {destinos.map((d) => (
-              <label key={d.id} className="flex items-center gap-2 text-sm text-carbon">
-                <input
-                  type="checkbox"
-                  checked={destinosIds.includes(d.id)}
-                  onChange={(e) =>
-                    setDestinosIds(
-                      e.target.checked
-                        ? [...destinosIds, d.id]
-                        : destinosIds.filter((x) => x !== d.id),
-                    )
-                  }
-                />
-                {d.nombre}
-              </label>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="flex items-center gap-3 border-t border-arena pt-5">
-        <Button onClick={alGuardar} disabled={pending}>
-          {pending ? "Guardando…" : esNuevo ? "Crear paquete" : "Guardar cambios"}
-        </Button>
-        {!esNuevo && (
-          <Button
-            variante="fantasma"
-            className="text-error hover:bg-error/10"
-            onClick={alEliminar}
-            disabled={pending}
+          <Seccion
+            icono={<MapPinned size={18} />}
+            titulo="Campos y destinos"
+            descripcion="Toca para seleccionar."
           >
-            Eliminar
-          </Button>
-        )}
+            <div>
+              <span className="text-sm font-medium text-carbon">Campos de golf incluidos</span>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {campos.length === 0 && (
+                  <p className="text-sm text-niebla">No hay campos de golf en el catálogo todavía.</p>
+                )}
+                {campos.map((c) => (
+                  <Chip key={c.codigo} activo={camposIds.includes(c.codigo)} onClick={() => alternar(camposIds, setCamposIds, c.codigo)}>
+                    {c.nombre}
+                  </Chip>
+                ))}
+              </div>
+            </div>
+            <div>
+              <span className="text-sm font-medium text-carbon">Destinos donde aparece</span>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {destinos.map((d) => (
+                  <Chip key={d.id} activo={destinosIds.includes(d.id)} onClick={() => alternar(destinosIds, setDestinosIds, d.id)}>
+                    {d.nombre}
+                  </Chip>
+                ))}
+              </div>
+            </div>
+          </Seccion>
+        </div>
+
+        <aside className="space-y-5 lg:sticky lg:top-6">
+          <Seccion icono={<Rocket size={18} />} titulo="Publicación">
+            <Interruptor
+              checked={activo}
+              onChange={setActivo}
+              titulo="Publicado"
+              descripcion="Visible en el sitio y en el filtro de planes."
+            />
+            <div className="border-t border-arena" />
+            <Interruptor
+              checked={destacado}
+              onChange={setDestacado}
+              titulo="Destacado"
+              descripcion="Aparece como “Más elegido”."
+            />
+          </Seccion>
+        </aside>
       </div>
+
+      <BarraGuardar
+        pending={pending}
+        etiqueta={esNuevo ? "Crear paquete" : "Guardar cambios"}
+        onGuardar={alGuardar}
+        onEliminar={esNuevo ? undefined : alEliminar}
+        error={error}
+      />
     </div>
-  );
-}
-
-const estiloInput =
-  "mt-1 w-full rounded-[var(--radius-control)] border border-arena bg-crema px-3 py-2 text-sm outline-none focus:border-verde-golf";
-
-function Campo({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <label className="block">
-      <span className="text-sm font-medium text-carbon">{label}</span>
-      {children}
-    </label>
   );
 }

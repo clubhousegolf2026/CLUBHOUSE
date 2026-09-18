@@ -2,7 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { CalendarPlus } from "lucide-react";
+import { AlertaError, Campo, Entrada, Selector } from "@/components/admin/form-ui";
 import { crearBloqueo } from "@/app/admin/(panel)/calendario/actions";
 
 export function BloqueoForm({ paqueteId }: { paqueteId: string | null }) {
@@ -46,73 +47,48 @@ export function BloqueoForm({ paqueteId }: { paqueteId: string | null }) {
   }
 
   return (
-    <div className="rounded-[var(--radius-panel)] border border-arena bg-blanco-roto p-5">
-      <h2 className="font-serif text-lg text-carbon">Agregar rango</h2>
-      {error && (
-        <p className="mt-2 rounded-[var(--radius-control)] bg-error/10 px-3 py-2 text-sm text-error">
-          {error}
-        </p>
-      )}
-      <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <label className="block">
-          <span className="text-sm text-carbon">Desde</span>
-          <input
-            type="date"
-            value={fechaInicio}
-            onChange={(e) => setFechaInicio(e.target.value)}
-            className={estiloInput}
-          />
-        </label>
-        <label className="block">
-          <span className="text-sm text-carbon">Hasta</span>
-          <input
-            type="date"
-            value={fechaFin}
-            onChange={(e) => setFechaFin(e.target.value)}
-            className={estiloInput}
-          />
-        </label>
-        <label className="block">
-          <span className="text-sm text-carbon">Tipo</span>
-          <select
-            value={tipo}
-            onChange={(e) => setTipo(e.target.value as typeof tipo)}
-            className={estiloInput}
-          >
+    <section className="rounded-[var(--radius-panel)] border border-arena bg-blanco-roto p-5 shadow-[var(--shadow-suave)] sm:p-6">
+      <header className="mb-5 flex items-start gap-3">
+        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-verde-golf/10 text-verde-golf">
+          <CalendarPlus size={18} />
+        </span>
+        <div>
+          <h2 className="font-serif text-lg leading-tight text-carbon">Agregar rango</h2>
+          <p className="mt-0.5 text-sm text-niebla">Bloquea fechas, marca temporada alta o limita cupos.</p>
+        </div>
+      </header>
+      {error && <div className="mb-4"><AlertaError>{error}</AlertaError></div>}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Campo label="Desde">
+          <Entrada type="date" value={fechaInicio} onChange={(e) => setFechaInicio(e.target.value)} />
+        </Campo>
+        <Campo label="Hasta">
+          <Entrada type="date" value={fechaFin} onChange={(e) => setFechaFin(e.target.value)} />
+        </Campo>
+        <Campo label="Tipo">
+          <Selector value={tipo} onChange={(e) => setTipo(e.target.value as typeof tipo)}>
             <option value="bloqueo">Bloqueo (sin cupo)</option>
             <option value="temporada_alta">Temporada alta</option>
             <option value="cupo">Cupo limitado</option>
-          </select>
-        </label>
+          </Selector>
+        </Campo>
         {tipo === "temporada_alta" && (
-          <label className="block">
-            <span className="text-sm text-carbon">Factor de precio</span>
-            <input
-              type="number"
-              min={1}
-              step={0.01}
-              value={factor}
-              onChange={(e) => setFactor(Number(e.target.value))}
-              className={estiloInput}
-            />
-          </label>
+          <Campo label="Factor de precio" ayuda="1,15 = +15%">
+            <Entrada type="number" min={1} step={0.01} sufijo="×" value={factor} onChange={(e) => setFactor(Number(e.target.value))} />
+          </Campo>
         )}
       </div>
-      <label className="mt-3 block">
-        <span className="text-sm text-carbon">Nota (opcional)</span>
-        <input
-          value={nota}
-          onChange={(e) => setNota(e.target.value)}
-          placeholder="Ej. Mantenimiento de campos"
-          className={estiloInput}
-        />
-      </label>
-      <Button className="mt-4" onClick={alCrear} disabled={pending}>
+      <Campo label="Nota (opcional)" className="mt-4">
+        <Entrada value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Ej. Mantenimiento de campos" />
+      </Campo>
+      <button
+        type="button"
+        onClick={alCrear}
+        disabled={pending}
+        className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-xl bg-verde-golf px-6 text-sm font-medium text-crema shadow-sm transition-colors hover:bg-verde-calle disabled:opacity-60"
+      >
         {pending ? "Guardando…" : "Agregar rango"}
-      </Button>
-    </div>
+      </button>
+    </section>
   );
 }
-
-const estiloInput =
-  "mt-1 w-full rounded-[var(--radius-control)] border border-arena bg-crema px-3 py-2 text-sm outline-none focus:border-verde-golf";

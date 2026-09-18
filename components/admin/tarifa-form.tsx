@@ -1,7 +1,16 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Button } from "@/components/ui/button";
+import { Rocket, Tag, Wallet } from "lucide-react";
+import {
+  AreaTexto,
+  BarraGuardar,
+  Campo,
+  Entrada,
+  Interruptor,
+  Seccion,
+  Selector,
+} from "@/components/admin/form-ui";
 import {
   crearTarifa,
   actualizarTarifa,
@@ -92,136 +101,89 @@ export function TarifaForm({
   }
 
   return (
-    <div className="max-w-2xl space-y-5">
-      {error && (
-        <p className="rounded-[var(--radius-control)] bg-error/10 px-3 py-2 text-sm text-error">
-          {error}
-        </p>
-      )}
+    <div className="max-w-5xl space-y-5">
+      <div className="grid items-start gap-5 lg:grid-cols-[1fr_300px]">
+        <div className="space-y-5">
+          <Seccion icono={<Tag size={18} />} titulo="Identificación" descripcion="Qué es este componente del viaje.">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Campo label="Tipo">
+                <Selector value={tipo} onChange={(e) => setTipo(e.target.value as TipoComponente)}>
+                  {TIPOS.map((t) => (
+                    <option key={t.valor} value={t.valor}>
+                      {t.etiqueta}
+                    </option>
+                  ))}
+                </Selector>
+              </Campo>
+              <Campo label="Código" ayuda={esNueva ? "Identificador único; no se puede cambiar después." : "El código no se puede cambiar."}>
+                <Entrada
+                  value={codigo}
+                  disabled={!esNueva}
+                  onChange={(e) => setCodigo(e.target.value.trim())}
+                  placeholder="campo-mi-club"
+                />
+              </Campo>
+            </div>
+            <Campo label="Nombre">
+              <Entrada value={nombre} onChange={(e) => setNombre(e.target.value)} />
+            </Campo>
+            <Campo label="Descripción">
+              <AreaTexto rows={3} value={descripcion} onChange={(e) => setDescripcion(e.target.value)} />
+            </Campo>
+            {tipo === "campo_golf" && (
+              <Campo label="Destino al que pertenece">
+                <Selector value={destinoId} onChange={(e) => setDestinoId(e.target.value)}>
+                  <option value="">Sin asignar</option>
+                  {destinos.map((d) => (
+                    <option key={d.id} value={d.id}>
+                      {d.nombre}
+                    </option>
+                  ))}
+                </Selector>
+              </Campo>
+            )}
+          </Seccion>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Campo label="Código (identificador único)">
-          <input
-            value={codigo}
-            disabled={!esNueva}
-            onChange={(e) => setCodigo(e.target.value.trim())}
-            placeholder="campo-mi-club"
-            className={`${estiloInput} disabled:opacity-60`}
-          />
-        </Campo>
-        <Campo label="Tipo">
-          <select
-            value={tipo}
-            onChange={(e) => setTipo(e.target.value as TipoComponente)}
-            className={estiloInput}
-          >
-            {TIPOS.map((t) => (
-              <option key={t.valor} value={t.valor}>
-                {t.etiqueta}
-              </option>
-            ))}
-          </select>
-        </Campo>
+          <Seccion icono={<Wallet size={18} />} titulo="Precio" descripcion="Cómo se cobra en el cotizador.">
+            <div className="grid gap-4 sm:grid-cols-3">
+              <Campo label="Precio unitario">
+                <Entrada type="number" min={0} step={1000} prefijo="$" sufijo="COP" value={precio} onChange={(e) => setPrecio(Number(e.target.value))} />
+              </Campo>
+              <Campo label="Se cobra">
+                <Selector value={unidad} onChange={(e) => setUnidad(e.target.value as typeof unidad)}>
+                  {UNIDADES.map((u) => (
+                    <option key={u.valor} value={u.valor}>
+                      {u.etiqueta}
+                    </option>
+                  ))}
+                </Selector>
+              </Campo>
+              <Campo label="Factor temporada alta" ayuda="1 = sin recargo; 1,15 = +15%.">
+                <Entrada type="number" min={1} step={0.01} sufijo="×" value={factor} onChange={(e) => setFactor(Number(e.target.value))} />
+              </Campo>
+            </div>
+          </Seccion>
+        </div>
+
+        <aside className="lg:sticky lg:top-6">
+          <Seccion icono={<Rocket size={18} />} titulo="Estado">
+            <Interruptor
+              checked={activo}
+              onChange={setActivo}
+              titulo="Activo"
+              descripcion="Disponible en el cotizador."
+            />
+          </Seccion>
+        </aside>
       </div>
 
-      <Campo label="Nombre">
-        <input value={nombre} onChange={(e) => setNombre(e.target.value)} className={estiloInput} />
-      </Campo>
-
-      <Campo label="Descripción">
-        <textarea
-          rows={2}
-          value={descripcion}
-          onChange={(e) => setDescripcion(e.target.value)}
-          className={estiloInput}
-        />
-      </Campo>
-
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Campo label="Precio unitario (COP)">
-          <input
-            type="number"
-            min={0}
-            step={1000}
-            value={precio}
-            onChange={(e) => setPrecio(Number(e.target.value))}
-            className={estiloInput}
-          />
-        </Campo>
-        <Campo label="Unidad">
-          <select
-            value={unidad}
-            onChange={(e) => setUnidad(e.target.value as typeof unidad)}
-            className={estiloInput}
-          >
-            {UNIDADES.map((u) => (
-              <option key={u.valor} value={u.valor}>
-                {u.etiqueta}
-              </option>
-            ))}
-          </select>
-        </Campo>
-        <Campo label="Factor temporada alta">
-          <input
-            type="number"
-            min={1}
-            step={0.01}
-            value={factor}
-            onChange={(e) => setFactor(Number(e.target.value))}
-            className={estiloInput}
-          />
-        </Campo>
-      </div>
-
-      {tipo === "campo_golf" && (
-        <Campo label="Destino al que pertenece">
-          <select
-            value={destinoId}
-            onChange={(e) => setDestinoId(e.target.value)}
-            className={estiloInput}
-          >
-            <option value="">Sin asignar</option>
-            {destinos.map((d) => (
-              <option key={d.id} value={d.id}>
-                {d.nombre}
-              </option>
-            ))}
-          </select>
-        </Campo>
-      )}
-
-      <label className="flex items-center gap-2 text-sm text-carbon">
-        <input type="checkbox" checked={activo} onChange={(e) => setActivo(e.target.checked)} />
-        Activo (disponible en el cotizador)
-      </label>
-
-      <div className="flex items-center gap-3 border-t border-arena pt-5">
-        <Button onClick={alGuardar} disabled={pending}>
-          {pending ? "Guardando…" : esNueva ? "Crear" : "Guardar cambios"}
-        </Button>
-        {!esNueva && (
-          <Button
-            variante="fantasma"
-            className="text-error hover:bg-error/10"
-            onClick={alEliminar}
-            disabled={pending}
-          >
-            Eliminar
-          </Button>
-        )}
-      </div>
+      <BarraGuardar
+        pending={pending}
+        etiqueta={esNueva ? "Crear tarifa" : "Guardar cambios"}
+        onGuardar={alGuardar}
+        onEliminar={esNueva ? undefined : alEliminar}
+        error={error}
+      />
     </div>
-  );
-}
-
-const estiloInput =
-  "mt-1 w-full rounded-[var(--radius-control)] border border-arena bg-crema px-3 py-2 text-sm outline-none focus:border-verde-golf";
-
-function Campo({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <label className="block">
-      <span className="text-sm font-medium text-carbon">{label}</span>
-      {children}
-    </label>
   );
 }

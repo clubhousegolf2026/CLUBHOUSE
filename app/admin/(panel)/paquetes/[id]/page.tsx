@@ -78,7 +78,7 @@ export default async function EditarPaquetePage({
   };
 
   return (
-    <div className="max-w-3xl space-y-6">
+    <div className="max-w-6xl space-y-6">
       <Link
         href="/admin/paquetes"
         className="inline-flex items-center gap-1 text-sm text-niebla hover:text-carbon"

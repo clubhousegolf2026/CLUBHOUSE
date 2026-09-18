@@ -1,7 +1,8 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { ImagePlus, Loader2 } from "lucide-react";
+import { ImagePlus, Loader2, UploadCloud } from "lucide-react";
+import { cn } from "@/lib/cn";
 import { createBrowserSupabase } from "@/lib/supabase/client";
 
 const LADO_MAX = 1920;
@@ -27,26 +28,28 @@ export function SubirFotos({
   carpeta,
   alt,
   onSubidas,
+  multiple = true,
+  className,
 }: {
   carpeta: string;
   alt: string;
   onSubidas: (fotos: { url: string; alt: string }[]) => void;
+  multiple?: boolean;
+  className?: string;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [subiendo, setSubiendo] = useState(false);
+  const [arrastrando, setArrastrando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function alElegir(e: React.ChangeEvent<HTMLInputElement>) {
-    const archivos = Array.from(e.target.files ?? []);
-    e.target.value = "";
+  async function subir(archivos: File[]) {
     if (archivos.length === 0) return;
-
     setError(null);
     setSubiendo(true);
     try {
       const supabase = createBrowserSupabase();
       const subidas: { url: string; alt: string }[] = [];
-      for (const archivo of archivos) {
+      for (const archivo of multiple ? archivos : archivos.slice(0, 1)) {
         if (!archivo.type.startsWith("image/")) {
           throw new Error(`"${archivo.name}" no es una imagen.`);
         }
@@ -68,28 +71,59 @@ export function SubirFotos({
   }
 
   return (
-    <div>
+    <div className={className}>
       <input
         ref={inputRef}
         type="file"
         accept="image/jpeg,image/png,image/webp,image/avif"
-        multiple
+        multiple={multiple}
         hidden
-        onChange={alElegir}
+        onChange={(e) => {
+          const archivos = Array.from(e.target.files ?? []);
+          e.target.value = "";
+          void subir(archivos);
+        }}
       />
       <button
         type="button"
-        onClick={() => inputRef.current?.click()}
         disabled={subiendo}
-        className="inline-flex items-center gap-1.5 rounded-[var(--radius-control)] border border-dashed border-verde-golf/50 px-3 py-2 text-sm text-verde-golf hover:bg-verde-golf/5 disabled:opacity-50"
+        onClick={() => inputRef.current?.click()}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setArrastrando(true);
+        }}
+        onDragLeave={() => setArrastrando(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setArrastrando(false);
+          void subir(Array.from(e.dataTransfer.files));
+        }}
+        className={cn(
+          "flex w-full flex-col items-center justify-center gap-1.5 rounded-2xl border-2 border-dashed px-4 py-7 text-center transition-colors disabled:cursor-wait",
+          arrastrando
+            ? "border-verde-golf bg-verde-golf/10"
+            : "border-arena bg-crema/60 hover:border-verde-golf/50 hover:bg-verde-golf/5",
+        )}
       >
         {subiendo ? (
           <>
-            <Loader2 size={15} className="animate-spin" /> Subiendo…
+            <Loader2 size={26} className="animate-spin text-verde-golf" />
+            <span className="text-sm font-medium text-carbon">Subiendo…</span>
           </>
         ) : (
           <>
-            <ImagePlus size={15} /> Subir fotos
+            <span className="grid h-11 w-11 place-items-center rounded-full bg-verde-golf/10 text-verde-golf">
+              <UploadCloud size={22} />
+            </span>
+            <span className="text-sm font-medium text-carbon">
+              Arrastra {multiple ? "tus fotos" : "la foto"} aquí o{" "}
+              <span className="text-verde-golf underline underline-offset-4">
+                busca en tu equipo
+              </span>
+            </span>
+            <span className="flex items-center gap-1 text-xs text-niebla">
+              <ImagePlus size={12} /> JPG, PNG o WebP · se optimizan automáticamente
+            </span>
           </>
         )}
       </button>
