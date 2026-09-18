@@ -21,14 +21,16 @@ export function PackageCard({
           href={`/paquetes/${paquete.slug}`}
           className="group flex flex-col overflow-hidden rounded-[var(--radius-card)] border border-arena bg-blanco-roto shadow-[var(--shadow-suave)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-elevada)]"
         >
-          <div className="relative aspect-[4/3] overflow-hidden">
-            <Image
-              src={paquete.galeria[0].url}
-              alt={paquete.galeria[0].alt}
-              fill
-              sizes="(max-width: 768px) 100vw, 400px"
-              className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-            />
+          <div className="relative aspect-[4/3] overflow-hidden bg-arena">
+            {paquete.galeria[0] && (
+              <Image
+                src={paquete.galeria[0].url}
+                alt={paquete.galeria[0].alt}
+                fill
+                sizes="(max-width: 768px) 100vw, 400px"
+                className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+              />
+            )}
             {paquete.destacado && (
               <span className="absolute left-3 top-3 rounded-full bg-verde-calle/90 px-3 py-1 text-xs font-medium text-crema">
                 Más elegido

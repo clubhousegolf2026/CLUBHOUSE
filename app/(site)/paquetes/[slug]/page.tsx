@@ -25,7 +25,11 @@ export async function generateMetadata({
   return {
     title: p.nombre,
     description: p.descripcion,
-    openGraph: { images: [p.galeria[0].url], title: p.nombre, description: p.descripcion },
+    openGraph: {
+      images: p.galeria[0] ? [p.galeria[0].url] : [],
+      title: p.nombre,
+      description: p.descripcion,
+    },
   };
 }
 
@@ -47,15 +51,17 @@ export default async function PaqueteDetallePage({
 
         <div className="mt-4 grid gap-8 lg:grid-cols-[1.5fr_1fr]">
           <div>
-            <div className="relative aspect-[16/10] overflow-hidden rounded-[var(--radius-panel)]">
-              <Image
-                src={p.galeria[0].url}
-                alt={p.galeria[0].alt}
-                fill
-                priority
-                sizes="(max-width: 1024px) 100vw, 640px"
-                className="object-cover"
-              />
+            <div className="relative aspect-[16/10] overflow-hidden rounded-[var(--radius-panel)] bg-arena">
+              {p.galeria[0] && (
+                <Image
+                  src={p.galeria[0].url}
+                  alt={p.galeria[0].alt}
+                  fill
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 640px"
+                  className="object-cover"
+                />
+              )}
             </div>
             {p.galeria.length > 1 && (
               <div className="mt-3 grid grid-cols-3 gap-3">

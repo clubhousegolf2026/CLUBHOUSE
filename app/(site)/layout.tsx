@@ -1,8 +1,9 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { fraunces, inter } from "@/lib/fonts";
 import { Header } from "@/components/site/header";
 import { Footer } from "@/components/site/footer";
 import { PageTransition } from "@/components/site/page-transition";
+import { RegistroServiceWorker } from "@/components/site/registro-service-worker";
 import "../globals.css";
 
 export const metadata: Metadata = {
@@ -18,6 +19,21 @@ export const metadata: Metadata = {
     locale: "es_CO",
     siteName: "Clubhouse",
   },
+  manifest: "/manifest.webmanifest",
+  icons: {
+    apple: "/icons/apple-touch-icon.png",
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Clubhouse",
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#1f3b2f",
 };
 
 export default function RootLayout({
@@ -26,6 +42,7 @@ export default function RootLayout({
   return (
     <html lang="es" className={`${fraunces.variable} ${inter.variable}`}>
       <body className="flex min-h-dvh flex-col">
+        <RegistroServiceWorker />
         <Header />
         <main className="flex-1">
           <PageTransition>{children}</PageTransition>

@@ -78,6 +78,10 @@ export function PaqueteForm({
       setError("Nombre, slug y descripción son obligatorios.");
       return;
     }
+    if (datos.activo && datos.galeria.length === 0) {
+      setError("Agrega al menos una foto antes de publicar el paquete.");
+      return;
+    }
 
     startTransition(async () => {
       try {
