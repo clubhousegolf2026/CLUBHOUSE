@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { PackageCard } from "@/components/marketing/package-card";
+import { FiltroPaquetes } from "@/components/marketing/filtro-paquetes";
 import { Section, SectionHead } from "@/components/ui/section";
-import { getPaquetes } from "@/lib/data";
+import { getDestinosConPaquetes, getPaquetes } from "@/lib/data";
 
 export const metadata: Metadata = {
   title: "Paquetes de golf",
@@ -12,7 +12,10 @@ export const metadata: Metadata = {
 export const revalidate = 3600;
 
 export default async function PaquetesPage() {
-  const paquetes = await getPaquetes();
+  const [paquetes, destinos] = await Promise.all([
+    getPaquetes(),
+    getDestinosConPaquetes(),
+  ]);
 
   return (
     <Section>
@@ -21,11 +24,7 @@ export default async function PaquetesPage() {
         titulo="Nuestros paquetes"
         descripcion="Itinerarios ya armados por nuestro equipo. ¿Quieres algo distinto? Arma el tuyo en el constructor."
       />
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {paquetes.map((p) => (
-          <PackageCard key={p.id} paquete={p} />
-        ))}
-      </div>
+      <FiltroPaquetes paquetes={paquetes} destinos={destinos} />
     </Section>
   );
 }
