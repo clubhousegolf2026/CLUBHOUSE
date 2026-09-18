@@ -1,6 +1,6 @@
-import Image from "next/image";
-import { Flag } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { BarChart3, ShieldCheck, Zap } from "lucide-react";
+import { Logo } from "@/components/site/logo";
+import { LoginForm } from "@/components/admin/login-form";
 import { signIn } from "./actions";
 
 const MENSAJES_ERROR: Record<string, string> = {
@@ -8,6 +8,12 @@ const MENSAJES_ERROR: Record<string, string> = {
   "faltan-datos": "Escribe tu correo y tu contraseña.",
   "no-autorizado": "Esta cuenta no tiene acceso al panel.",
 };
+
+const PUNTOS = [
+  { icono: BarChart3, texto: "Pipeline de leads y cotizaciones en vivo" },
+  { icono: Zap, texto: "Reservas y pagos en un solo lugar" },
+  { icono: ShieldCheck, texto: "Acceso seguro solo para el equipo" },
+];
 
 export default async function AdminLoginPage({
   searchParams,
@@ -18,92 +24,58 @@ export default async function AdminLoginPage({
   const mensaje = error ? MENSAJES_ERROR[error] : undefined;
 
   return (
-    <div className="grid min-h-screen lg:grid-cols-2">
-      {/* Columna de marca: foto de golf a pantalla completa, solo en
-          desktop — en móvil el formulario ocupa toda la pantalla. */}
-      <div className="relative hidden overflow-hidden bg-verde-calle lg:block">
-        <Image
-          src="https://images.unsplash.com/photo-1535131749006-b7f58c99034b?q=80&w=1600&auto=format&fit=crop"
-          alt="Green de golf al atardecer"
-          fill
-          priority
-          className="object-cover"
-        />
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "linear-gradient(180deg, rgba(11,61,46,.15) 0%, rgba(9,50,38,.55) 55%, rgba(9,50,38,.92) 100%)",
-          }}
-        />
-        <div className="relative flex h-full flex-col justify-between p-12">
-          <span className="flex items-center gap-2 text-sm uppercase tracking-[0.2em] text-champagne">
-            <Flag size={16} /> Club House
-          </span>
-          <div>
-            <h1 className="max-w-md font-serif text-4xl leading-tight text-crema">
-              El panel que mueve cada reserva de golf.
-            </h1>
-            <p className="mt-4 max-w-sm text-crema/75">
-              Pipeline de leads, cotizaciones y confirmaciones de pago — todo
-              en un solo lugar para el equipo.
-            </p>
-          </div>
-        </div>
-      </div>
+    <div className="admin-side min-h-screen">
+      <div
+        aria-hidden
+        className="absolute inset-0 -z-10 opacity-40"
+        style={{
+          backgroundImage:
+            "linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px)",
+          backgroundSize: "56px 56px",
+          maskImage: "radial-gradient(ellipse at center, black 30%, transparent 75%)",
+        }}
+      />
 
-      {/* Columna del formulario */}
-      <div className="flex items-center justify-center bg-blanco-roto px-6 py-16">
-        <div className="w-full max-w-sm">
-          <span className="flex items-center gap-1.5 text-xs uppercase tracking-[0.18em] text-champagne lg:hidden">
-            <Flag size={13} /> Club House
-          </span>
-          <h2 className="mt-2 font-serif text-3xl text-carbon lg:mt-0">
+      <div className="mx-auto grid min-h-screen max-w-6xl items-center gap-12 px-6 py-12 lg:grid-cols-[1.1fr_440px]">
+        <div className="entra hidden lg:block">
+          <Logo variante="claro" />
+          <h1 className="mt-10 max-w-lg font-serif text-5xl leading-[1.08] text-white">
+            El panel que mueve cada reserva de golf.
+          </h1>
+          <p className="mt-5 max-w-md text-lg text-crema/70">
+            Controla el catálogo, sigue cada lead y confirma pagos con el
+            equipo, desde cualquier dispositivo.
+          </p>
+          <ul className="mt-10 space-y-4">
+            {PUNTOS.map(({ icono: Icono, texto }, i) => (
+              <li
+                key={texto}
+                className="entra flex items-center gap-3 text-crema/85"
+                style={{ "--i": i + 2 } as React.CSSProperties}
+              >
+                <span className="grid h-10 w-10 place-items-center rounded-xl border border-white/15 bg-white/[0.07] text-champagne backdrop-blur">
+                  <Icono size={18} />
+                </span>
+                {texto}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div
+          className="entra rounded-[2rem] border border-white/15 bg-white/[0.08] p-8 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.6)] backdrop-blur-2xl sm:p-10"
+          style={{ "--i": 1 } as React.CSSProperties}
+        >
+          <div className="lg:hidden">
+            <Logo variante="claro" />
+          </div>
+          <h2 className="mt-6 font-serif text-3xl text-white lg:mt-0">
             Bienvenido de vuelta
           </h2>
-          <p className="mt-1 text-sm text-niebla">
+          <p className="mt-1.5 text-sm text-crema/65">
             Entra con tu cuenta del equipo para ver el panel.
           </p>
-
-          <form action={signIn} className="mt-8 space-y-4">
-            <label className="block">
-              <span className="text-sm font-medium text-carbon">Correo</span>
-              <input
-                name="email"
-                type="email"
-                required
-                autoComplete="email"
-                placeholder="tu@clubhouse.com"
-                className="mt-1.5 w-full rounded-[var(--radius-control)] border border-arena bg-crema px-3.5 py-2.5 text-sm outline-none transition-colors focus:border-verde-golf focus:ring-2 focus:ring-verde-golf/20"
-              />
-            </label>
-            <label className="block">
-              <span className="text-sm font-medium text-carbon">
-                Contraseña
-              </span>
-              <input
-                name="password"
-                type="password"
-                required
-                autoComplete="current-password"
-                placeholder="••••••••"
-                className="mt-1.5 w-full rounded-[var(--radius-control)] border border-arena bg-crema px-3.5 py-2.5 text-sm outline-none transition-colors focus:border-verde-golf focus:ring-2 focus:ring-verde-golf/20"
-              />
-            </label>
-
-            {mensaje && (
-              <p
-                role="status"
-                className="rounded-[var(--radius-control)] bg-error/10 px-3 py-2 text-sm text-error"
-              >
-                {mensaje}
-              </p>
-            )}
-
-            <Button type="submit" className="w-full">
-              Entrar
-            </Button>
-          </form>
+          <LoginForm action={signIn} mensaje={mensaje} />
         </div>
       </div>
     </div>
