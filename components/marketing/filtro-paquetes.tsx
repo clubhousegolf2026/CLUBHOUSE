@@ -243,6 +243,7 @@ export function FiltroPaquetes({
         </label>
       </div>
 
+      <h2 className="sr-only">Planes disponibles</h2>
       {resultados.length > 0 ? (
         <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:gap-8">
           {resultados.map((p) => (

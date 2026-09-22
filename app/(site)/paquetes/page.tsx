@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { FiltroPaquetes } from "@/components/marketing/filtro-paquetes";
-import { Section, SectionHead } from "@/components/ui/section";
+import { PaginaHero, Oro } from "@/components/marketing/pagina-hero";
 import { getDestinosConPaquetes, getPaquetes } from "@/lib/data";
 
 export const metadata: Metadata = {
@@ -18,13 +18,21 @@ export default async function PaquetesPage() {
   ]);
 
   return (
-    <Section>
-      <SectionHead
+    <>
+      <PaginaHero
         eyebrow="Listos para reservar"
-        titulo="Nuestros paquetes"
+        titulo={
+          <>
+            Nuestros <Oro>paquetes</Oro> de golf
+          </>
+        }
         descripcion="Itinerarios ya armados por nuestro equipo. ¿Quieres algo distinto? Arma el tuyo en el constructor."
       />
-      <FiltroPaquetes paquetes={paquetes} destinos={destinos} />
-    </Section>
+      <section className="px-6 pb-24 sm:px-10 lg:px-16 xl:px-24">
+        <div className="relative z-10 mx-auto -mt-8 max-w-[1600px]">
+          <FiltroPaquetes paquetes={paquetes} destinos={destinos} />
+        </div>
+      </section>
+    </>
   );
 }

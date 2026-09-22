@@ -1,22 +1,37 @@
 import Link from "next/link";
-import { Container } from "@/components/ui/container";
+import { ArrowRight } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <Container className="py-24 text-center">
-      <p className="font-serif text-5xl text-verde-calle">404</p>
-      <h1 className="mt-4 font-serif text-2xl text-carbon">
+    <section className="grano relative isolate -mt-20 flex min-h-dvh flex-col items-center justify-center overflow-hidden bg-[#071d16] px-6 pt-20 text-center text-crema">
+      <div className="hero-degradado absolute inset-0 -z-20" />
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+        <div className="orbita orbita-gira aspect-square w-[420px]" />
+        <div className="orbita orbita-gira-inversa aspect-square w-[680px] !border-white/10" />
+      </div>
+
+      <p className="font-serif text-[6rem] leading-none texto-oro sm:text-[9rem]">404</p>
+      <h1 className="mt-4 font-serif text-3xl text-white sm:text-4xl">
         No encontramos esa página
       </h1>
-      <p className="mt-2 text-niebla">
+      <p className="mx-auto mt-4 max-w-md text-crema/70">
         Puede que el enlace esté roto o que el contenido se haya movido.
       </p>
-      <Link
-        href="/"
-        className="mt-6 inline-block rounded-[var(--radius-control)] bg-verde-golf px-6 py-3 text-sm font-medium text-crema"
-      >
-        Volver al inicio
-      </Link>
-    </Container>
+      <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
+        <Link
+          href="/"
+          className="boton-oro group inline-flex min-h-12 items-center gap-2 rounded-full px-8 text-sm font-semibold"
+        >
+          Volver al inicio
+          <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+        </Link>
+        <Link
+          href="/paquetes"
+          className="boton-cristal inline-flex min-h-12 items-center rounded-full px-8 text-sm font-medium"
+        >
+          Ver paquetes
+        </Link>
+      </div>
+    </section>
   );
 }

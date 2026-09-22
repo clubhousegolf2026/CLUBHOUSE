@@ -68,9 +68,9 @@ export function Footer() {
         </div>
 
         <nav>
-          <h3 className="text-xs font-semibold uppercase tracking-[0.22em] text-[#e8d3a0]">
+          <h2 className="text-xs font-semibold uppercase tracking-[0.22em] text-[#e8d3a0]">
             Explora
-          </h3>
+          </h2>
           <ul className="mt-5 space-y-3 text-sm">
             <li><Link href="/paquetes" className={enlace}>Paquetes</Link></li>
             <li><Link href="/cotizador" className={enlace}>Arma tu viaje</Link></li>
@@ -80,9 +80,9 @@ export function Footer() {
         </nav>
 
         <div>
-          <h3 className="text-xs font-semibold uppercase tracking-[0.22em] text-[#e8d3a0]">
+          <h2 className="text-xs font-semibold uppercase tracking-[0.22em] text-[#e8d3a0]">
             Contacto
-          </h3>
+          </h2>
           <ul className="mt-5 space-y-3.5 text-sm">
             <li className="flex items-start gap-3 text-crema/65">
               <MapPin size={16} className="mt-0.5 shrink-0 text-[#c6a664]" /> Bogotá D.C., Colombia
@@ -99,9 +99,9 @@ export function Footer() {
         </div>
 
         <div>
-          <h3 className="text-xs font-semibold uppercase tracking-[0.22em] text-[#e8d3a0]">
+          <h2 className="text-xs font-semibold uppercase tracking-[0.22em] text-[#e8d3a0]">
             Empieza hoy
-          </h3>
+          </h2>
           <p className="mt-5 text-sm leading-relaxed text-crema/60">
             Cotiza tu viaje de golf en minutos y mira el precio al instante.
           </p>

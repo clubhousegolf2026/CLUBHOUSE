@@ -11,7 +11,9 @@ function Contenido() {
 
   return (
     <>
-      <h3 className="font-serif text-lg text-carbon">Tu viaje</h3>
+      <h2 className="flex items-center gap-2 font-serif text-xl text-carbon">
+        <span className="h-px w-6 bg-champagne" /> Tu viaje
+      </h2>
 
       <ul className="mt-4 space-y-2 text-sm">
         {cotizacion.lineas.map((l, i) => (
@@ -46,7 +48,7 @@ function Contenido() {
           aria-live="polite"
         >
           <span className="font-serif text-lg text-carbon">Total</span>
-          <span className="font-serif text-2xl tabular text-verde-golf">
+          <span className="font-serif text-3xl tabular text-verde-golf">
             {cop(cotizacion.total)}
           </span>
         </m.div>
@@ -57,7 +59,7 @@ function Contenido() {
 
       <Link
         href="/cotizador/resumen"
-        className="mt-6 block w-full rounded-[var(--radius-control)] bg-carbon py-3 text-center text-sm font-medium text-crema hover:bg-verde-calle"
+        className="boton-oro mt-6 flex min-h-13 w-full items-center justify-center rounded-xl px-5 py-3.5 text-center text-sm font-semibold"
       >
         {cotizacion.total > 0
           ? `Reservar con ${cop(Math.round(cotizacion.total * 0.3))} de anticipo`
@@ -72,7 +74,7 @@ function Contenido() {
 
 export function PanelPrecioSticky() {
   return (
-    <aside className="glass hidden h-fit rounded-[var(--radius-panel)] border border-white/50 bg-white/70 p-6 shadow-[var(--shadow-elevada)] backdrop-blur-md lg:sticky lg:top-24 lg:block">
+    <aside className="hidden h-fit rounded-[2rem] border border-white/80 bg-white/85 p-7 shadow-[0_30px_80px_-30px_rgba(11,43,33,0.45)] ring-1 ring-arena/60 backdrop-blur-xl lg:sticky lg:top-28 lg:block">
       <Contenido />
     </aside>
   );
@@ -81,17 +83,17 @@ export function PanelPrecioSticky() {
 export function BarraPrecioMovil() {
   const { cotizacion } = useCotizador();
   return (
-    <div className="glass fixed inset-x-0 bottom-0 z-40 border-t border-arena bg-blanco-roto/95 p-3 backdrop-blur-md lg:hidden">
+    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-arena/80 bg-blanco-roto/90 p-3 backdrop-blur-xl lg:hidden">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-1">
         <div>
           <span className="block text-xs text-niebla">Total estimado</span>
-          <span className="font-serif text-lg tabular text-verde-golf">
+          <span className="font-serif text-2xl tabular text-verde-golf">
             {cop(cotizacion.total)}
           </span>
         </div>
         <Link
           href="/cotizador/resumen"
-          className="rounded-[var(--radius-control)] bg-carbon px-5 py-3 text-sm font-medium text-crema"
+          className="boton-oro rounded-xl px-6 py-3 text-sm font-semibold"
         >
           Ver resumen
         </Link>

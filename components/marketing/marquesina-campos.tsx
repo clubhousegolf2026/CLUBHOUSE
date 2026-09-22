@@ -4,7 +4,7 @@ export function MarquesinaCampos({ campos }: { campos: string[] }) {
   if (campos.length === 0) return null;
   const fila = [...campos, ...campos];
   return (
-    <div
+    <section
       aria-label="Campos de golf disponibles"
       className="relative overflow-hidden border-y border-white/10 bg-[#061a13] py-5"
     >
@@ -22,6 +22,6 @@ export function MarquesinaCampos({ campos }: { campos: string[] }) {
           </ul>
         ))}
       </div>
-    </div>
+    </section>
   );
 }

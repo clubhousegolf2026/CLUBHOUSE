@@ -50,8 +50,8 @@ export function Header() {
           className={cn(
             "mx-auto flex h-16 max-w-[1600px] items-center justify-between rounded-full border pl-2 pr-2 backdrop-blur-xl transition-all duration-500 sm:pl-3 sm:pr-3",
             scrolled
-              ? "border-white/15 bg-[#0a2a20]/90 shadow-[0_18px_50px_-14px_rgba(0,0,0,0.65)]"
-              : "border-white/10 bg-[#0a2a20]/60 shadow-[0_10px_30px_-16px_rgba(0,0,0,0.4)]",
+              ? "border-white/15 bg-[#0a2a20]/95 shadow-[0_18px_50px_-14px_rgba(0,0,0,0.65)]"
+              : "border-white/10 bg-[#0a2a20]/85 shadow-[0_10px_30px_-16px_rgba(0,0,0,0.4)]",
           )}
         >
           <Link

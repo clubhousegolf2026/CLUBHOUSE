@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { CheckCircle2, Mail, Phone, MapPin } from "lucide-react";
-import { Section, SectionHead } from "@/components/ui/section";
-import { Button } from "@/components/ui/button";
+import { PaginaHero, Oro } from "@/components/marketing/pagina-hero";
 
 export default function ContactoPage() {
   const [enviado, setEnviado] = useState(false);
@@ -39,82 +38,99 @@ export default function ContactoPage() {
     }
   }
 
+  const tarjeta =
+    "rounded-[2rem] border border-white/80 bg-white/80 shadow-[0_30px_80px_-30px_rgba(11,43,33,0.4)] ring-1 ring-arena/60 backdrop-blur-xl";
+
   return (
-    <Section>
-      <SectionHead
+    <>
+      <PaginaHero
         eyebrow="Contacto"
-        titulo="Hablemos de tu viaje"
+        titulo={
+          <>
+            Hablemos de tu <Oro>viaje</Oro>
+          </>
+        }
         descripcion="Cuéntanos qué tienes en mente y un asesor te responde el mismo día hábil."
       />
 
-      <div className="grid gap-10 lg:grid-cols-[1fr_320px]">
-        {enviado ? (
-          <div className="rounded-[var(--radius-panel)] border border-arena bg-blanco-roto p-8 text-center">
-            <CheckCircle2 className="mx-auto text-exito" size={40} />
-            <p className="mt-3 font-serif text-xl text-carbon">
-              ¡Mensaje recibido!
-            </p>
-            <p className="mt-1 text-sm text-niebla">
-              Te contactamos muy pronto.
-            </p>
-          </div>
-        ) : (
-          <form
-            className="grid gap-4 rounded-[var(--radius-panel)] border border-arena bg-blanco-roto p-6 sm:grid-cols-2"
-            onSubmit={enviar}
-          >
-            <input
-              name="website"
-              type="text"
-              tabIndex={-1}
-              autoComplete="off"
-              aria-hidden="true"
-              className="absolute -left-[9999px] h-0 w-0 opacity-0"
-            />
-            <Input id="nombre" label="Nombre" required />
-            <Input id="email" label="Correo" type="email" required />
-            <Input id="telefono" label="Teléfono / WhatsApp" />
-            <Input id="fecha" label="Fecha tentativa" type="date" />
-            <label className="sm:col-span-2">
-              <span className="block text-sm text-carbon">Mensaje</span>
-              <textarea
-                name="mensaje"
-                required
-                rows={4}
-                className="mt-1 w-full rounded-[var(--radius-control)] border border-arena bg-crema px-3 py-2 text-sm outline-none focus:border-verde-golf"
+      <section className="px-6 pb-24 sm:px-10 lg:px-16 xl:px-24">
+        <div className="relative z-10 mx-auto -mt-8 grid max-w-[1200px] gap-8 lg:grid-cols-[1fr_340px]">
+          {enviado ? (
+            <div className={`${tarjeta} p-10 text-center`}>
+              <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-gradient-to-br from-[#ecd396] to-[#a98745] text-[#1a1a1a]">
+                <CheckCircle2 size={32} />
+              </span>
+              <p className="mt-5 font-serif text-3xl text-carbon">¡Mensaje recibido!</p>
+              <p className="mt-2 text-niebla">Te contactamos muy pronto.</p>
+            </div>
+          ) : (
+            <form className={`${tarjeta} grid gap-5 p-6 sm:grid-cols-2 sm:p-9`} onSubmit={enviar}>
+              <input
+                name="website"
+                type="text"
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+                className="absolute -left-[9999px] h-0 w-0 opacity-0"
               />
-            </label>
-            {error && (
-              <p role="status" className="text-sm text-error sm:col-span-2">
-                {error}
-              </p>
-            )}
-            <Button type="submit" disabled={enviando} className="sm:col-span-2">
-              {enviando ? "Enviando…" : "Enviar mensaje"}
-            </Button>
-          </form>
-        )}
+              <Input id="nombre" label="Nombre" required />
+              <Input id="email" label="Correo" type="email" required />
+              <Input id="telefono" label="Teléfono / WhatsApp" />
+              <Input id="fecha" label="Fecha tentativa" type="date" />
+              <label className="sm:col-span-2">
+                <span className="block text-xs font-medium uppercase tracking-[0.12em] text-niebla">Mensaje</span>
+                <textarea
+                  name="mensaje"
+                  required
+                  rows={5}
+                  className="mt-2 w-full rounded-xl border border-arena bg-white px-4 py-3 text-sm outline-none transition placeholder:text-niebla/50 hover:border-verde-golf/40 focus:border-verde-golf focus:ring-4 focus:ring-verde-golf/10"
+                />
+              </label>
+              {error && (
+                <p role="alert" className="rounded-xl border border-error/20 bg-error/5 px-3.5 py-2.5 text-sm text-error sm:col-span-2">
+                  {error}
+                </p>
+              )}
+              <button
+                type="submit"
+                disabled={enviando}
+                className="inline-flex min-h-13 items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-verde-golf to-verde-calle px-8 py-3.5 text-sm font-semibold text-crema shadow-lg shadow-verde-calle/30 transition-all hover:-translate-y-0.5 hover:shadow-xl disabled:opacity-60 sm:col-span-2"
+              >
+                {enviando ? "Enviando…" : "Enviar mensaje"}
+              </button>
+            </form>
+          )}
 
-        <aside className="space-y-4 text-sm text-carbon">
-          <p className="flex items-start gap-3">
-            <MapPin size={18} className="mt-0.5 text-verde-golf" /> Bogotá D.C.,
-            Colombia
-          </p>
-          <p className="flex items-start gap-3">
-            <Mail size={18} className="mt-0.5 text-verde-golf" />
-            <a href="mailto:hola@clubhouse.co" className="hover:underline">
-              hola@clubhouse.co
-            </a>
-          </p>
-          <p className="flex items-start gap-3">
-            <Phone size={18} className="mt-0.5 text-verde-golf" />
-            <a href="tel:+5716000000" className="hover:underline">
-              +57 (601) 600 0000
-            </a>
-          </p>
-        </aside>
-      </div>
-    </Section>
+          <aside className="space-y-4">
+            {[
+              { icono: MapPin, titulo: "Oficina", texto: "Bogotá D.C., Colombia", href: undefined as string | undefined },
+              { icono: Mail, titulo: "Correo", texto: "hola@clubhouse.co", href: "mailto:hola@clubhouse.co" },
+              { icono: Phone, titulo: "Teléfono", texto: "+57 (601) 600 0000", href: "tel:+5716000000" },
+            ].map(({ icono: Icono, titulo, texto, href }) => {
+              const contenido = (
+                <>
+                  <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[#ecd396] to-[#a98745] text-[#1a1a1a] shadow-md shadow-champagne/30">
+                    <Icono size={20} />
+                  </span>
+                  <span>
+                    <span className="block text-[11px] font-medium uppercase tracking-[0.14em] text-niebla">{titulo}</span>
+                    <span className="mt-0.5 block text-carbon">{texto}</span>
+                  </span>
+                </>
+              );
+              const clase = `${tarjeta} flex items-center gap-4 p-5 transition-all`;
+              return href ? (
+                <a key={titulo} href={href} className={`${clase} hover:-translate-y-1 hover:shadow-[0_34px_70px_-28px_rgba(11,43,33,0.5)]`}>
+                  {contenido}
+                </a>
+              ) : (
+                <div key={titulo} className={clase}>{contenido}</div>
+              );
+            })}
+          </aside>
+        </div>
+      </section>
+    </>
   );
 }
 
@@ -131,7 +147,7 @@ function Input({
 }) {
   return (
     <label>
-      <span className="block text-sm text-carbon">
+      <span className="block text-xs font-medium uppercase tracking-[0.12em] text-niebla">
         {label}
         {required && <span className="text-alerta"> *</span>}
       </span>
@@ -140,7 +156,7 @@ function Input({
         name={id}
         type={type}
         required={required}
-        className="mt-1 w-full rounded-[var(--radius-control)] border border-arena bg-crema px-3 py-2 text-sm outline-none focus:border-verde-golf"
+        className="mt-2 h-12 w-full rounded-xl border border-arena bg-white px-4 text-sm outline-none transition placeholder:text-niebla/50 hover:border-verde-golf/40 focus:border-verde-golf focus:ring-4 focus:ring-verde-golf/10"
       />
     </label>
   );
