@@ -28,9 +28,9 @@ const FAQ = [
 ];
 
 const VALORES = [
-  { icono: Flag, titulo: "Campos seleccionados", texto: "Trabajamos con los mejores campos del país y con hoteles escogidos uno a uno." },
-  { icono: Zap, titulo: "Precio al instante", texto: "Eliges tu itinerario y ves el precio al momento, sin esperar cotizaciones." },
-  { icono: UserCheck, titulo: "Anfitrión local", texto: "Un anfitrión te acompaña durante todo el viaje: horarios, traslados y detalles." },
+  { icono: Flag, titulo: "Campos seleccionados", texto: "Trabajamos en alianza con los mejores campos del mundo y las principales cadenas hoteleras." },
+  { icono: Zap, titulo: "Itinerario a la medida", texto: "Diseñamos su itinerario desde cero y le acompañamos de puerta a puerta." },
+  { icono: UserCheck, titulo: "Anfitrión local", texto: "Le acompañamos durante todo el viaje: horarios, traslados y detalles." },
 ];
 
 export default function NosotrosPage() {
@@ -43,7 +43,7 @@ export default function NosotrosPage() {
             Golf en Colombia, <Oro>sin fricción</Oro>
           </>
         }
-        descripcion="Clubhouse es una agencia de turismo de golf. Armar un viaje debería ser tan simple como jugar una ronda."
+        descripcion="Clubhouse es una agencia bespoke de viajes de golf. Cada viaje se diseña desde cero, alrededor de su juego, su grupo y su forma de viajar."
       />
 
       <section className="px-6 pb-20 sm:px-10 lg:px-16 xl:px-24">
@@ -64,10 +64,9 @@ export default function NosotrosPage() {
 
         <div className="mx-auto mt-20 max-w-3xl space-y-5 text-center text-lg leading-relaxed text-carbon">
           <p>
-            En lugar de una web que solo muestra fotos, construimos una
-            herramienta: eliges tu itinerario, ves el precio al instante,
-            reservas en línea y te acompaña un anfitrión local durante todo el
-            viaje.
+            En lugar de una web que solo muestra fotos, construimos una agencia:
+            entendemos su juego, diseñamos el itinerario, reservamos cada
+            detalle y le acompañamos durante todo el viaje.
           </p>
         </div>
       </section>

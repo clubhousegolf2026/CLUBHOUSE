@@ -113,7 +113,7 @@ export function DetalleDestino({
                   href="/cotizador"
                   className="mt-1 inline-flex items-center gap-1 text-sm font-medium text-verde-golf"
                 >
-                  O arma tu propio itinerario <ArrowRight size={15} />
+                  O arme su propio itinerario <ArrowRight size={15} />
                 </Link>
               </li>
             </ul>

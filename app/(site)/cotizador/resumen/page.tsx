@@ -22,7 +22,7 @@ export default function ResumenPage() {
 
   async function enviar(tipo: "cotizacion" | "reserva") {
     if (!form.nombre.trim() || !form.email.trim()) {
-      setError("Escribe tu nombre y correo para continuar.");
+      setError("Escriba su nombre y correo para continuar.");
       return;
     }
     setError(null);
@@ -72,7 +72,7 @@ export default function ResumenPage() {
         <p className="mx-auto mt-5 max-w-md text-lg leading-relaxed text-crema/70">
           {enviado === "reserva"
             ? "En la versión final aquí te redirigimos a la pasarela de pago para confirmar con el anticipo."
-            : `Te enviamos el detalle a ${form.email || "tu correo"}. Un asesor te contactará el mismo día hábil.`}
+            : `Le enviamos el detalle a ${form.email || "su correo"}. Un asesor le contactará el mismo día hábil.`}
         </p>
         <Link
           href="/"
@@ -103,10 +103,10 @@ export default function ResumenPage() {
             <ArrowLeft size={15} /> Volver a editar
           </Link>
           <h1 className="mt-5 font-serif text-4xl leading-tight text-white sm:text-5xl">
-            Resumen de tu <em className="texto-oro pr-1 font-medium italic">viaje</em>
+            Resumen de su <em className="texto-oro pr-1 font-medium italic">viaje</em>
           </h1>
           <p className="mt-2 text-crema/60">
-            Revisa el detalle y confirma con el 30% de anticipo.
+            Revise el detalle y confirme con el 30% de anticipo.
           </p>
         </Container>
       </section>
@@ -115,13 +115,13 @@ export default function ResumenPage() {
         {!hidratado || vacio ? (
           <div className={`${tarjeta} relative z-10 -mt-10 p-10 text-center`}>
             <p className="font-serif text-2xl text-carbon">
-              Todavía no has armado tu itinerario
+              Todavía no ha armado su itinerario
             </p>
             <Link
               href="/cotizador"
               className="boton-oro mt-6 inline-flex min-h-12 items-center rounded-full px-8 text-sm font-semibold"
             >
-              Empieza aquí
+              Empiece aquí
             </Link>
           </div>
         ) : (
@@ -160,10 +160,10 @@ export default function ResumenPage() {
 
             <aside className={`${tarjeta} h-fit p-7 lg:sticky lg:top-28`}>
               <h2 className="flex items-center gap-2 font-serif text-xl text-carbon">
-                <span className="h-px w-6 bg-champagne" /> Tus datos
+                <span className="h-px w-6 bg-champagne" /> Sus datos
               </h2>
               <p className="mt-1.5 text-xs text-niebla">
-                Los usamos solo para enviarte la cotización o gestionar la reserva.
+                Los usamos solo para enviarle la cotización o gestionar la reserva.
               </p>
               <div className="mt-5 space-y-4">
                 <input

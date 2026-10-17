@@ -36,7 +36,7 @@ export function ListaDestinos({
             {pais ? `Destinos en ${pais}` : "Elige una ciudad"}
           </span>
           <h3 className="mt-1 font-serif text-2xl text-carbon">
-            ¿A dónde quieres jugar?
+            ¿A dónde quiere jugar?
           </h3>
         </div>
         <button

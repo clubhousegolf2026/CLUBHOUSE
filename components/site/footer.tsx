@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Mail, Phone, MapPin } from "lucide-react";
 import { Container } from "@/components/ui/container";
+import { MARCA } from "@/lib/contenido/clubhouse";
 import { Logo } from "@/components/site/logo";
 
 type IconoProps = { size?: number };
@@ -49,8 +50,8 @@ export function Footer() {
         <div>
           <Logo variante="claro" />
           <p className="mt-5 max-w-xs text-sm leading-relaxed text-crema/60">
-            Turismo de golf en Colombia. Armas tu itinerario, eliges fecha y
-            reservas en línea — nosotros nos encargamos del resto.
+            Agencia bespoke de viajes de golf. 50 destinos en 5 continentes,
+            con itinerarios diseñados desde cero alrededor de su juego.
           </p>
           <ul className="mt-6 flex gap-2.5">
             {REDES.map(({ icono: Icono, etiqueta, href }) => (
@@ -72,8 +73,9 @@ export function Footer() {
             Explora
           </h2>
           <ul className="mt-5 space-y-3 text-sm">
+            <li><Link href="/#experiencias" className={enlace}>Experiencias</Link></li>
             <li><Link href="/paquetes" className={enlace}>Paquetes</Link></li>
-            <li><Link href="/cotizador" className={enlace}>Arma tu viaje</Link></li>
+            <li><Link href="/cotizador" className={enlace}>Arme su viaje</Link></li>
             <li><Link href="/nosotros" className={enlace}>Nosotros</Link></li>
             <li><Link href="/contacto" className={enlace}>Contacto</Link></li>
           </ul>
@@ -85,15 +87,15 @@ export function Footer() {
           </h2>
           <ul className="mt-5 space-y-3.5 text-sm">
             <li className="flex items-start gap-3 text-crema/65">
-              <MapPin size={16} className="mt-0.5 shrink-0 text-[#c6a664]" /> Bogotá D.C., Colombia
+              <MapPin size={16} className="mt-0.5 shrink-0 text-[#c6a664]" /> {MARCA.ciudad}
             </li>
             <li className="flex items-start gap-3">
               <Mail size={16} className="mt-0.5 shrink-0 text-[#c6a664]" />
-              <a href="mailto:hola@clubhouse.co" className={enlace}>hola@clubhouse.co</a>
+              <a href={`mailto:${MARCA.email}`} className={enlace}>{MARCA.email}</a>
             </li>
             <li className="flex items-start gap-3">
               <Phone size={16} className="mt-0.5 shrink-0 text-[#c6a664]" />
-              <a href="tel:+5716000000" className={enlace}>+57 (601) 600 0000</a>
+              <a href={MARCA.whatsappUrl} target="_blank" rel="noopener noreferrer" className={enlace}>{MARCA.whatsapp}</a>
             </li>
           </ul>
         </div>
@@ -103,14 +105,16 @@ export function Footer() {
             Empieza hoy
           </h2>
           <p className="mt-5 text-sm leading-relaxed text-crema/60">
-            Cotiza tu viaje de golf en minutos y mira el precio al instante.
+            Cuéntenos qué tiene en mente y diseñamos su viaje a la medida.
           </p>
-          <Link
-            href="/cotizador"
+          <a
+            href={MARCA.whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
             className="boton-oro mt-5 inline-flex rounded-full px-6 py-3 text-sm font-semibold"
           >
-            Cotizar ahora
-          </Link>
+            Escríbanos por WhatsApp
+          </a>
         </div>
       </Container>
 

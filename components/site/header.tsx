@@ -10,8 +10,9 @@ import { Logo } from "@/components/site/logo";
 
 const NAV = [
   { href: "/", label: "Inicio" },
+  { href: "/#experiencias", label: "Experiencias" },
   { href: "/paquetes", label: "Paquetes" },
-  { href: "/cotizador", label: "Arma tu viaje" },
+  { href: "/cotizador", label: "Arme su viaje" },
   { href: "/nosotros", label: "Nosotros" },
   { href: "/contacto", label: "Contacto" },
 ];

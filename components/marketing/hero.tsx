@@ -5,6 +5,7 @@ import { geoDistance } from "d3-geo";
 import { AnimatePresence, LazyMotion, domAnimation, m } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
+import { MARCA } from "@/lib/contenido/clubhouse";
 import { Globo3D } from "./globo-3d";
 import { DetalleDestino } from "./detalle-destino";
 import { ListaDestinos } from "./lista-destinos";
@@ -13,12 +14,10 @@ import type { PaquetePredefinido, Destino } from "@/lib/data/types";
 type DestinoConPaquetes = Destino & { paquetes: PaquetePredefinido[] };
 
 export function Hero({ destinos }: { destinos: DestinoConPaquetes[] }) {
-  const planes = new Set(destinos.flatMap((d) => d.paquetes.map((p) => p.id))).size;
-  const campos = new Set(destinos.flatMap((d) => d.campos)).size;
   const estadisticas = [
-    { valor: String(planes), etiqueta: planes === 1 ? "plan listo" : "planes listos" },
-    { valor: String(campos), etiqueta: campos === 1 ? "campo de golf" : "campos de golf" },
-    { valor: "30%", etiqueta: "para reservar" },
+    { valor: "50", etiqueta: "destinos" },
+    { valor: "5", etiqueta: "continentes" },
+    { valor: "95+", etiqueta: "campos jugados" },
   ];
 
   const [seleccion, setSeleccion] = useState<DestinoConPaquetes | null>(null);
@@ -71,62 +70,68 @@ export function Hero({ destinos }: { destinos: DestinoConPaquetes[] }) {
 
   return (
     <LazyMotion features={domAnimation}>
-      <section className="grano relative isolate -mt-20 flex min-h-dvh flex-col justify-center overflow-hidden bg-[#071d16] pt-20 text-crema">
+      <section className="grano relative isolate -mt-20 flex min-h-dvh flex-col justify-center overflow-hidden bg-[#061a13] pt-20 text-crema">
         <div className="hero-degradado -z-20 absolute inset-0" />
         <div
           aria-hidden
-          className="-z-10 absolute inset-0 bg-[radial-gradient(ellipse_at_60%_45%,transparent_35%,rgba(3,15,11,0.6)_100%)]"
+          className="-z-10 absolute inset-0 bg-[radial-gradient(ellipse_at_62%_45%,transparent_30%,rgba(3,15,11,0.72)_100%)]"
         />
 
         <div className="mx-auto grid w-full max-w-[1920px] items-center gap-6 px-6 sm:px-10 lg:grid-cols-[3fr_2fr] lg:gap-10 lg:px-16 xl:px-24">
           <div className="pt-16 pb-10 lg:pt-28 lg:pb-24">
-            <span className="entra-hero inline-flex items-center gap-3 text-xs font-medium uppercase tracking-[0.28em] text-[#e8d3a0]">
+            <span className="entra-hero inline-flex items-center gap-3 text-[11px] font-medium uppercase tracking-[0.34em] text-[#e8d3a0]">
               <span className="h-px w-10 bg-gradient-to-r from-transparent to-[#e8d3a0]" />
-              Turismo de golf en Colombia y el mundo
+              {MARCA.claim}
             </span>
+
             <h1
-              className="entra-hero mt-6 max-w-4xl font-serif text-[2.75rem] leading-[1.04] sm:text-6xl xl:text-7xl"
+              className="entra-hero mt-7 max-w-[15ch] font-serif text-[2.9rem] leading-[0.98] tracking-[-0.02em] sm:text-[4.2rem] xl:text-[5.4rem]"
               style={{ "--i": 1 } as React.CSSProperties}
             >
-              Arma tu viaje de{" "}
-              <em className="texto-oro pr-1 font-medium italic">golf</em> y mira el
-              precio al instante
+              Usted lo sueña,
+              <br />
+              <span className="texto-oro">Clubhouse</span> lo hace
+              <br />
+              realidad.
             </h1>
+
             <p
-              className="entra-hero mt-7 max-w-2xl text-lg leading-relaxed text-crema/75"
+              className="entra-hero mt-8 max-w-xl text-lg leading-relaxed text-crema/70"
               style={{ "--i": 2 } as React.CSSProperties}
             >
-              Elige campos, hotel, transporte y fecha. El precio se calcula en
-              pantalla mientras decides. Reservas en línea, confirmación
-              inmediata y un anfitrión local durante todo el viaje.
+              Una agencia bespoke de viajes de golf. Cada viaje se diseña desde
+              cero, alrededor de su juego, su grupo y su forma de viajar.
             </p>
+
             <div
               className="entra-hero mt-10 flex flex-wrap gap-3"
               style={{ "--i": 3 } as React.CSSProperties}
             >
-              <Link
-                href="/cotizador"
-                className="boton-oro group inline-flex min-h-12 items-center gap-2 rounded-full px-8 text-sm font-semibold"
+              <a
+                href={MARCA.whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="boton-oro group inline-flex min-h-13 items-center gap-2 rounded-full px-8 text-sm font-semibold"
               >
-                Arma tu viaje
+                Hablemos de su viaje
                 <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
-              </Link>
-              <Link
-                href="/paquetes"
-                className="boton-cristal inline-flex min-h-12 items-center gap-2 rounded-full px-8 text-sm font-medium"
+              </a>
+              <a
+                href="#experiencias"
+                className="boton-cristal inline-flex min-h-13 items-center gap-2 rounded-full px-8 text-sm font-medium"
               >
-                Ver paquetes listos
-              </Link>
+                Ver experiencias
+              </a>
             </div>
 
             <dl
-              className="entra-hero mt-12 flex flex-wrap gap-x-10 gap-y-4 border-t border-white/10 pt-6"
+              className="entra-hero mt-14 flex flex-wrap gap-x-12 gap-y-4 border-t border-white/10 pt-7"
               style={{ "--i": 4 } as React.CSSProperties}
             >
               {estadisticas.map((e) => (
                 <div key={e.etiqueta}>
-                  <dt className="font-serif text-3xl texto-oro">{e.valor}</dt>
-                  <dd className="mt-0.5 text-xs uppercase tracking-[0.14em] text-crema/55">
+                  <dt className="texto-oro font-serif text-[2rem] leading-none">{e.valor}</dt>
+                  <dd className="mt-1.5 text-[11px] uppercase tracking-[0.18em] text-crema/50">
                     {e.etiqueta}
                   </dd>
                 </div>
@@ -134,7 +139,7 @@ export function Hero({ destinos }: { destinos: DestinoConPaquetes[] }) {
             </dl>
           </div>
 
-          {/* Globo 3D — a mano derecha del titular. Arrástralo para girarlo. */}
+          {/* Globo 3D — el mundo de la marca: 50 destinos en 5 continentes. */}
           <div className="relative -mt-16 flex w-full min-w-0 justify-center lg:mt-0 lg:justify-end">
             <div aria-hidden className="pointer-events-none absolute inset-0 hidden lg:block">
               <div className="orbita orbita-gira aspect-square w-[96%]" />
@@ -147,9 +152,9 @@ export function Hero({ destinos }: { destinos: DestinoConPaquetes[] }) {
               onAbrirLista={abrirLista}
             />
             <div className="pointer-events-none absolute bottom-3 left-1/2 z-10 -translate-x-1/2 sm:bottom-5">
-              <span className="inline-flex items-center gap-2.5 rounded-full border border-white/15 bg-[#071d16]/60 px-4 py-2 text-xs text-crema/85 backdrop-blur-md">
+              <span className="inline-flex items-center gap-2.5 rounded-full border border-white/15 bg-[#061a13]/60 px-4 py-2 text-xs text-crema/85 backdrop-blur-md">
                 <span className="punto-vivo h-2 w-2 rounded-full bg-[#e8d3a0]" />
-                Toca un banderín para explorar
+                Toque un banderín para explorar
                 <Sparkles size={13} className="text-[#e8d3a0]" />
               </span>
             </div>
@@ -157,8 +162,8 @@ export function Hero({ destinos }: { destinos: DestinoConPaquetes[] }) {
         </div>
 
         <a
-          href="#planes"
-          aria-label="Ver planes"
+          href="#suenos"
+          aria-label="Seguir leyendo"
           className="absolute bottom-6 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-crema/45 transition-colors hover:text-crema md:flex"
         >
           Desliza

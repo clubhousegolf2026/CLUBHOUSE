@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     template: "%s · Clubhouse",
   },
   description:
-    "Arma tu viaje de golf en Colombia: elige campos, hotel y fechas, mira el precio al instante y reserva en línea.",
+    "Agencia bespoke de viajes de golf: 50 destinos en 5 continentes, con itinerarios diseñados a la medida de su juego y su grupo.",
   openGraph: {
     type: "website",
     locale: "es_CO",

@@ -256,7 +256,7 @@ export function FiltroPaquetes({
             Ningún plan coincide con esos filtros
           </p>
           <p className="mt-2 text-sm text-niebla">
-            Prueba con otro destino o presupuesto, o arma uno a tu medida en el
+            Pruebe con otro destino o presupuesto, o arme uno a su medida en el
             constructor.
           </p>
           <button

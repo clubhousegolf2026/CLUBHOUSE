@@ -34,7 +34,7 @@ export default function ContactoPage() {
     if (res.ok) {
       setEnviado(true);
     } else {
-      setError("No pudimos enviar tu mensaje. Intenta de nuevo en un momento.");
+      setError("No pudimos enviar su mensaje. Inténtelo de nuevo en un momento.");
     }
   }
 
@@ -47,10 +47,10 @@ export default function ContactoPage() {
         eyebrow="Contacto"
         titulo={
           <>
-            Hablemos de tu <Oro>viaje</Oro>
+            Hablemos de su <Oro>viaje</Oro>
           </>
         }
-        descripcion="Cuéntanos qué tienes en mente y un asesor te responde el mismo día hábil."
+        descripcion="Cuéntenos qué tiene en mente y un asesor le responde el mismo día hábil."
       />
 
       <section className="px-6 pb-24 sm:px-10 lg:px-16 xl:px-24">
@@ -61,7 +61,7 @@ export default function ContactoPage() {
                 <CheckCircle2 size={32} />
               </span>
               <p className="mt-5 font-serif text-3xl text-carbon">¡Mensaje recibido!</p>
-              <p className="mt-2 text-niebla">Te contactamos muy pronto.</p>
+              <p className="mt-2 text-niebla">Le contactamos muy pronto.</p>
             </div>
           ) : (
             <form className={`${tarjeta} grid gap-5 p-6 sm:grid-cols-2 sm:p-9`} onSubmit={enviar}>

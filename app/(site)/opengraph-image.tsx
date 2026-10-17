@@ -26,7 +26,7 @@ export default function Image() {
           Clubhouse
         </div>
         <div style={{ fontSize: 40, marginTop: 28, opacity: 0.85 }}>
-          Arma tu viaje de golf en Colombia y mira el precio al instante
+          Usted lo sueña, Clubhouse lo hace realidad
         </div>
       </div>
     ),

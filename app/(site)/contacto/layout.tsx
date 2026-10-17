@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Contacto",
   description:
-    "Habla con un asesor de Clubhouse: cuéntanos tu viaje de golf en Colombia y te respondemos el mismo día hábil.",
+    "Hable con un asesor de Clubhouse: cuéntenos su viaje de golf y le respondemos el mismo día hábil.",
   alternates: { canonical: "/contacto" },
 };
 
