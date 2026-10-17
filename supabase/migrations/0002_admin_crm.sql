@@ -7,15 +7,20 @@
 -- ============================================================
 
 -- ---------- Tipos enumerados ----------
-create type staff_rol as enum ('admin', 'asesor');
-create type estado_contacto as enum (
-  'nuevo', 'contactado', 'cotizado', 'confirmado', 'viajo', 'perdido'
-);
+do $$ begin
+  create type staff_rol as enum ('admin', 'asesor');
+exception when duplicate_object then null; end $$;
+
+do $$ begin
+  create type estado_contacto as enum (
+    'nuevo', 'contactado', 'cotizado', 'confirmado', 'viajo', 'perdido'
+  );
+exception when duplicate_object then null; end $$;
 
 -- ============================================================
 -- 1. STAFF — mapea usuarios de Supabase Auth a rol interno
 -- ============================================================
-create table staff (
+create table if not exists staff (
   user_id    uuid primary key references auth.users (id) on delete cascade,
   nombre     text,
   rol        staff_rol not null default 'admin',
@@ -28,16 +33,16 @@ comment on table staff is 'Quién del equipo puede entrar a /admin. Un usuario d
 -- 2. CONTACTOS — se convierte en el lead del CRM (pipeline)
 -- ============================================================
 alter table contactos
-  add column estado         estado_contacto not null default 'nuevo',
-  add column propietario_id uuid references staff (user_id) on delete set null,
-  add column valor_estimado_cop bigint check (valor_estimado_cop is null or valor_estimado_cop >= 0),
-  add column notas          text,
-  add column updated_at     timestamptz not null default now();
+  add column if not exists estado         estado_contacto not null default 'nuevo',
+  add column if not exists propietario_id uuid references staff (user_id) on delete set null,
+  add column if not exists valor_estimado_cop bigint check (valor_estimado_cop is null or valor_estimado_cop >= 0),
+  add column if not exists notas          text,
+  add column if not exists updated_at     timestamptz not null default now();
 
 -- ============================================================
 -- 3. CRM_EVENTOS — bitácora inmutable de cambios de estado
 -- ============================================================
-create table crm_eventos (
+create table if not exists crm_eventos (
   id              bigint generated always as identity primary key,
   contacto_id     uuid not null references contactos (id) on delete cascade,
   estado_anterior estado_contacto,
@@ -53,13 +58,13 @@ comment on table crm_eventos is 'Historia de cada contacto: permite reconstruir 
 -- ============================================================
 create extension if not exists "pg_trgm";
 
-create index idx_contactos_estado      on contactos (estado, updated_at desc);
-create index idx_contactos_propietario on contactos (propietario_id, estado) where propietario_id is not null;
-create index idx_contactos_email_trgm  on contactos using gin (email gin_trgm_ops);
-create index idx_contactos_nombre_trgm on contactos using gin (nombre gin_trgm_ops);
-create index idx_crm_eventos_contacto  on crm_eventos (contacto_id, created_at desc);
-create index idx_cotizaciones_contacto on cotizaciones (contacto_id);
-create index idx_reservas_estado_pago  on reservas (estado_pago);
+create index if not exists idx_contactos_estado      on contactos (estado, updated_at desc);
+create index if not exists idx_contactos_propietario on contactos (propietario_id, estado) where propietario_id is not null;
+create index if not exists idx_contactos_email_trgm  on contactos using gin (email gin_trgm_ops);
+create index if not exists idx_contactos_nombre_trgm on contactos using gin (nombre gin_trgm_ops);
+create index if not exists idx_crm_eventos_contacto  on crm_eventos (contacto_id, created_at desc);
+create index if not exists idx_cotizaciones_contacto on cotizaciones (contacto_id);
+create index if not exists idx_reservas_estado_pago  on reservas (estado_pago);
 
 -- ============================================================
 -- FUNCIONES Y TRIGGERS
@@ -79,6 +84,7 @@ begin
   return new;
 end $$;
 
+drop trigger if exists trg_contactos_updated_at on contactos;
 create trigger trg_contactos_updated_at before update on contactos
   for each row execute function set_updated_at();
 
@@ -96,6 +102,7 @@ begin
   return new;
 end $$;
 
+drop trigger if exists trg_contactos_estado on contactos;
 create trigger trg_contactos_estado after insert or update of estado on contactos
   for each row execute function log_cambio_estado_contacto();
 
