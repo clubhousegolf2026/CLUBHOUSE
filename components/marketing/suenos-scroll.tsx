@@ -52,7 +52,7 @@ function Escenario() {
         style={{ height: `${(ELEMENTOS + 1.5) * 85}vh` }}
         aria-label="Los sueños del golfista"
       >
-        <div className="grano sticky top-0 isolate flex h-dvh flex-col items-center justify-center overflow-hidden px-6 pt-20 text-center text-crema sm:px-10">
+        <div className="sticky top-0 isolate flex h-dvh flex-col items-center justify-center overflow-hidden px-6 pt-20 text-center text-crema sm:px-10">
           <m.div style={{ scale: zoom }} className="absolute inset-0 -z-20">
             <Image
               src="/fotos/alcaidesa.webp"
