@@ -47,4 +47,6 @@ export interface Destino {
   slugsPaquetes: string[];
   disponible: boolean;
   foto?: string;
+  /** Si el punto del globo es una experiencia firmada (Tailandia, Utah…) */
+  experiencia?: { slug: string; desde: string; fechas: string; duracion: string };
 }

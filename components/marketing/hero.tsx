@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { geoDistance } from "d3-geo";
 import { AnimatePresence, LazyMotion, domAnimation, m } from "framer-motion";
-import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { MARCA } from "@/lib/contenido/clubhouse";
 import { Globo3D } from "./globo-3d";
@@ -71,7 +71,21 @@ export function Hero({ destinos }: { destinos: DestinoConPaquetes[] }) {
   return (
     <LazyMotion features={domAnimation}>
       <section className="grano relative isolate -mt-20 flex min-h-dvh flex-col justify-center overflow-hidden bg-[#061a13] pt-20 text-crema">
-        <div className="hero-degradado -z-20 absolute inset-0" />
+        <div className="hero-degradado -z-30 absolute inset-0" />
+        {/* Foto del brochure (Dubai Creek) de fondo, tamizada de verde para
+            que el texto y el globo sigan leyéndose. */}
+        <Image
+          src="/fotos/dubai-creek.webp"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="-z-20 object-cover object-[center_60%] opacity-40"
+        />
+        <div
+          aria-hidden
+          className="-z-[15] absolute inset-0 bg-gradient-to-r from-[#061a13]/90 via-[#061a13]/50 to-[#061a13]/20"
+        />
         <div
           aria-hidden
           className="-z-10 absolute inset-0 bg-[radial-gradient(ellipse_at_62%_45%,transparent_30%,rgba(3,15,11,0.72)_100%)]"

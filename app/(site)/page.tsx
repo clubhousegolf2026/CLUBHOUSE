@@ -5,6 +5,8 @@ import { EncabezadoSeccion } from "@/components/marketing/encabezado-seccion";
 import { Oro } from "@/components/marketing/pagina-hero";
 import { Testimonios } from "@/components/marketing/testimonios";
 import { Reveal } from "@/components/site/reveal";
+import { SuenosScroll } from "@/components/marketing/suenos-scroll";
+import { EXPERIENCIAS } from "@/lib/contenido/experiencias";
 import {
   SeccionContacto,
   SeccionDestinos,
@@ -12,7 +14,6 @@ import {
   SeccionExperiencias,
   SeccionIncluye,
   SeccionProceso,
-  SeccionSuenos,
 } from "@/components/marketing/secciones-marca";
 import {
   getDestinosConPaquetes,
@@ -23,11 +24,27 @@ import {
 export const revalidate = 300;
 
 export default async function HomePage() {
-  const [destinos, paquetes, testimonios] = await Promise.all([
+  const [destinosCatalogo, paquetes, testimonios] = await Promise.all([
     getDestinosConPaquetes(),
     getPaquetes(),
     getTestimonios(),
   ]);
+  // Las dos experiencias firmadas también se marcan en el globo.
+  const destinosExperiencia: typeof destinosCatalogo = EXPERIENCIAS.map((e) => ({
+    id: `exp-${e.slug}`,
+    nombre: e.nombre,
+    region: e.subtitulo,
+    pais: e.pais,
+    coordenadas: e.coordenadas,
+    resumen: e.resumen,
+    campos: e.rondas.map((r) => r.nombre),
+    slugsPaquetes: [],
+    disponible: true,
+    foto: e.foto,
+    paquetes: [],
+    experiencia: { slug: e.slug, desde: e.desde, fechas: e.fechas, duracion: e.duracion },
+  }));
+  const destinos = [...destinosCatalogo, ...destinosExperiencia];
   const campos = [...new Set(destinos.flatMap((d) => d.campos))];
 
   return (
@@ -35,7 +52,7 @@ export default async function HomePage() {
       <Hero destinos={destinos} />
       <MarquesinaCampos campos={campos} />
 
-      <SeccionSuenos />
+      <SuenosScroll />
       <SeccionIncluye />
       <SeccionExperiencias />
       <SeccionDestinos />

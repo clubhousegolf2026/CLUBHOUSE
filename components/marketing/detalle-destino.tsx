@@ -85,11 +85,29 @@ export function DetalleDestino({
         </div>
 
         <div>
+          {destino.experiencia && (
+            <div className="mb-4 rounded-[var(--radius-card)] border border-champagne/40 bg-champagne/10 p-4">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-champagne">
+                Experiencia firmada · {destino.experiencia.fechas}
+              </span>
+              <p className="mt-1 text-sm text-carbon">
+                {destino.experiencia.duracion} · desde {destino.experiencia.desde}
+              </p>
+              <Link
+                href={`/experiencias/${destino.experiencia.slug}`}
+                className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-verde-golf"
+              >
+                Ver el itinerario completo <ArrowRight size={15} />
+              </Link>
+            </div>
+          )}
+          {!(destino.experiencia && destino.paquetes.length === 0) && (
           <h4 className="font-serif text-sm text-carbon">
             {destino.paquetes.length > 0
               ? `Paquetes en ${destino.nombre}`
               : "Destino en preparación"}
           </h4>
+          )}
           {destino.paquetes.length > 0 ? (
             <ul className="mt-2 space-y-2">
               {destino.paquetes.map((p) => (
@@ -117,7 +135,7 @@ export function DetalleDestino({
                 </Link>
               </li>
             </ul>
-          ) : (
+          ) : destino.experiencia ? null : (
             <p className="mt-2 text-sm text-niebla">
               Aún no tenemos paquetes cerrados aquí.{" "}
               <Link href="/contacto" className="text-verde-golf underline">

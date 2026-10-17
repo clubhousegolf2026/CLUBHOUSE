@@ -29,6 +29,8 @@ export interface Experiencia {
   slug: string;
   pais: string;
   bandera: string;
+  /** [longitud, latitud] del punto que se marca en el globo del inicio */
+  coordenadas: [number, number];
   nombre: string;
   subtitulo: string;
   fechas: string;
@@ -56,6 +58,7 @@ export const EXPERIENCIAS: Experiencia[] = [
     slug: "tailandia",
     pais: "Tailandia",
     bandera: "🇹🇭",
+    coordenadas: [100.75, 13.35],
     nombre: "Tailandia, golf de clase mundial",
     subtitulo: "Bangkok & Pattaya",
     fechas: "8 – 16 mar 2027",
@@ -191,6 +194,7 @@ export const EXPERIENCIAS: Experiencia[] = [
     slug: "utah",
     pais: "Estados Unidos",
     bandera: "🇺🇸",
+    coordenadas: [-113.58, 37.1],
     nombre: "Utah Experience",
     subtitulo: "St. George & Black Desert",
     fechas: "28 jun – 5 jul 2027",

@@ -503,6 +503,15 @@ const BANDERAS: Record<string, DibujoBandera> = {
     ctx.fillRect(x + w * 0.58, y, w * 0.42, h * 0.42);
     ctx.fillRect(x, y + h * 0.58, w * 0.42, h * 0.42);
   },
+  tailandia: (ctx, x, y, w, h) =>
+    franjas(ctx, x, y, w, h, [
+      ["#a51931", 1],
+      ["#f4f5f8", 1],
+      ["#2d2a4a", 2],
+      ["#f4f5f8", 1],
+      ["#a51931", 1],
+    ]),
+  "estados unidos": (ctx, x, y, w, h) => BANDERAS.eeuu(ctx, x, y, w, h),
   eeuu: (ctx, x, y, w, h) => {
     const rayas: [string, number][] = Array.from({ length: 7 }, (_, i) => [
       i % 2 === 0 ? "#b22234" : "#ffffff",
