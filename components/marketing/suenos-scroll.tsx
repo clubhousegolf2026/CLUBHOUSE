@@ -26,18 +26,33 @@ const ELEMENTOS = SUENOS.length + 1;
  *  (sticky) con la foto de La Hacienda Alcaidesa y, a medida que se hace
  *  scroll, van apareciendo las frases una a una. Con "reducir movimiento"
  *  se muestra la sección estática de siempre. */
-export function SuenosScroll() {
+export function SuenosScroll({ children }: { children?: React.ReactNode }) {
   const reducir = useReducedMotion();
-  if (reducir) return <SeccionSuenos />;
-  return <Escenario />;
+  if (reducir) {
+    return (
+      <>
+        <SeccionSuenos />
+        {children}
+      </>
+    );
+  }
+  return <Escenario>{children}</Escenario>;
 }
 
-function Escenario() {
+/** Distancia de scroll de las frases (en dvh) y de la "cortina" final en la
+ *  que `children` sube y cubre la escena fija. */
+const DIST_FRASES = (ELEMENTOS + 1.5) * 85 - 100;
+const DIST_CORTINA = 100;
+const FRACCION_FRASES = DIST_FRASES / (DIST_FRASES + DIST_CORTINA);
+
+function Escenario({ children }: { children?: React.ReactNode }) {
   const ref = useRef<HTMLElement>(null);
-  const { scrollYProgress: p } = useScroll({
+  const { scrollYProgress: total } = useScroll({
     target: ref,
     offset: ["start start", "end end"],
   });
+  // Las frases terminan de aparecer antes de que empiece la cortina.
+  const p = useTransform(total, [0, FRACCION_FRASES], [0, 1], { clamp: true });
 
   const zoom = useTransform(p, [0, 1], [1.14, 1]);
   const velo = useTransform(p, [0, INICIO + PASO * 1.5], [0.12, 0.82]);
@@ -49,7 +64,7 @@ function Escenario() {
         id="suenos"
         ref={ref}
         className="relative scroll-mt-0 bg-[#04140e]"
-        style={{ height: `${(ELEMENTOS + 1.5) * 85}vh` }}
+        style={{ height: `${DIST_FRASES + DIST_CORTINA + 100}dvh` }}
         aria-label="Los sueños del golfista"
       >
         <div className="sticky top-0 isolate flex h-dvh flex-col items-center justify-center overflow-hidden px-6 pt-20 text-center text-crema sm:px-10">
@@ -95,6 +110,12 @@ function Escenario() {
           />
         </div>
       </section>
+
+      {children && (
+        <div className="relative z-10 -mt-[100dvh] rounded-t-[2.5rem] bg-blanco-roto shadow-[0_-40px_80px_-20px_rgba(0,0,0,0.55)]">
+          {children}
+        </div>
+      )}
     </LazyMotion>
   );
 }

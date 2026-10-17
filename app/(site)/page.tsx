@@ -4,7 +4,6 @@ import { FiltroPaquetes } from "@/components/marketing/filtro-paquetes";
 import { EncabezadoSeccion } from "@/components/marketing/encabezado-seccion";
 import { Oro } from "@/components/marketing/pagina-hero";
 import { Testimonios } from "@/components/marketing/testimonios";
-import { Reveal } from "@/components/site/reveal";
 import { SuenosScroll } from "@/components/marketing/suenos-scroll";
 import { EXPERIENCIAS } from "@/lib/contenido/experiencias";
 import {
@@ -52,13 +51,8 @@ export default async function HomePage() {
       <Hero destinos={destinos} />
       <MarquesinaCampos campos={campos} />
 
-      <SuenosScroll />
-      <SeccionIncluye />
-      <SeccionExperiencias />
-      <SeccionDestinos />
-
-      {paquetes.length > 0 && (
-        <Reveal>
+      <SuenosScroll>
+        {paquetes.length > 0 && (
           <section
             id="planes"
             className="scroll-mt-24 bg-blanco-roto px-6 py-24 sm:px-10 sm:py-28 lg:px-16 xl:px-24"
@@ -76,8 +70,12 @@ export default async function HomePage() {
               <FiltroPaquetes paquetes={paquetes} destinos={destinos} />
             </div>
           </section>
-        </Reveal>
-      )}
+        )}
+      </SuenosScroll>
+      <SeccionIncluye />
+      <SeccionExperiencias />
+      <SeccionDestinos />
+
 
       <SeccionProceso />
       <SeccionDirector />
