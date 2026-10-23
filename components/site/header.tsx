@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AnimatePresence, LazyMotion, domAnimation, m } from "framer-motion";
-import { ArrowUpRight, LayoutDashboard, Menu, X } from "lucide-react";
+import { LayoutDashboard, Menu, X } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { Logo } from "@/components/site/logo";
 
@@ -102,16 +102,6 @@ export function Header() {
             >
               <LayoutDashboard size={17} />
             </Link>
-            <Link
-              href="/cotizador"
-              className="boton-oro group inline-flex items-center gap-1.5 rounded-full px-5 py-2.5 text-sm font-semibold"
-            >
-              Cotizar ahora
-              <ArrowUpRight
-                size={15}
-                className="transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-              />
-            </Link>
           </div>
 
           <button
@@ -151,13 +141,6 @@ export function Header() {
                   {item.label}
                 </Link>
               ))}
-              <Link
-                href="/cotizador"
-                onClick={() => setAbierto(false)}
-                className="boton-oro mt-1 flex items-center justify-center gap-1.5 rounded-2xl px-5 py-3.5 text-base font-semibold"
-              >
-                Cotizar ahora <ArrowUpRight size={16} />
-              </Link>
               <Link
                 href="/admin/login"
                 onClick={() => setAbierto(false)}
