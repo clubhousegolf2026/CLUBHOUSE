@@ -54,7 +54,7 @@ function Escenario({ children }: { children?: React.ReactNode }) {
   // Las frases terminan de aparecer antes de que empiece la cortina.
   const p = useTransform(total, [0, FRACCION_FRASES], [0, 1], { clamp: true });
 
-  const zoom = useTransform(p, [0, 1], [1.14, 1]);
+  const zoom = useTransform(p, [0, 1], [1.05, 1]);
   const velo = useTransform(p, [0, INICIO + PASO * 1.5], [0.12, 0.82]);
   const barra = useTransform(p, [0, 1], [0, 1]);
 
@@ -68,15 +68,29 @@ function Escenario({ children }: { children?: React.ReactNode }) {
         aria-label="Los sueños del golfista"
       >
         <div className="sticky top-0 isolate flex h-dvh flex-col items-center justify-center overflow-hidden px-6 pt-20 text-center text-crema sm:px-10">
+          {/* La foto original mide 906×1280 px: estirada a pantalla completa se
+              pixela. Se muestra a su tamaño real (nítida, con los bordes
+              difuminados) sobre una copia desenfocada que rellena el resto. */}
           <m.div style={{ scale: zoom }} className="absolute inset-0 -z-20">
             <Image
               src="/fotos/alcaidesa.webp"
-              alt="Golfista en el green de La Hacienda Alcaidesa, Cádiz"
+              alt=""
+              aria-hidden
               fill
-              priority
               sizes="100vw"
-              className="object-cover object-[center_30%]"
+              className="scale-110 object-cover object-[center_30%] opacity-70 blur-2xl"
             />
+            <div className="absolute inset-y-0 left-1/2 w-full max-w-[906px] -translate-x-1/2 [mask-image:linear-gradient(to_right,transparent,black_18%,black_82%,transparent)]">
+              <Image
+                src="/fotos/alcaidesa.webp"
+                alt="Golfista en el green de La Hacienda Alcaidesa, Cádiz"
+                fill
+                priority
+                quality={95}
+                sizes="906px"
+                className="object-cover object-[center_30%]"
+              />
+            </div>
           </m.div>
           <m.div
             aria-hidden
