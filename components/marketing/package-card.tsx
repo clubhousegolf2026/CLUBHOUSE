@@ -22,7 +22,7 @@ export function PackageCard({
 
   return (
     <Link
-      href={`/paquetes/${paquete.slug}`}
+      href={paquete.href ?? `/paquetes/${paquete.slug}`}
       onMouseMove={seguirCursor}
       className="tarjeta-luz group relative flex aspect-[4/5] flex-col justify-between overflow-hidden rounded-[1.75rem] bg-[#0b2b21] shadow-[0_20px_50px_-24px_rgba(11,43,33,0.7)] ring-1 ring-black/5 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_34px_70px_-26px_rgba(11,43,33,0.85)]"
     >
@@ -39,7 +39,11 @@ export function PackageCard({
       <div className="absolute inset-0 bg-gradient-to-b from-[#04140e]/45 via-transparent to-transparent" />
 
       <div className="relative z-10 flex items-start justify-between p-5">
-        {paquete.destacado ? (
+        {paquete.insignia ? (
+          <span className="rounded-full border border-white/25 bg-white/15 px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-white shadow-lg backdrop-blur-md">
+            {paquete.insignia}
+          </span>
+        ) : paquete.destacado ? (
           <span className="rounded-full bg-gradient-to-r from-[#ecd396] to-[#b8913f] px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-[#1a1a1a] shadow-lg">
             Más elegido
           </span>
@@ -75,7 +79,7 @@ export function PackageCard({
               Desde
             </span>
             <span className="font-serif text-2xl text-[#ecd396] tabular">
-              {cop(paquete.precioDesdeCop)}
+              {paquete.precioTexto ?? cop(paquete.precioDesdeCop)}
             </span>
           </div>
           <span className="text-xs text-white/60">por persona</span>

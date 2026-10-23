@@ -57,9 +57,13 @@ function Selector({
 export function FiltroPaquetes({
   paquetes,
   destinos,
+  experiencias = [],
 }: {
   paquetes: PaquetePredefinido[];
   destinos: DestinoConPaquetes[];
+  /** Experiencias firmadas (Tailandia, Utah…): van primero y se ocultan al filtrar,
+   *  porque sus precios están en USD y no entran en los filtros en COP. */
+  experiencias?: PaquetePredefinido[];
 }) {
   const [destino, setDestino] = useState("todos");
   const [noches, setNoches] = useState("todas");
@@ -127,6 +131,9 @@ export function FiltroPaquetes({
     presupuesto !== "todos" ||
     campo !== "todos" ||
     soloDestacados;
+
+  const destacadas = hayFiltros ? [] : experiencias;
+  const total = resultados.length + destacadas.length;
 
   function limpiar() {
     setDestino("todos");

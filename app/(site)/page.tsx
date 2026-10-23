@@ -44,6 +44,27 @@ export default async function HomePage() {
     experiencia: { slug: e.slug, desde: e.desde, fechas: e.fechas, duracion: e.duracion },
   }));
   const destinos = [...destinosCatalogo, ...destinosExperiencia];
+  // Las experiencias firmadas también salen como tarjetas junto a los paquetes.
+  const tarjetasExperiencia: typeof paquetes = EXPERIENCIAS.map((e) => {
+    const noches = Number(/(\d+)\s*noches/.exec(e.duracion)?.[1] ?? 0);
+    return {
+      id: `exp-${e.slug}`,
+      slug: e.slug,
+      nombre: e.nombre,
+      descripcion: e.resumen,
+      camposIncluidos: e.rondas.map((r) => r.nombre),
+      noches,
+      dias: noches + 1,
+      precioDesdeCop: 0,
+      galeria: [{ url: e.foto, alt: e.fotoAlt }],
+      incluye: e.incluye,
+      noIncluye: e.noIncluye,
+      destacado: false,
+      href: `/experiencias/${e.slug}`,
+      precioTexto: e.desde,
+      insignia: `${e.bandera} ${e.pais}`,
+    };
+  });
   const campos = [...new Set(destinos.flatMap((d) => d.campos))];
 
   return (
@@ -62,12 +83,16 @@ export default async function HomePage() {
                 eyebrow="Listos para reservar"
                 titulo={
                   <>
-                    Paquetes de golf en <Oro>Colombia</Oro>
+                    Planes de golf <Oro>listos para reservar</Oro>
                   </>
                 }
-                descripcion="Itinerarios cortos, ya armados, para jugar cerca de casa. Filtre por destino, duración, presupuesto o campo."
+                descripcion="Viajes internacionales con fecha, y itinerarios cortos para jugar cerca de casa. Filtre por destino, duración, presupuesto o campo."
               />
-              <FiltroPaquetes paquetes={paquetes} destinos={destinos} />
+              <FiltroPaquetes
+                paquetes={paquetes}
+                destinos={destinos}
+                experiencias={tarjetasExperiencia}
+              />
             </div>
           </section>
         )}

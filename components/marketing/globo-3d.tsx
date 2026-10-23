@@ -23,6 +23,13 @@ interface PuntoGlobo {
 
 const COLOR_OCEANO = "#07231b";
 
+// Empieza a descargar three.js y react-globe.gl en cuanto carga este módulo,
+// antes de que el componente monte, para que el globo aparezca casi al instante.
+if (typeof window !== "undefined") {
+  void import("react-globe.gl");
+  void import("three");
+}
+
 // Vista inicial: apunta a Colombia, sin acercar.
 const VISTA_INICIAL = { lat: 6, lng: -78, altitude: 2.1 };
 
@@ -103,36 +110,10 @@ export function Globo3D({
   // resolvió por objeto, se ignora el país/globo del mismo instante.
   const clicPorObjetoRef = useRef(0);
 
+  // El globo es lo primero que se ve en el inicio: arranca al montar, sin
+  // esperar al evento load ni a un retardo.
   useEffect(() => {
-    const el = contenedorRef.current;
-    if (!el) return;
-    let cancelado = false;
-    let idle: number | undefined;
-    // Espera a que la página termine de cargar y un respiro extra: el
-    // globo es un extra visual, el texto y los botones deben quedar
-    // interactivos antes de que three.js ocupe el hilo principal.
-    const arrancar = () => {
-      const lanzar = () => {
-        idle = window.setTimeout(() => !cancelado && setActivar(true), 1500);
-      };
-      if (document.readyState === "complete") lanzar();
-      else window.addEventListener("load", lanzar, { once: true });
-    };
-    const obs = new IntersectionObserver(
-      ([entrada]) => {
-        if (entrada.isIntersecting) {
-          obs.disconnect();
-          arrancar();
-        }
-      },
-      { rootMargin: "300px" },
-    );
-    obs.observe(el);
-    return () => {
-      cancelado = true;
-      obs.disconnect();
-      if (idle !== undefined) window.clearTimeout(idle);
-    };
+    setActivar(true);
   }, []);
 
   // Carga perezosa en el cliente: react-globe.gl y three tocan `window`/WebGL.
@@ -187,7 +168,7 @@ export function Globo3D({
     // en pantallas anchas pero de poca altura.
     const aplicar = () => {
       const porAncho = mq.matches ? 820 : mqLg.matches ? 660 : 420;
-      const porAlto = Math.round(window.innerHeight * 0.78);
+      const porAlto = Math.round(window.innerHeight * 0.68);
       // En móviles angostos el ancho disponible real es menor que el
       // tamaño "por ancho" del breakpoint (p. ej. 360px de pantalla) — sin
       // este tope el globo se desborda de su caja en vez de encogerse con

@@ -70,7 +70,7 @@ export function Hero({ destinos }: { destinos: DestinoConPaquetes[] }) {
 
   return (
     <LazyMotion features={domAnimation}>
-      <section className="grano relative isolate -mt-20 flex min-h-dvh flex-col justify-center overflow-hidden bg-[#061a13] pt-20 text-crema">
+      <section className="grano relative isolate -mt-20 flex min-h-[78dvh] flex-col justify-center overflow-hidden bg-[#061a13] pt-20 text-crema">
         <div className="hero-degradado -z-30 absolute inset-0" />
         {/* Foto del brochure (Dubai Creek) de fondo, tamizada de verde para
             que el texto y el globo sigan leyéndose. */}
@@ -92,14 +92,14 @@ export function Hero({ destinos }: { destinos: DestinoConPaquetes[] }) {
         />
 
         <div className="mx-auto grid w-full max-w-[1920px] items-center gap-6 px-6 sm:px-10 lg:grid-cols-[3fr_2fr] lg:gap-10 lg:px-16 xl:px-24">
-          <div className="pt-16 pb-10 lg:pt-28 lg:pb-24">
+          <div className="pt-12 pb-8 lg:pt-14 lg:pb-10">
             <span className="entra-hero inline-flex items-center gap-3 text-[11px] font-medium uppercase tracking-[0.34em] text-[#e8d3a0]">
               <span className="h-px w-10 bg-gradient-to-r from-transparent to-[#e8d3a0]" />
               {MARCA.claim}
             </span>
 
             <h1
-              className="entra-hero mt-7 max-w-[15ch] font-serif text-[2.9rem] leading-[0.98] tracking-[-0.02em] sm:text-[4.2rem] xl:text-[5.4rem]"
+              className="entra-hero mt-7 max-w-[15ch] font-serif text-[2.9rem] leading-[0.98] tracking-[-0.02em] sm:text-[4.2rem] xl:text-[4.6rem]"
               style={{ "--i": 1 } as React.CSSProperties}
             >
               Usted lo sueña,
@@ -139,7 +139,7 @@ export function Hero({ destinos }: { destinos: DestinoConPaquetes[] }) {
             </div>
 
             <dl
-              className="entra-hero mt-14 flex flex-wrap gap-x-12 gap-y-4 border-t border-white/10 pt-7"
+              className="entra-hero mt-9 flex flex-wrap gap-x-12 gap-y-4 border-t border-white/10 pt-7"
               style={{ "--i": 4 } as React.CSSProperties}
             >
               {estadisticas.map((e) => (

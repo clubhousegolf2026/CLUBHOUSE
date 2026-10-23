@@ -16,6 +16,10 @@ export interface PaquetePredefinido {
   incluye: string[];
   noIncluye: string[];
   destacado: boolean;
+  /** Experiencia firmada: enlaza a su propia página y muestra el precio en texto (USD) */
+  href?: string;
+  precioTexto?: string;
+  insignia?: string;
 }
 
 export interface Testimonio {
