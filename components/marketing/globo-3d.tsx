@@ -330,8 +330,13 @@ export function Globo3D({
   function alTocarZona(lat: number, lng: number) {
     const g = globoRef.current;
     const DURACION_ZOOM = 550;
+    const t0 = Date.now();
     if (g) g.pointOfView({ lat, lng, altitude: 0.75 }, DURACION_ZOOM);
-    window.setTimeout(() => onAbrirLista(lat, lng), DURACION_ZOOM + 80);
+    window.setTimeout(() => {
+      // Si entre tanto se tocó un banderín, esa elección manda.
+      if (clicPorObjetoRef.current > t0 - 50) return;
+      onAbrirLista(lat, lng);
+    }, DURACION_ZOOM + 80);
   }
 
   // OJO: no se usa el `d` (dato) que entrega onObjectClick para identificar
@@ -382,11 +387,46 @@ export function Globo3D({
     return false;
   }
 
+  // Clic en cualquier parte del globo: se compara con la posición REAL en
+  // pantalla de cada banderín (base y tela), con ~56 px de tolerancia, en vez
+  // de depender de acertar exacto sobre el sprite con el raycast de three.js.
+  const TOLERANCIA_PX = 56;
+  function alClicContenedor(e: React.MouseEvent<HTMLDivElement>) {
+    const g = globoRef.current;
+    const el = contenedorRef.current;
+    if (!g || !el || !listo) return;
+    const r = el.getBoundingClientRect();
+    const x = e.clientX - r.left;
+    const y = e.clientY - r.top;
+    const pov = g.pointOfView();
+    let mejor: PuntoGlobo | null = null;
+    let mejorD = TOLERANCIA_PX;
+    for (const p of puntos) {
+      // Solo los banderines del hemisferio que mira a la cámara.
+      if (geoDistance([pov.lng, pov.lat], [p.lng, p.lat]) > 1.25) continue;
+      const c = g.getScreenCoords(p.lat, p.lng, 0.01);
+      if (!c) continue;
+      const d = Math.min(
+        Math.hypot(x - c.x, y - c.y),
+        Math.hypot(x - c.x, y - (c.y - 26)),
+      );
+      if (d < mejorD) {
+        mejorD = d;
+        mejor = p;
+      }
+    }
+    if (mejor) {
+      clicPorObjetoRef.current = Date.now();
+      alHacerClick(mejor);
+    }
+  }
+
   return (
     <div
       ref={contenedorRef}
       className="relative mx-auto"
       style={{ width: tamano, height: tamano }}
+      onClickCapture={alClicContenedor}
     >
       {!(Globe && oceano && THREE) && (
         <div
