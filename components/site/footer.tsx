@@ -50,8 +50,8 @@ export function Footer() {
         <div>
           <Logo variante="claro" />
           <p className="mt-5 max-w-xs text-sm leading-relaxed text-crema/60">
-            Agencia bespoke de viajes de golf. 50 destinos en 5 continentes,
-            con itinerarios diseñados desde cero alrededor de su juego.
+            Agencia bespoke de viajes de golf. Itinerarios diseñados desde
+            cero alrededor de su juego, su grupo y su forma de viajar.
           </p>
         </div>
 

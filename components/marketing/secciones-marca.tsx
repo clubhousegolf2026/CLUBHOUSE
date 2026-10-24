@@ -12,7 +12,6 @@ import {
 import { EncabezadoSeccion } from "@/components/marketing/encabezado-seccion";
 import { Oro } from "@/components/marketing/pagina-hero";
 import {
-  CONTINENTES,
   INCLUYE,
   MARCA,
   PASOS,
@@ -187,42 +186,6 @@ export function SeccionExperiencias() {
             </Link>
           ))}
         </div>
-      </div>
-    </section>
-  );
-}
-
-/** 50 destinos en 5 continentes. */
-export function SeccionDestinos() {
-  return (
-    <section className="px-6 py-24 sm:px-10 sm:py-28 lg:px-16 xl:px-24">
-      <div className="mx-auto max-w-[1400px]">
-        <EncabezadoSeccion
-          eyebrow="Destinos"
-          titulo={
-            <>
-              50 destinos en <Oro>5 continentes</Oro>
-            </>
-          }
-          descripcion="Trabajamos en alianza con los mejores campos de golf y las principales cadenas hoteleras del mundo."
-        />
-
-        <ul className="divide-y divide-arena/70 border-y border-arena/70">
-          {CONTINENTES.map((c) => (
-            <li
-              key={c.nombre}
-              className="group grid items-baseline gap-2 py-7 transition-colors hover:bg-white/50 sm:grid-cols-[auto_1fr] sm:gap-10 sm:px-4"
-            >
-              <div className="flex items-baseline gap-4 sm:w-56">
-                <span className="texto-oro font-serif text-4xl leading-none tabular-nums">
-                  {String(c.total).padStart(2, "0")}
-                </span>
-                <h3 className="font-serif text-2xl text-carbon">{c.nombre}</h3>
-              </div>
-              <p className="text-sm leading-relaxed text-niebla">{c.paises}</p>
-            </li>
-          ))}
-        </ul>
       </div>
     </section>
   );

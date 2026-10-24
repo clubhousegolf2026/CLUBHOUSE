@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 const VALORES = [
   { icono: Flag, titulo: "Itinerario a la medida", texto: "Cada viaje se diseña desde cero, alrededor de su juego, su grupo y su forma de viajar." },
-  { icono: Zap, titulo: "50 destinos en 5 continentes", texto: "América, Europa, Asia, África y Oceanía: los grandes campos del mundo en un mismo lugar." },
+  { icono: Zap, titulo: "Todo resuelto", texto: "Tiquetes, traslados, hoteles o villas, tee times y tours: nos encargamos de cada detalle del viaje." },
   { icono: UserCheck, titulo: "Años en el golf", texto: "Fundada y dirigida por Juan Manuel Morales Calderón, con 10 años como Golf Manager en FROSCH Latinoamérica." },
 ];
 

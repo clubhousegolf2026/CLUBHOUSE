@@ -7,7 +7,6 @@ import { SuenosScroll } from "@/components/marketing/suenos-scroll";
 import { getExperiencias } from "@/lib/contenido/experiencias-editables";
 import {
   SeccionContacto,
-  SeccionDestinos,
   SeccionDirector,
   SeccionIncluye,
   SeccionProceso,
@@ -97,7 +96,6 @@ export default async function HomePage() {
         </section>
       </SuenosScroll>
       <SeccionIncluye />
-      <SeccionDestinos />
 
 
       <SeccionProceso />

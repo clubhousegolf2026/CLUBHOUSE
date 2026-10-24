@@ -29,33 +29,6 @@ export const INCLUYE = [
   { titulo: "Historia y cultura", texto: "Recorridos para conocer cada destino más allá del campo." },
 ] as const;
 
-export const CONTINENTES = [
-  {
-    nombre: "América",
-    total: 10,
-    paises:
-      "Estados Unidos · Canadá · México · República Dominicana y el Caribe · Costa Rica · Honduras · Panamá · Colombia · Brasil · Argentina",
-  },
-  {
-    nombre: "Europa",
-    total: 18,
-    paises:
-      "España · Portugal · Escocia · Inglaterra · Irlanda · Irlanda del Norte · Gales · Francia · Grecia · Alemania · Italia · República Checa · Bulgaria · Austria · Suecia · Dinamarca · Finlandia · Noruega",
-  },
-  {
-    nombre: "Asia",
-    total: 14,
-    paises:
-      "Japón · Corea del Sur · China · Turquía · Omán · Qatar · Arabia Saudita · Emiratos Árabes Unidos · India · Tailandia · Vietnam · Camboya · Malasia · Indonesia",
-  },
-  {
-    nombre: "África",
-    total: 6,
-    paises: "Marruecos · Egipto · Kenia · Suráfrica · Zimbabwe · Islas Mauricio",
-  },
-  { nombre: "Oceanía", total: 2, paises: "Australia · Nueva Zelanda" },
-] as const;
-
 export const PASOS = [
   { n: "01", titulo: "Conversamos", texto: "Entendemos su juego, su grupo, sus fechas y lo que espera del viaje." },
   { n: "02", titulo: "Diseñamos", texto: "Armamos un itinerario a medida: campos, alojamiento, traslados y experiencias." },

@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { fraunces, inter } from "@/lib/fonts";
 import { Header } from "@/components/site/header";
 import { Footer } from "@/components/site/footer";
-import { PageTransition } from "@/components/site/page-transition";
 import { RegistroServiceWorker } from "@/components/site/registro-service-worker";
 import { JsonLd } from "@/components/site/json-ld";
 import { SITE_NOMBRE, SITE_URL } from "@/lib/site";
@@ -17,7 +16,7 @@ export const metadata: Metadata = {
     template: "%s · Clubhouse",
   },
   description:
-    "Agencia bespoke de viajes de golf: 50 destinos en 5 continentes, con itinerarios diseñados a la medida de su juego y su grupo.",
+    "Agencia bespoke de viajes de golf: itinerarios diseñados a la medida de su juego y su grupo.",
   openGraph: {
     type: "website",
     locale: "es_CO",
@@ -63,7 +62,7 @@ export default function RootLayout({
         <RegistroServiceWorker />
         <Header />
         <main className="flex-1">
-          <PageTransition>{children}</PageTransition>
+          {children}
         </main>
         <Footer />
       </body>

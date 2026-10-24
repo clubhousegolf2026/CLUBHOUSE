@@ -14,11 +14,6 @@ import type { PaquetePredefinido, Destino } from "@/lib/data/types";
 type DestinoConPaquetes = Destino & { paquetes: PaquetePredefinido[] };
 
 export function Hero({ destinos }: { destinos: DestinoConPaquetes[] }) {
-  const estadisticas = [
-    { valor: "50", etiqueta: "destinos" },
-    { valor: "5", etiqueta: "continentes" },
-  ];
-
   const [seleccion, setSeleccion] = useState<DestinoConPaquetes | null>(null);
   // El panel puede mostrar la lista de todas las ciudades o el detalle de
   // una — se cambia de vista sin cerrar el modal, con transición animada.
@@ -137,22 +132,9 @@ export function Hero({ destinos }: { destinos: DestinoConPaquetes[] }) {
               </a>
             </div>
 
-            <dl
-              className="entra-hero mt-6 flex flex-wrap gap-x-12 gap-y-4 border-t border-white/10 pt-5"
-              style={{ "--i": 4 } as React.CSSProperties}
-            >
-              {estadisticas.map((e) => (
-                <div key={e.etiqueta}>
-                  <dt className="texto-oro font-serif text-[2rem] leading-none">{e.valor}</dt>
-                  <dd className="mt-1.5 text-[11px] uppercase tracking-[0.18em] text-crema/50">
-                    {e.etiqueta}
-                  </dd>
-                </div>
-              ))}
-            </dl>
           </div>
 
-          {/* Globo 3D — el mundo de la marca: 50 destinos en 5 continentes. */}
+          {/* Globo 3D — los viajes que vende la agencia. */}
           <div className="relative order-1 -mb-8 mt-2 flex w-full min-w-0 justify-center lg:order-none lg:-my-12 lg:justify-end">
             <div aria-hidden className="pointer-events-none absolute inset-0 hidden lg:block">
               <div className="orbita orbita-gira aspect-square w-[96%]" />
