@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { FotoSegura } from "@/components/marketing/foto-segura";
-import { escribirFechas } from "@/lib/contenido/fechas-viaje";
+import { escribirFechas, leerFechas } from "@/lib/contenido/fechas-viaje";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight, Check, X } from "lucide-react";
@@ -10,6 +10,7 @@ import { MARCA } from "@/lib/contenido/clubhouse";
 import { EncabezadoSeccion } from "@/components/marketing/encabezado-seccion";
 import { Oro } from "@/components/marketing/pagina-hero";
 import { JsonLd } from "@/components/site/json-ld";
+import { BarraReserva, CuentaRegresiva, NavSecciones } from "@/components/marketing/ficha-viaje";
 import { SITE_URL } from "@/lib/site";
 
 export const revalidate = 300;
@@ -48,6 +49,24 @@ export default async function ExperienciaPage({
 
   const otra = todas.find((x) => x.slug !== e.slug);
 
+  // Próxima salida (la principal o cualquiera de las adicionales) para la cuenta regresiva.
+  const hoy = new Date().toISOString().slice(0, 10);
+  const proxima =
+    [leerFechas(e.fechas).inicio, ...(e.salidas ?? []).map((s) => s.inicio)]
+      .filter((f) => f && f >= hoy)
+      .sort()[0] ?? "";
+
+  const navItems = [
+    { id: "propuesta", etiqueta: "Propuesta" },
+    ...(e.programa.length > 0 ? [{ id: "programa", etiqueta: "Programa" }] : []),
+    ...(e.rondas.length > 0 ? [{ id: "rondas", etiqueta: "Campos" }] : []),
+    ...(e.alojamiento.length > 0 ? [{ id: "alojamiento", etiqueta: "Alojamiento" }] : []),
+    ...(e.tarifas.length > 0 ? [{ id: "tarifas", etiqueta: "Tarifas" }] : []),
+    ...((e.salidas ?? []).length > 0 ? [{ id: "salidas", etiqueta: "Salidas" }] : []),
+    ...((e.galeria ?? []).length > 0 ? [{ id: "galeria", etiqueta: "Galería" }] : []),
+    ...((e.politicas ?? []).length > 0 || (e.faq ?? []).length > 0 ? [{ id: "condiciones", etiqueta: "Condiciones" }] : []),
+  ];
+
   return (
     <article>
       <JsonLd
@@ -62,15 +81,23 @@ export default async function ExperienciaPage({
         }}
       />
 
+      <NavSecciones items={navItems} />
+      <BarraReserva
+        nombre={e.nombre}
+        desde={e.desde}
+        fechas={e.fechas}
+        href={`${MARCA.whatsappUrl}?text=${encodeURIComponent(`Hola, me interesa ${e.nombre}${e.fechas ? ` (${e.fechas})` : ""}.`)}`}
+      />
+
       {/* Portada */}
-      <header className="grano relative isolate -mt-20 flex min-h-[85dvh] items-end overflow-hidden bg-[#061a13] pb-14 pt-32 text-crema">
+      <header className="grano luz-cursor relative isolate -mt-20 flex min-h-[85dvh] items-end overflow-hidden bg-[#061a13] pb-14 pt-32 text-crema">
         <FotoSegura
           src={e.foto}
           alt={e.fotoAlt}
           fill
           priority
           sizes="100vw"
-          className="-z-20 object-cover"
+          className="parallax-portada -z-20 object-cover"
         />
         <div
           aria-hidden
@@ -110,11 +137,12 @@ export default async function ExperienciaPage({
           >
             {e.fechas} · {e.duracion} · desde {e.desde}
           </p>
+          {proxima && <CuentaRegresiva fecha={proxima} />}
         </div>
       </header>
 
       {/* La propuesta */}
-      <section className="px-6 py-20 sm:px-10 sm:py-24 lg:px-16 xl:px-24">
+      <section id="propuesta" className="px-6 py-20 sm:px-10 sm:py-24 lg:px-16 xl:px-24">
         <div className="mx-auto grid max-w-[1400px] gap-12 lg:grid-cols-[1.2fr_1fr]">
           <div>
             <span className="inline-flex items-center gap-3 text-[11px] font-medium uppercase tracking-[0.3em] text-champagne">
@@ -184,7 +212,7 @@ export default async function ExperienciaPage({
       </section>
 
       {/* Programa */}
-      <section className="grano relative isolate overflow-hidden bg-[#071d16] px-6 py-24 text-crema sm:px-10 lg:px-16 xl:px-24">
+      <section id="programa" className="grano relative isolate overflow-hidden bg-[#071d16] px-6 py-24 text-crema sm:px-10 lg:px-16 xl:px-24">
         <div className="hero-degradado absolute inset-0 -z-10 opacity-75" />
         <div className="mx-auto max-w-[1500px]">
           <EncabezadoSeccion
@@ -200,7 +228,7 @@ export default async function ExperienciaPage({
             {e.programa.map((d) => (
               <li
                 key={d.fecha}
-                className="rounded-2xl border border-white/10 bg-white/[0.05] p-6 backdrop-blur-md transition-colors hover:border-[#c6a664]/40 hover:bg-white/[0.09]"
+                className="revela rounded-2xl border border-white/10 bg-white/[0.05] p-6 backdrop-blur-md transition-colors hover:border-[#c6a664]/40 hover:bg-white/[0.09]"
               >
                 <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-[#e8d3a0]">
                   {d.fecha}
@@ -218,7 +246,7 @@ export default async function ExperienciaPage({
       </section>
 
       {/* Las rondas */}
-      <section className="px-6 py-24 sm:px-10 sm:py-28 lg:px-16 xl:px-24">
+      <section id="rondas" className="px-6 py-24 sm:px-10 sm:py-28 lg:px-16 xl:px-24">
         <div className="mx-auto max-w-[1400px]">
           <EncabezadoSeccion
             eyebrow="Las rondas"
@@ -232,7 +260,7 @@ export default async function ExperienciaPage({
             {e.rondas.map((r, i) => (
               <article
                 key={r.nombre}
-                className={`grid items-center gap-8 overflow-hidden rounded-[2rem] border border-arena/70 bg-white/70 shadow-[0_24px_60px_-35px_rgba(11,43,33,0.45)] backdrop-blur-sm lg:grid-cols-2 ${
+                className={`revela grid items-center gap-8 overflow-hidden rounded-[2rem] border border-arena/70 bg-white/70 shadow-[0_24px_60px_-35px_rgba(11,43,33,0.45)] backdrop-blur-sm lg:grid-cols-2 ${
                   i % 2 === 1 ? "lg:[&>figure]:order-last" : ""
                 }`}
               >
@@ -271,7 +299,7 @@ export default async function ExperienciaPage({
       </section>
 
       {/* Alojamiento y más allá del golf */}
-      <section className="bg-blanco-roto px-6 py-24 sm:px-10 lg:px-16 xl:px-24">
+      <section id="alojamiento" className="bg-blanco-roto px-6 py-24 sm:px-10 lg:px-16 xl:px-24">
         <div className="mx-auto grid max-w-[1400px] gap-12 lg:grid-cols-2">
           <div>
             <span className="inline-flex items-center gap-3 text-[11px] font-medium uppercase tracking-[0.3em] text-champagne">
@@ -323,7 +351,7 @@ export default async function ExperienciaPage({
       </section>
 
       {/* Tarifas */}
-      <section className="px-6 py-24 sm:px-10 sm:py-28 lg:px-16 xl:px-24">
+      <section id="tarifas" className="px-6 py-24 sm:px-10 sm:py-28 lg:px-16 xl:px-24">
         <div className="mx-auto max-w-[1400px]">
           <EncabezadoSeccion
             eyebrow={`Tarifas · ${e.fechas}`}
@@ -337,9 +365,9 @@ export default async function ExperienciaPage({
             {e.tarifas.map((t) => (
               <div
                 key={`${t.perfil}-${t.detalle}`}
-                className={`flex flex-col rounded-[2rem] p-8 transition-all duration-500 hover:-translate-y-1.5 ${
+                className={`revela flex flex-col rounded-[2rem] p-8 transition-all duration-500 hover:-translate-y-1.5 ${
                   t.destacada
-                    ? "grano relative isolate overflow-hidden bg-[#071d16] text-crema shadow-[0_34px_80px_-34px_rgba(7,29,22,0.8)]"
+                    ? "grano borde-oro relative isolate overflow-hidden bg-[#071d16] text-crema shadow-[0_34px_80px_-34px_rgba(7,29,22,0.8)]"
                     : "border border-arena/70 bg-white/70 backdrop-blur-sm"
                 }`}
               >
@@ -441,7 +469,7 @@ export default async function ExperienciaPage({
 
       {/* Salidas */}
       {(e.salidas ?? []).length > 0 && (
-        <section className="bg-blanco-roto px-6 py-24 sm:px-10 lg:px-16 xl:px-24">
+        <section id="salidas" className="bg-blanco-roto px-6 py-24 sm:px-10 lg:px-16 xl:px-24">
           <div className="mx-auto max-w-[1100px]">
             <EncabezadoSeccion
               eyebrow="Fechas de salida"
@@ -493,7 +521,7 @@ export default async function ExperienciaPage({
 
       {/* Galería */}
       {(e.galeria ?? []).length > 0 && (
-        <section className="px-6 py-24 sm:px-10 lg:px-16 xl:px-24">
+        <section id="galeria" className="px-6 py-24 sm:px-10 lg:px-16 xl:px-24">
           <div className="mx-auto max-w-[1400px]">
             <EncabezadoSeccion
               eyebrow="Galería"
@@ -516,7 +544,7 @@ export default async function ExperienciaPage({
 
       {/* Políticas y preguntas */}
       {((e.politicas ?? []).length > 0 || (e.faq ?? []).length > 0) && (
-        <section className="bg-blanco-roto px-6 py-24 sm:px-10 lg:px-16 xl:px-24">
+        <section id="condiciones" className="bg-blanco-roto px-6 py-24 sm:px-10 lg:px-16 xl:px-24">
           <div className="mx-auto grid max-w-[1200px] gap-12 lg:grid-cols-2">
             {(e.politicas ?? []).length > 0 && (
               <div>

@@ -103,6 +103,13 @@ export function Footer() {
         </div>
       </Container>
 
+      {/* Marca gigante que se desvanece, como cierre */}
+      <div aria-hidden className="pointer-events-none select-none overflow-hidden px-2 text-center">
+        <span className="block bg-gradient-to-b from-[#c6a664]/40 via-[#c6a664]/12 to-transparent bg-clip-text font-serif text-[15vw] uppercase leading-[0.82] tracking-[-0.03em] text-transparent">
+          Clubhouse
+        </span>
+      </div>
+
       <div className="border-t border-white/10">
         <Container className="flex max-w-[1400px] flex-col justify-between gap-2 py-6 text-xs text-crema/45 sm:flex-row">
           <span>© {new Date().getFullYear()} Clubhouse. Todos los derechos reservados.</span>

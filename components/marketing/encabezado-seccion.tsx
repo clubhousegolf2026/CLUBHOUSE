@@ -15,7 +15,7 @@ export function EncabezadoSeccion({
   centrado?: boolean;
 }) {
   return (
-    <header className={cn("mb-12 max-w-3xl", centrado && "mx-auto text-center")}>
+    <header className={cn("revela mb-12 max-w-3xl", centrado && "mx-auto text-center")}>
       <span
         className={cn(
           "inline-flex items-center gap-3 text-xs font-medium uppercase tracking-[0.28em]",

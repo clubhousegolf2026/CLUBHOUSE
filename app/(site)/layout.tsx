@@ -4,6 +4,7 @@ import { Header } from "@/components/site/header";
 import { Footer } from "@/components/site/footer";
 import { RegistroServiceWorker } from "@/components/site/registro-service-worker";
 import { JsonLd } from "@/components/site/json-ld";
+import { EfectosGlobales } from "@/components/site/efectos-globales";
 import { SITE_NOMBRE, SITE_URL } from "@/lib/site";
 import { MARCA } from "@/lib/contenido/clubhouse";
 import "../globals.css";
@@ -59,12 +60,14 @@ export default function RootLayout({
             telephone: MARCA.whatsapp,
           }}
         />
+        <div aria-hidden className="progreso-scroll" />
         <RegistroServiceWorker />
         <Header />
         <main className="flex-1">
           {children}
         </main>
         <Footer />
+        <EfectosGlobales />
       </body>
     </html>
   );

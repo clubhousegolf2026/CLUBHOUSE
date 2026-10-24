@@ -10,6 +10,7 @@ import {
   UtensilsCrossed,
 } from "lucide-react";
 import { EncabezadoSeccion } from "@/components/marketing/encabezado-seccion";
+import { Inclinar } from "@/components/site/inclinar";
 import { Oro } from "@/components/marketing/pagina-hero";
 import {
   INCLUYE,
@@ -27,14 +28,14 @@ export function SeccionSuenos() {
   return (
     <section
       id="suenos"
-      className="grano relative isolate scroll-mt-24 overflow-hidden bg-[#04140e] py-24 text-crema sm:py-32"
+      className="grano luz-cursor relative isolate scroll-mt-24 overflow-hidden bg-[#04140e] py-24 text-crema sm:py-32"
     >
       <Image
         src="/fotos/alcaidesa.webp"
         alt="Golfista en el green de La Hacienda Alcaidesa, Cádiz"
         fill
         sizes="100vw"
-        className="-z-20 object-cover object-[center_30%] opacity-40"
+        className="parallax -z-20 object-cover object-[center_30%] opacity-40"
       />
       <div
         aria-hidden
@@ -90,9 +91,8 @@ export function SeccionIncluye() {
           {INCLUYE.map((item, i) => {
             const Icono = ICONOS[i];
             return (
-              <li
-                key={item.titulo}
-                className="group relative isolate overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-[#10402f] via-[#0b2b21] to-[#061a13] p-7 shadow-[0_30px_60px_-32px_rgba(7,29,22,0.75)] ring-1 ring-[#c6a664]/25 transition-all duration-500 hover:-translate-y-2 hover:ring-[#c6a664]/60 hover:shadow-[0_40px_70px_-30px_rgba(7,29,22,0.85)] sm:p-8"
+              <li key={item.titulo} className="revela" style={{ "--r": i % 3 } as React.CSSProperties}>
+              <Inclinar className="group relative isolate h-full overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-[#10402f] via-[#0b2b21] to-[#061a13] p-7 shadow-[0_30px_60px_-32px_rgba(7,29,22,0.75)] ring-1 ring-[#c6a664]/25 transition-all duration-500 hover:-translate-y-2 hover:ring-[#c6a664]/60 hover:shadow-[0_40px_70px_-30px_rgba(7,29,22,0.85)] sm:p-8"
               >
                 {/* Resplandor dorado que crece al pasar el cursor */}
                 <span
@@ -117,6 +117,7 @@ export function SeccionIncluye() {
                   className="mt-4 block h-px w-10 bg-gradient-to-r from-[#c6a664] to-transparent transition-all duration-500 group-hover:w-28"
                 />
                 <p className="mt-4 text-[15px] leading-relaxed text-crema/70">{item.texto}</p>
+              </Inclinar>
               </li>
             );
           })}
@@ -135,7 +136,7 @@ export function SeccionExperiencias() {
   return (
     <section
       id="experiencias"
-      className="grano relative isolate scroll-mt-24 overflow-hidden bg-[#071d16] px-6 py-24 text-crema sm:px-10 sm:py-28 lg:px-16 xl:px-24"
+      className="grano luz-cursor relative isolate scroll-mt-24 overflow-hidden bg-[#071d16] px-6 py-24 text-crema sm:px-10 sm:py-28 lg:px-16 xl:px-24"
     >
       <div className="hero-degradado absolute inset-0 -z-10 opacity-75" />
       <div className="mx-auto max-w-[1500px]">
@@ -212,14 +213,14 @@ export function SeccionExperiencias() {
 /** Cómo trabajamos: los cuatro pasos del brochure. */
 export function SeccionProceso() {
   return (
-    <section className="grano relative isolate overflow-hidden bg-[#061a13] px-6 py-24 text-crema sm:px-10 sm:py-28 lg:px-16 xl:px-24">
+    <section className="grano luz-cursor relative isolate overflow-hidden bg-[#061a13] px-6 py-24 text-crema sm:px-10 sm:py-28 lg:px-16 xl:px-24">
       <Image
         src="/fotos/dubai-creek.webp"
         alt=""
         aria-hidden
         fill
         sizes="100vw"
-        className="-z-20 object-cover opacity-25"
+        className="parallax -z-20 object-cover opacity-25"
       />
       <div
         aria-hidden
@@ -242,10 +243,11 @@ export function SeccionProceso() {
             aria-hidden
             className="pointer-events-none absolute left-[12%] right-[12%] top-[3.5rem] hidden h-px bg-gradient-to-r from-transparent via-[#c6a664]/50 to-transparent lg:block"
           />
-          {PASOS.map((p) => (
+          {PASOS.map((p, i) => (
             <li
               key={p.n}
-              className="group relative rounded-[1.75rem] border border-white/10 bg-white/[0.05] p-7 backdrop-blur-md transition-all duration-500 hover:-translate-y-1.5 hover:border-[#c6a664]/40 hover:bg-white/[0.09]"
+              style={{ "--r": i } as React.CSSProperties}
+              className="revela group relative rounded-[1.75rem] border border-white/10 bg-white/[0.05] p-7 backdrop-blur-md transition-all duration-500 hover:-translate-y-1.5 hover:border-[#c6a664]/40 hover:bg-white/[0.09]"
             >
               <span className="relative grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-[#ecd396] to-[#a98745] font-serif text-xl text-[#1a1a1a] shadow-lg shadow-black/30 transition-transform duration-500 group-hover:-rotate-6 group-hover:scale-110">
                 {p.n}
@@ -334,14 +336,14 @@ export function SeccionDirector() {
 export function SeccionContacto() {
   return (
     <section className="px-6 pb-24 sm:px-10 lg:px-16 xl:px-24">
-      <div className="grano relative isolate mx-auto max-w-[1400px] overflow-hidden rounded-[2.5rem] bg-[#071d16] px-8 py-16 text-center text-crema shadow-[0_40px_90px_-30px_rgba(7,29,22,0.8)] sm:px-16 sm:py-20">
+      <div className="grano luz-cursor relative isolate mx-auto max-w-[1400px] overflow-hidden rounded-[2.5rem] bg-[#071d16] px-8 py-16 text-center text-crema shadow-[0_40px_90px_-30px_rgba(7,29,22,0.8)] sm:px-16 sm:py-20">
         <Image
           src="/fotos/chee-chan.webp"
           alt=""
           aria-hidden
           fill
           sizes="100vw"
-          className="-z-20 object-cover opacity-30"
+          className="parallax -z-20 object-cover opacity-30"
         />
         <div
           aria-hidden

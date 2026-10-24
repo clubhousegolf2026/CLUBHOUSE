@@ -447,7 +447,8 @@ html {
   .revela {
     animation: revela-entra linear both;
     animation-timeline: view();
-    animation-range: entry 0% entry 38%;
+    /* --r escalona los elementos de una misma fila (0, 1, 2…). */
+    animation-range: entry calc(var(--r, 0) * 6%) entry calc(38% + var(--r, 0) * 6%);
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -470,4 +471,189 @@ html {
   .hoja-impresion { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .evitar-corte { break-inside: avoid; }
   @page { size: A4; margin: 12mm; }
+}
+
+
+/* ───────────── Efectos globales del sitio público ───────────── */
+
+/* Barra de progreso de lectura (dorada, ligada al scroll sin JavaScript). */
+.progreso-scroll {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 100;
+  height: 3px;
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  background: linear-gradient(90deg, #a98745, #ecd396 60%, #fff3cf);
+  box-shadow: 0 0 12px rgba(236, 211, 150, 0.7);
+  pointer-events: none;
+}
+@supports (animation-timeline: scroll()) {
+  .progreso-scroll {
+    animation: progreso-crece linear both;
+    animation-timeline: scroll(root);
+  }
+}
+@keyframes progreso-crece {
+  to { transform: scaleX(1); }
+}
+
+/* Parallax: la foto de fondo se desplaza más lento que la página. */
+@keyframes parallax-vista {
+  from { transform: translateY(-7%) scale(1.14); }
+  to { transform: translateY(7%) scale(1.14); }
+}
+@keyframes parallax-portada {
+  from { transform: translateY(0) scale(1.12); }
+  to { transform: translateY(9%) scale(1.12); }
+}
+@supports (animation-timeline: view()) {
+  .parallax {
+    animation: parallax-vista linear both;
+    animation-timeline: view();
+  }
+}
+@supports (animation-timeline: scroll()) {
+  .parallax-portada {
+    animation: parallax-portada linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 100vh;
+  }
+}
+
+/* Titulares que suben desde una máscara, línea por línea. */
+.linea-mascara {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.14em;
+  margin-bottom: -0.14em;
+}
+.linea-mascara > span {
+  display: block;
+  animation: linea-sube 1s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--l, 0) * 120ms + 100ms);
+}
+@keyframes linea-sube {
+  from { transform: translateY(112%); }
+  to { transform: none; }
+}
+
+/* Foco dorado que sigue al cursor sobre las secciones oscuras (solo con ratón). */
+@media (hover: hover) and (pointer: fine) {
+  .luz-cursor {
+    position: relative;
+  }
+  .luz-cursor::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background: radial-gradient(520px circle at var(--px, -999px) var(--py, -999px), rgba(232, 211, 160, 0.09), transparent 62%);
+    background-attachment: fixed;
+  }
+}
+
+/* Tarjeta que se inclina en 3D hacia el cursor, con brillo. */
+.inclinar {
+  position: relative;
+  transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+.inclinar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  background: radial-gradient(280px circle at var(--gx, 50%) var(--gy, 50%), rgba(255, 255, 255, 0.16), transparent 60%);
+}
+.inclinar:hover::after {
+  opacity: 1;
+}
+
+/* Borde dorado que gira alrededor de la tarjeta destacada. */
+@property --ang {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+.borde-oro {
+  position: relative;
+}
+.borde-oro::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(from var(--ang), transparent 0 55%, #ecd396 78%, #fff3cf 88%, transparent 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  animation: borde-gira 6s linear infinite;
+  pointer-events: none;
+}
+@keyframes borde-gira {
+  to { --ang: 360deg; }
+}
+
+/* Cursor dorado (punto + anillo) para escritorio. */
+.cursor-oro-punto,
+.cursor-oro-anillo {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 9999;
+  pointer-events: none;
+  border-radius: 9999px;
+  opacity: 0;
+  transition: opacity 0.25s ease, width 0.25s ease, height 0.25s ease, background-color 0.25s ease, border-color 0.25s ease;
+}
+.cursor-oro-punto {
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  background: #c6a664;
+}
+.cursor-oro-anillo {
+  width: 34px;
+  height: 34px;
+  margin: -17px 0 0 -17px;
+  border: 1px solid rgba(198, 166, 100, 0.7);
+}
+.cursor-oro-activo .cursor-oro-punto,
+.cursor-oro-activo .cursor-oro-anillo {
+  opacity: 1;
+}
+.cursor-oro-enlace .cursor-oro-anillo {
+  width: 58px;
+  height: 58px;
+  margin: -29px 0 0 -29px;
+  background: rgba(198, 166, 100, 0.14);
+  border-color: rgba(236, 211, 150, 0.9);
+}
+.cursor-oro-enlace .cursor-oro-punto {
+  opacity: 0;
+}
+
+/* Botones flotantes (WhatsApp y volver arriba). */
+.fab-pulso::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: rgba(37, 211, 102, 0.55);
+  animation: punto-vivo 2.4s ease-out infinite;
+  z-index: -1;
+}
+
+/* Las secciones con ancla no quedan tapadas por el encabezado flotante. */
+section[id] {
+  scroll-margin-top: 8.5rem;
 }

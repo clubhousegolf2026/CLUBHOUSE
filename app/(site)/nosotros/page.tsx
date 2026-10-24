@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowRight, Flag, UserCheck, Zap } from "lucide-react";
 import { Oro } from "@/components/marketing/pagina-hero";
 import { EncabezadoSeccion } from "@/components/marketing/encabezado-seccion";
+import { Contador } from "@/components/site/contador";
 import {
   SeccionContacto,
   SeccionIncluye,
@@ -46,16 +47,16 @@ const CAMPOS = [
 ] as const;
 
 const CIFRAS = [
-  { valor: "10", unidad: "años", texto: "como Golf Manager de FROSCH Latinoamérica" },
-  { valor: "95+", unidad: "campos", texto: "jugados alrededor del mundo" },
-  { valor: "4", unidad: "pasos", texto: "de la primera conversación al tee" },
+  { hasta: 10, sufijo: "", unidad: "años", texto: "como Golf Manager de FROSCH Latinoamérica" },
+  { hasta: 95, sufijo: "+", unidad: "campos", texto: "jugados alrededor del mundo" },
+  { hasta: 4, sufijo: "", unidad: "pasos", texto: "de la primera conversación al tee" },
 ] as const;
 
 export default function NosotrosPage() {
   return (
     <>
       {/* ───────── Portada ───────── */}
-      <section className="grano relative isolate -mt-20 overflow-hidden bg-[#071d16] pb-24 pt-36 text-crema sm:pt-44 lg:pb-32">
+      <section className="grano luz-cursor relative isolate -mt-20 overflow-hidden bg-[#071d16] pb-24 pt-36 text-crema sm:pt-44 lg:pb-32">
         <div className="hero-degradado absolute inset-0 -z-20" />
         <div
           aria-hidden
@@ -92,9 +93,9 @@ export default function NosotrosPage() {
               style={{ "--i": 3 } as React.CSSProperties}
             >
               {CIFRAS.map((c) => (
-                <div key={c.valor}>
+                <div key={c.unidad}>
                   <dt className="font-serif text-4xl leading-none text-white sm:text-5xl">
-                    <span className="texto-oro">{c.valor}</span>
+                    <span className="texto-oro"><Contador hasta={c.hasta} sufijo={c.sufijo} /></span>
                   </dt>
                   <dd className="mt-2 text-[11px] uppercase tracking-[0.14em] text-[#e8d3a0]">{c.unidad}</dd>
                   <dd className="mt-1 hidden text-xs leading-snug text-crema/55 sm:block">{c.texto}</dd>
@@ -194,7 +195,7 @@ export default function NosotrosPage() {
       </section>
 
       {/* ───────── Campos ───────── */}
-      <section className="grano relative isolate overflow-hidden bg-[#071d16] px-6 py-24 text-crema sm:px-10 sm:py-28 lg:px-16 xl:px-24">
+      <section className="grano luz-cursor relative isolate overflow-hidden bg-[#071d16] px-6 py-24 text-crema sm:px-10 sm:py-28 lg:px-16 xl:px-24">
         <div className="hero-degradado absolute inset-0 -z-10 opacity-60" />
         <div className="mx-auto max-w-[1500px]">
           <div className="revela">
@@ -210,11 +211,12 @@ export default function NosotrosPage() {
             />
           </div>
 
-          <ul className="revela grid auto-rows-[13rem] grid-cols-2 gap-3 sm:auto-rows-[15rem] sm:gap-4 lg:grid-cols-4 lg:auto-rows-[17rem]">
-            {CAMPOS.map((c) => (
+          <ul className="grid auto-rows-[13rem] grid-cols-2 gap-3 sm:auto-rows-[15rem] sm:gap-4 lg:grid-cols-4 lg:auto-rows-[17rem]">
+            {CAMPOS.map((c, i) => (
               <li
                 key={c.nombre}
-                className={`group relative overflow-hidden rounded-[1.5rem] ring-1 ring-white/10 transition-all duration-500 hover:ring-[#c6a664]/60 ${c.clase}`}
+                style={{ "--r": i % 4 } as React.CSSProperties}
+                className={`revela group relative overflow-hidden rounded-[1.5rem] ring-1 ring-white/10 transition-all duration-500 hover:ring-[#c6a664]/60 ${c.clase}`}
               >
                 <Image
                   src={c.foto}

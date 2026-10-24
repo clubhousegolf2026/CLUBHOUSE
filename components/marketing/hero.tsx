@@ -64,7 +64,7 @@ export function Hero({ destinos }: { destinos: DestinoConPaquetes[] }) {
 
   return (
     <LazyMotion features={domAnimation}>
-      <section className="grano relative isolate -mt-20 flex min-h-[60dvh] flex-1 flex-col justify-center overflow-hidden bg-[#061a13] pt-20 text-crema">
+      <section className="grano luz-cursor relative isolate -mt-20 flex min-h-[60dvh] flex-1 flex-col justify-center overflow-hidden bg-[#061a13] pt-20 text-crema">
         <div className="hero-degradado -z-30 absolute inset-0" />
         {/* Foto del brochure (Dubai Creek) de fondo, tamizada de verde para
             que el texto y el globo sigan leyéndose. */}
@@ -74,7 +74,7 @@ export function Hero({ destinos }: { destinos: DestinoConPaquetes[] }) {
           fill
           priority
           sizes="100vw"
-          className="-z-20 object-cover object-[center_60%] opacity-40"
+          className="parallax-portada -z-20 object-cover object-[center_60%] opacity-40"
         />
         <div
           aria-hidden
@@ -92,15 +92,18 @@ export function Hero({ destinos }: { destinos: DestinoConPaquetes[] }) {
               {MARCA.claim}
             </span>
 
-            <h1
-              className="entra-hero mt-5 max-w-[15ch] font-serif text-[2.9rem] leading-[0.98] tracking-[-0.02em] sm:text-[3.6rem] xl:text-[3.9rem]"
-              style={{ "--i": 1 } as React.CSSProperties}
-            >
-              Usted lo sueña,
-              <br />
-              <span className="texto-oro">Clubhouse</span> lo hace
-              <br />
-              realidad.
+            <h1 className="mt-5 max-w-[15ch] font-serif text-[2.9rem] leading-[0.98] tracking-[-0.02em] sm:text-[3.6rem] xl:text-[3.9rem]">
+              <span className="linea-mascara">
+                <span style={{ "--l": 0 } as React.CSSProperties}>Usted lo sueña,</span>
+              </span>
+              <span className="linea-mascara">
+                <span style={{ "--l": 1 } as React.CSSProperties}>
+                  <span className="texto-oro">Clubhouse</span> lo hace
+                </span>
+              </span>
+              <span className="linea-mascara">
+                <span style={{ "--l": 2 } as React.CSSProperties}>realidad.</span>
+              </span>
             </h1>
 
             <p

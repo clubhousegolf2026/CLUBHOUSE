@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, LazyMotion, domAnimation, m } from "framer-motion";
 import { LayoutDashboard, Menu, X } from "lucide-react";
 import { cn } from "@/lib/cn";
@@ -23,13 +23,29 @@ export function Header() {
   const [abierto, setAbierto] = useState(false);
   const [hover, setHover] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
+  const [oculto, setOculto] = useState(false);
+  const ultimoY = useRef(0);
 
   useEffect(() => {
-    const alScroll = () => setScrolled(window.scrollY > 24);
+    const alScroll = () => {
+      const y = window.scrollY;
+      setScrolled(y > 24);
+      // Se esconde al bajar y reaparece al subir.
+      if (Math.abs(y - ultimoY.current) > 8) {
+        setOculto(y > ultimoY.current && y > 260);
+        ultimoY.current = y;
+      }
+    };
     alScroll();
     window.addEventListener("scroll", alScroll, { passive: true });
     return () => window.removeEventListener("scroll", alScroll);
   }, []);
+
+  // Deja constancia en <html> para que otros elementos fijos (p. ej. la barra de
+  // secciones de un viaje) suban cuando el encabezado se esconde.
+  useEffect(() => {
+    document.documentElement.dataset.cabecera = oculto && !abierto ? "oculta" : "visible";
+  }, [oculto, abierto]);
 
   // Cierra el menú móvil si la ventana crece hasta el breakpoint de escritorio.
   useEffect(() => {
@@ -44,7 +60,12 @@ export function Header() {
       {/* Píldora oscura flotante, separada del borde en todas las
           resoluciones — la marca vive siempre sobre el mismo fondo carbón,
           sin depender del contenido que haya detrás. */}
-      <header className="sticky top-0 z-50 bg-transparent px-3 pt-3 sm:px-5 sm:pt-4">
+      <header
+        className={cn(
+          "sticky top-0 z-50 bg-transparent px-3 pt-3 transition-transform duration-500 ease-out sm:px-5 sm:pt-4",
+          oculto && !abierto && "-translate-y-[130%]",
+        )}
+      >
         <div
           className={cn(
             "mx-auto flex h-16 max-w-[1600px] items-center justify-between rounded-full border md:grid md:grid-cols-[1fr_auto_1fr] pl-2 pr-2 backdrop-blur-xl transition-all duration-500 sm:pl-3 sm:pr-3",
