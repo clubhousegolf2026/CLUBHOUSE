@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Plus } from "lucide-react";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { EstadoPagoBadge } from "@/components/admin/estado-badge";
 import { cop, fechaCo } from "@/lib/format";
@@ -51,9 +52,17 @@ export default async function ReservasPage({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-serif text-2xl text-carbon">Reservas</h1>
-        <p className="text-sm text-niebla">Estado de pago y anticipos</p>
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="font-serif text-2xl text-carbon">Reservas</h1>
+          <p className="text-sm text-niebla">Estado de pago y anticipos</p>
+        </div>
+        <Link
+          href="/admin/reservas/nueva"
+          className="inline-flex items-center gap-2 rounded-xl bg-verde-golf px-5 py-3 text-sm font-semibold text-crema hover:bg-verde-calle"
+        >
+          <Plus size={16} /> Nueva reserva
+        </Link>
       </div>
 
       <div className="flex flex-wrap gap-2">

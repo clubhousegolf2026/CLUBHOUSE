@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { BloqueoForm } from "@/components/admin/bloqueo-form";
 import { EliminarBloqueoButton } from "@/components/admin/eliminar-bloqueo-button";
+import { EditarBloqueoButton } from "@/components/admin/editar-bloqueo-button";
 import { fechaCo } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
@@ -92,7 +93,10 @@ export default async function CalendarioAdminPage({
                   </td>
                   <td className="px-4 py-3 text-niebla">{b.nota ?? "—"}</td>
                   <td className="px-4 py-3 text-right">
-                    <EliminarBloqueoButton id={b.id} />
+                    <span className="inline-flex items-center gap-1">
+                      <EditarBloqueoButton bloqueo={b} />
+                      <EliminarBloqueoButton id={b.id} />
+                    </span>
                   </td>
                 </tr>
               );

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { EstadoPagoBadge } from "@/components/admin/estado-badge";
-import { MarcarPagoForm } from "@/components/admin/marcar-pago-form";
+import { ReservaEdicion } from "@/components/admin/reservas/reserva-edicion";
 import { cop, fechaCo } from "@/lib/format";
 import type { Database } from "@/lib/data/database.types";
 
@@ -112,7 +112,13 @@ export default async function ReservaDetallePage({
             )}
           </div>
 
-          <MarcarPagoForm reservaId={reserva.id} estadoActual={reserva.estado_pago} />
+          <ReservaEdicion
+            id={reserva.id}
+            estado={reserva.estado_pago}
+            anticipo={reserva.monto_deposito_cop}
+            pasarela={reserva.pasarela}
+            referencia={reserva.referencia_pago}
+          />
         </section>
       </div>
     </div>
