@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Plus } from "lucide-react";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { ButtonLink } from "@/components/ui/button";
+import { EXPERIENCIAS } from "@/lib/contenido/experiencias";
 
 export const dynamic = "force-dynamic";
 
@@ -18,13 +19,47 @@ export default async function DestinosAdminPage() {
         <div>
           <h1 className="font-serif text-2xl text-carbon">Destinos</h1>
           <p className="text-sm text-niebla">
-            Ciudades que aparecen como banderines en el globo del hero.
+            Banderines que aparecen en el globo del inicio.
           </p>
         </div>
         <ButtonLink href="/admin/destinos/nuevo">
           <Plus size={16} /> Nuevo destino
         </ButtonLink>
       </div>
+
+      <section>
+        <h2 className="font-serif text-lg text-carbon">Experiencias firmadas</h2>
+        <p className="text-sm text-niebla">
+          Tailandia y Utah siempre aparecen en el globo. Su contenido vive en el código del sitio.
+        </p>
+        <ul className="mt-3 divide-y divide-arena overflow-hidden rounded-[var(--radius-panel)] border border-arena bg-blanco-roto">
+          {EXPERIENCIAS.map((e) => (
+            <li key={e.slug} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+              <span>
+                <span className="block font-medium text-carbon">
+                  <span aria-hidden>{e.bandera}</span> {e.pais}
+                </span>
+                <span className="text-xs text-niebla">
+                  {e.nombre} · {e.subtitulo}
+                </span>
+              </span>
+              <span className="flex items-center gap-4">
+                <span className="rounded-full bg-verde-golf/10 px-2 py-0.5 text-xs font-medium text-verde-golf">
+                  Disponible
+                </span>
+                <Link href={`/experiencias/${e.slug}`} target="_blank" className="text-verde-golf hover:underline">
+                  Ver en el sitio
+                </Link>
+              </span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section>
+        <h2 className="font-serif text-lg text-carbon">Otros destinos</h2>
+        <p className="text-sm text-niebla">Los que agregues aquí también se marcan en el globo.</p>
+      </section>
 
       <div className="overflow-hidden rounded-[var(--radius-panel)] border border-arena bg-blanco-roto">
         <table className="w-full text-sm">
