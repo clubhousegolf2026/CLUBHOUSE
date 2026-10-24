@@ -21,7 +21,10 @@ export function AdminShell({
 
   return (
     <div className="admin-fondo min-h-screen lg:grid lg:grid-cols-[264px_1fr]">
-      <aside className="admin-side flex flex-col justify-between px-4 py-5 lg:sticky lg:top-0 lg:h-screen lg:self-start lg:overflow-y-auto lg:border-r lg:border-white/5 lg:px-5 lg:py-6">
+      {/* El sticky va en este contenedor: .admin-side fuerza position: relative
+          y anularía el sticky si estuviera en el propio aside. */}
+      <div className="lg:sticky lg:top-0 lg:h-screen lg:self-start">
+      <aside className="admin-side flex h-full flex-col justify-between px-4 py-5 lg:overflow-y-auto lg:border-r lg:border-white/5 lg:px-5 lg:py-6">
         <div>
           <div className="flex items-center justify-between">
             <Link href="/admin" className="block">
@@ -66,6 +69,7 @@ export function AdminShell({
           </form>
         </div>
       </aside>
+      </div>
 
       <div className="flex min-h-screen min-w-0 flex-col">
         <AdminTopbar nombre={nombre} />
