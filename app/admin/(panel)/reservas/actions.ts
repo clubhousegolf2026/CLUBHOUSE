@@ -113,3 +113,23 @@ export async function eliminarReserva(id: string): Promise<Res> {
   revalidatePath("/admin");
   return { ok: true };
 }
+
+/** Cambia solo el estado de pago (tablero Kanban). Pagado y fallido pasan por
+ *  la función que además avanza al lead en el CRM. */
+export async function moverReserva(
+  id: string,
+  estado: "pendiente" | "pagado" | "fallido" | "reembolsado",
+): Promise<Res> {
+  const supabase = await createServerSupabase();
+  if (estado === "pagado" || estado === "fallido") {
+    const r = await supabase.rpc("marcar_reserva_pagada", { p_reserva: id, p_pagada: estado === "pagado" });
+    if (r.error) return { ok: false, error: r.error.message };
+  } else {
+    const r = await supabase.from("reservas").update({ estado_pago: estado }).eq("id", id);
+    if (r.error) return { ok: false, error: r.error.message };
+  }
+  revalidatePath("/admin/reservas");
+  revalidatePath("/admin");
+  revalidatePath("/admin/crm");
+  return { ok: true };
+}
