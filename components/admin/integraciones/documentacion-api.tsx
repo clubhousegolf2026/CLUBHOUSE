@@ -363,7 +363,11 @@ export function DocumentacionApi({ spec, origen }: { spec: Obj; origen: string }
         porTag.set(tag, [...(porTag.get(tag) ?? []), { ruta, metodo, op }]);
       }
     }
-    return (spec.tags as Obj[]).map((t) => ({ ...t, ops: porTag.get(t.name) ?? [] }));
+    return (spec.tags as { name: string; description?: string }[]).map((t) => ({
+      name: t.name,
+      description: t.description ?? "",
+      ops: porTag.get(t.name) ?? [],
+    }));
   }, [spec]);
 
   const webhooks = spec["x-webhooks"] as Obj;
@@ -423,7 +427,7 @@ export function DocumentacionApi({ spec, origen }: { spec: Obj; origen: string }
             <p className="text-sm text-niebla">{g.description}</p>
           </div>
           <div className="space-y-2">
-            {g.ops.map((o: any) => (
+            {g.ops.map((o) => (
               <Operacion key={`${o.metodo}${o.ruta}`} spec={spec} ruta={o.ruta} metodo={o.metodo} op={o.op} clave={clave} origen={origen} />
             ))}
           </div>
