@@ -5,9 +5,10 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Check, Copy, ExternalLink, FileInput, Inbox, Loader2, Plus, Trash2, X } from "lucide-react";
 import { cn } from "@/lib/cn";
-import { PLANTILLAS, type Plantilla } from "@/lib/formularios/tipos";
+import { configPorDefecto, PLANTILLAS, type FormularioFila, type Plantilla } from "@/lib/formularios/tipos";
 import { estiloInput } from "@/components/admin/form-ui";
 import { MiniaturaPlantilla } from "@/components/admin/formularios/miniaturas";
+import { VistaPrevia } from "@/components/admin/formularios/vista-previa";
 import {
   crearFormulario,
   duplicarFormulario,
@@ -35,6 +36,17 @@ export function ListaFormularios({ items, origen, migracionPendiente }: { items:
   const [error, setError] = useState<string | null>(null);
   const [copiado, setCopiado] = useState<string | null>(null);
   const [pendiente, empezar] = useTransition();
+
+  const ejemplo: FormularioFila = {
+    id: "ejemplo",
+    slug: "ejemplo",
+    nombre: nombre || "Inscripción Utah 2027",
+    plantilla,
+    publicado: false,
+    config: configPorDefecto(plantilla, nombre.trim() || "Inscripción Utah 2027"),
+    created_at: "",
+    updated_at: "",
+  };
 
   function crear() {
     setError(null);
@@ -72,45 +84,60 @@ export function ListaFormularios({ items, origen, migracionPendiente }: { items:
 
       {creando && (
         <section className="space-y-5 rounded-[var(--radius-panel)] border border-arena bg-blanco-roto p-5 shadow-[var(--shadow-suave)] sm:p-6">
-          <label className="block">
-            <span className="text-sm font-medium text-carbon">Nombre del formulario</span>
-            <input value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Ej.: Inscripción Utah 2027" className={cn(estiloInput, "mt-1.5 h-11")} />
-          </label>
-          <div>
-            <span className="text-sm font-medium text-carbon">Elige una plantilla</span>
-            <p className="text-xs text-niebla">Después puedes cambiarla sin perder tus campos.</p>
-            <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-              {PLANTILLAS.map((p) => (
-                <button
-                  key={p.id}
-                  type="button"
-                  onClick={() => setPlantilla(p.id)}
-                  aria-pressed={plantilla === p.id}
-                  className={cn(
-                    "overflow-hidden rounded-2xl border-2 bg-white text-left transition hover:-translate-y-0.5",
-                    plantilla === p.id ? "border-verde-golf shadow-lg" : "border-arena",
-                  )}
-                >
-                  <div className="aspect-[16/10] border-b border-arena"><MiniaturaPlantilla plantilla={p.id} /></div>
-                  <div className="p-3">
-                    <p className="flex items-center gap-1.5 text-sm font-semibold text-carbon">
-                      {plantilla === p.id && <Check size={14} className="text-verde-golf" />} {p.nombre}
-                    </p>
-                    <p className="mt-0.5 text-xs leading-snug text-niebla">{p.descripcion}</p>
-                  </div>
-                </button>
-              ))}
+          <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,380px)_minmax(0,1fr)]">
+            <div className="space-y-5">
+              <label className="block">
+                <span className="text-sm font-medium text-carbon">Nombre del formulario</span>
+                <input value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Ej.: Inscripción Utah 2027" className={cn(estiloInput, "mt-1.5 h-11")} />
+              </label>
+              <div>
+                <span className="text-sm font-medium text-carbon">Elige una plantilla</span>
+                <p className="text-xs text-niebla">Mira cómo queda a la derecha. Después puedes cambiarla sin perder tus campos.</p>
+                <div className="mt-3 space-y-2.5">
+                  {PLANTILLAS.map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => setPlantilla(p.id)}
+                      aria-pressed={plantilla === p.id}
+                      className={cn(
+                        "flex w-full items-center gap-3 overflow-hidden rounded-2xl border-2 bg-white p-2 text-left transition hover:-translate-y-0.5",
+                        plantilla === p.id ? "border-verde-golf shadow-lg" : "border-arena",
+                      )}
+                    >
+                      <span className="block aspect-[16/10] w-28 shrink-0 overflow-hidden rounded-xl border border-arena">
+                        <MiniaturaPlantilla plantilla={p.id} />
+                      </span>
+                      <span className="min-w-0">
+                        <span className="flex items-center gap-1.5 text-sm font-semibold text-carbon">
+                          {plantilla === p.id && <Check size={14} className="text-verde-golf" />} {p.nombre}
+                        </span>
+                        <span className="mt-0.5 block text-xs leading-snug text-niebla">{p.descripcion}</span>
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {error && <p className="text-sm text-error">{error}</p>}
+              <button
+                type="button"
+                disabled={pendiente}
+                onClick={crear}
+                className="inline-flex items-center gap-2 rounded-xl bg-verde-golf px-5 py-2.5 text-sm font-semibold text-crema hover:bg-verde-calle disabled:opacity-60"
+              >
+                {pendiente && <Loader2 size={16} className="animate-spin" />} Crear y personalizar
+              </button>
+            </div>
+
+            <div className="min-w-0 xl:sticky xl:top-6">
+              <VistaPrevia
+                formulario={ejemplo}
+                alto={620}
+                titulo={`Vista previa · ${PLANTILLAS.find((p) => p.id === plantilla)?.nombre}`}
+                nota="Es la plantilla real, con campos de ejemplo. Pruébala: escribe, avanza y mira el resultado."
+              />
             </div>
           </div>
-          {error && <p className="text-sm text-error">{error}</p>}
-          <button
-            type="button"
-            disabled={pendiente}
-            onClick={crear}
-            className="inline-flex items-center gap-2 rounded-xl bg-verde-golf px-5 py-2.5 text-sm font-semibold text-crema hover:bg-verde-calle disabled:opacity-60"
-          >
-            {pendiente && <Loader2 size={16} className="animate-spin" />} Crear y personalizar
-          </button>
         </section>
       )}
 

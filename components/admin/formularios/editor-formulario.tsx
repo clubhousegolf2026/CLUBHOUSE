@@ -34,8 +34,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { alturaInput, estiloInput } from "@/components/admin/form-ui";
-import { FormularioPublico } from "@/components/formularios/formulario-publico";
 import { MiniaturaPlantilla } from "@/components/admin/formularios/miniaturas";
+import { VistaPrevia } from "@/components/admin/formularios/vista-previa";
 import { calcularCobro, pesos } from "@/lib/formularios/esquema";
 import {
   campoNuevo,
@@ -289,57 +289,6 @@ function FilaCampo({
         </div>
       )}
     </li>
-  );
-}
-
-/* ───────────── Vista previa ───────────── */
-
-function VistaPrevia({ formulario }: { formulario: FormularioFila }) {
-  const [modo, setModo] = useState<"escritorio" | "movil">("escritorio");
-  const caja = useRef<HTMLDivElement>(null);
-  const [ancho, setAncho] = useState(520);
-  const ALTO = 680;
-
-  useEffect(() => {
-    const el = caja.current;
-    if (!el) return;
-    const ro = new ResizeObserver(() => setAncho(el.clientWidth));
-    ro.observe(el);
-    setAncho(el.clientWidth);
-    return () => ro.disconnect();
-  }, []);
-
-  const base = modo === "escritorio" ? 1100 : 390;
-  const k = Math.min(1, ancho / base);
-
-  return (
-    <div>
-      <div className="mb-2 flex items-center justify-between">
-        <p className="text-sm font-medium text-carbon">Vista previa en vivo</p>
-        <div className="inline-flex rounded-lg border border-arena bg-white p-0.5 text-xs">
-          {(["escritorio", "movil"] as const).map((m) => (
-            <button key={m} type="button" onClick={() => setModo(m)} className={cn("rounded-md px-3 py-1", modo === m ? "bg-verde-golf text-crema" : "text-niebla hover:text-carbon")}>
-              {m === "escritorio" ? "Escritorio" : "Móvil"}
-            </button>
-          ))}
-        </div>
-      </div>
-      <div ref={caja} className="overflow-hidden rounded-2xl border border-arena bg-[#e7e5df]" style={{ height: ALTO }}>
-        <div
-          className="overflow-auto bg-white shadow-xl"
-          style={{
-            width: base,
-            height: ALTO / k,
-            transform: `scale(${k})`,
-            transformOrigin: "top left",
-            marginLeft: modo === "movil" ? Math.max(0, (ancho - base * k) / 2) : 0,
-          }}
-        >
-          <FormularioPublico key={formulario.plantilla} formulario={formulario} vista />
-        </div>
-      </div>
-      <p className="mt-2 text-xs text-niebla">Así lo verá el cliente. Pruébalo: escribe, cambia de paso y mira el resumen de pago.</p>
-    </div>
   );
 }
 

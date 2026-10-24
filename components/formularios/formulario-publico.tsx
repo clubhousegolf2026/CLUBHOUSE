@@ -310,11 +310,14 @@ function FormularioInterno({
   formulario,
   cerrado = false,
   vista = false,
+  llenar = false,
 }: {
   formulario: FormularioFila;
   cerrado?: boolean;
   /** Vista previa del admin: no envía nada y se ajusta a su contenedor. */
   vista?: boolean;
+  /** En vista previa, ocupa todo el alto del contenedor (pantalla completa). */
+  llenar?: boolean;
 }) {
   const cfg = formulario.config;
   const plantilla = formulario.plantilla;
@@ -759,7 +762,7 @@ function FormularioInterno({
 
   return (
     <div
-      className={cn("fm fm-grande flex flex-col bg-[#fdfcf9]", vista ? "relative h-[640px] overflow-hidden" : "fixed inset-0 overflow-auto")}
+      className={cn("fm fm-grande flex flex-col bg-[#fdfcf9]", vista ? (llenar ? "relative h-full overflow-auto" : "relative h-[640px] overflow-hidden") : "fixed inset-0 overflow-auto")}
       style={vars}
       tabIndex={-1}
       onKeyDown={alTeclear}
@@ -856,9 +859,9 @@ function FormularioInterno({
 }
 
 /** El formulario se adapta al ancho de su contenedor (container queries), no al de la ventana. */
-export function FormularioPublico(props: { formulario: FormularioFila; cerrado?: boolean; vista?: boolean }) {
+export function FormularioPublico(props: { formulario: FormularioFila; cerrado?: boolean; vista?: boolean; llenar?: boolean }) {
   return (
-    <div className="@container">
+    <div className={cn("@container", props.llenar && "h-full")}>
       <FormularioInterno {...props} />
     </div>
   );
