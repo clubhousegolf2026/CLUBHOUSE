@@ -290,16 +290,23 @@ export function CrmWorkspace({
         </div>
       </div>
 
-      {leads.length === 0 && !errorCarga ? (
-        <div className="rounded-[1.75rem] border border-dashed border-arena bg-blanco-roto p-12 text-center">
-          <p className="font-serif text-xl text-carbon">Todavía no hay leads</p>
-          <p className="mt-1 text-sm text-niebla">Llegan solos desde el formulario de contacto del sitio, o créalos tú mismo.</p>
-          <button onClick={() => setNuevo(true)} className="mt-5 inline-flex items-center gap-2 rounded-xl bg-verde-golf px-5 py-2.5 text-sm font-semibold text-crema">
+      {leads.length === 0 && !errorCarga && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-dashed border-verde-golf/40 bg-verde-golf/[0.04] px-5 py-4">
+          <p className="text-sm text-carbon">
+            <strong>Todavía no hay leads.</strong> Llegan solos desde el formulario de contacto del sitio, o créalos tú mismo y
+            arrástralos de una columna a otra.
+          </p>
+          <button onClick={() => setNuevo(true)} className="inline-flex items-center gap-2 rounded-xl bg-verde-golf px-5 py-2.5 text-sm font-semibold text-crema hover:bg-verde-calle">
             <Plus size={16} /> Crear el primero
           </button>
         </div>
-      ) : vista === "tablero" ? (
-        <Tablero leads={visibles} onAbrir={setAbierto} onMover={mover} />
+      )}
+
+      {vista === "tablero" ? (
+        <>
+          <p className="-mb-3 text-xs text-niebla">Arrastra las tarjetas entre columnas para cambiar la etapa del lead.</p>
+          <Tablero leads={visibles} onAbrir={setAbierto} onMover={mover} />
+        </>
       ) : (
         <Lista leads={visibles} onAbrir={setAbierto} onMover={mover} />
       )}
@@ -382,8 +389,9 @@ function Tablero({
               setSobre(null);
               setArrastrando(null);
             }}
-            className={`flex w-[290px] shrink-0 flex-col rounded-2xl border p-3 transition ${
-              sobre === estado ? "border-verde-golf bg-verde-golf/5" : "border-arena bg-white/50"
+            style={{ borderTopColor: COLOR_ESTADO[estado] }}
+            className={`flex min-h-[340px] w-[290px] shrink-0 flex-col rounded-2xl border border-t-4 p-3 transition ${
+              sobre === estado ? "border-x-verde-golf border-b-verde-golf bg-verde-golf/5" : "border-x-arena border-b-arena bg-white/50"
             }`}
           >
             <header className="mb-3 flex items-center justify-between px-1">
@@ -401,6 +409,7 @@ function Tablero({
                   lead={l}
                   arrastrando={arrastrando === l.id}
                   onAbrir={() => onAbrir(l.id)}
+                  onMover={(e) => onMover(l.id, e)}
                   onDragStart={(e) => { e.dataTransfer.setData("text/plain", l.id); e.dataTransfer.effectAllowed = "move"; setArrastrando(l.id); }}
                   onDragEnd={() => { setArrastrando(null); setSobre(null); }}
                 />
@@ -419,9 +428,9 @@ function Tablero({
 }
 
 function Tarjeta({
-  lead: l, arrastrando, onAbrir, onDragStart, onDragEnd,
+  lead: l, arrastrando, onAbrir, onMover, onDragStart, onDragEnd,
 }: {
-  lead: Lead; arrastrando: boolean; onAbrir: () => void;
+  lead: Lead; arrastrando: boolean; onAbrir: () => void; onMover: (e: Estado) => void;
   onDragStart: (e: React.DragEvent) => void; onDragEnd: () => void;
 }) {
   const wa = enlaceWhatsApp(l.telefono);
@@ -465,6 +474,19 @@ function Tarjeta({
       <div className="mt-3 flex items-center justify-between text-xs">
         <span className="font-medium tabular-nums text-carbon">{l.valor_estimado_cop ? cop(l.valor_estimado_cop) : <span className="text-niebla">Sin valor</span>}</span>
         <span className={fria ? "font-medium text-error" : "text-niebla"}>{textoHace(l.updated_at)}</span>
+      </div>
+
+      <div className="mt-2.5" onClick={(e) => e.stopPropagation()}>
+        <select
+          value={l.estado}
+          onChange={(e) => onMover(e.target.value as Estado)}
+          aria-label={`Mover a ${l.nombre}`}
+          className="w-full rounded-lg border border-arena bg-white px-2 py-1.5 text-xs text-niebla outline-none focus:border-verde-golf/60"
+        >
+          {ORDEN_ESTADOS_CONTACTO.map((e) => (
+            <option key={e} value={e}>{`Mover a: ${ETIQUETA_ESTADO_CONTACTO[e]}`}</option>
+          ))}
+        </select>
       </div>
 
       <div className="mt-2.5 flex items-center justify-between border-t border-arena pt-2.5">
