@@ -4,11 +4,14 @@ import { createServerSupabase } from "@/lib/supabase/server";
 import { cop } from "@/lib/format";
 import { ButtonLink } from "@/components/ui/button";
 import { EXPERIENCIAS } from "@/lib/contenido/experiencias";
+import { LimpiarDemo } from "@/components/admin/limpiar-demo";
+import { contarDatosDemo } from "./demo-actions";
 
 export const dynamic = "force-dynamic";
 
 export default async function PaquetesAdminPage() {
   const supabase = await createServerSupabase();
+  const conteosDemo = await contarDatosDemo();
   const { data: paquetes } = await supabase
     .from("paquetes")
     .select("id, nombre, slug, precio_desde_cop, destacado, activo")
@@ -27,6 +30,8 @@ export default async function PaquetesAdminPage() {
           <Plus size={16} /> Nuevo paquete
         </ButtonLink>
       </div>
+
+      <LimpiarDemo conteos={conteosDemo} />
 
       <section>
         <h2 className="font-serif text-lg text-carbon">Experiencias firmadas</h2>
