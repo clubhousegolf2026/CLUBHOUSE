@@ -71,6 +71,9 @@ export type Database = {
           notas: string | null
           origen: Database["public"]["Enums"]["origen_contacto"]
           propietario_id: string | null
+          proxima_accion: string | null
+          proxima_fecha: string | null
+          etiquetas: string[]
           telefono: string | null
           updated_at: string
           valor_estimado_cop: number | null
@@ -86,6 +89,9 @@ export type Database = {
           notas?: string | null
           origen: Database["public"]["Enums"]["origen_contacto"]
           propietario_id?: string | null
+          proxima_accion?: string | null
+          proxima_fecha?: string | null
+          etiquetas?: string[]
           telefono?: string | null
           updated_at?: string
           valor_estimado_cop?: number | null
@@ -101,6 +107,9 @@ export type Database = {
           notas?: string | null
           origen?: Database["public"]["Enums"]["origen_contacto"]
           propietario_id?: string | null
+          proxima_accion?: string | null
+          proxima_fecha?: string | null
+          etiquetas?: string[]
           telefono?: string | null
           updated_at?: string
           valor_estimado_cop?: number | null
@@ -112,6 +121,38 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "staff"
             referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      crm_notas: {
+        Row: {
+          autor: string | null
+          contacto_id: string
+          created_at: string
+          id: number
+          texto: string
+        }
+        Insert: {
+          autor?: string | null
+          contacto_id: string
+          created_at?: string
+          id?: number
+          texto: string
+        }
+        Update: {
+          autor?: string | null
+          contacto_id?: string
+          created_at?: string
+          id?: number
+          texto?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_notas_contacto_id_fkey"
+            columns: ["contacto_id"]
+            isOneToOne: false
+            referencedRelation: "contactos"
+            referencedColumns: ["id"]
           },
         ]
       }
