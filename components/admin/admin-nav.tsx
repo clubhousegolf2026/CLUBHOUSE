@@ -7,7 +7,6 @@ import {
   LayoutDashboard,
   Users,
   CalendarCheck,
-  Package,
   Plane,
   Tag,
   CalendarRange,
@@ -19,7 +18,6 @@ export const NAV = [
   { href: "/admin/crm", label: "CRM", icon: Users, grupo: "Ventas" },
   { href: "/admin/reservas", label: "Reservas", icon: CalendarCheck, grupo: "Ventas" },
   { href: "/admin/experiencias", label: "Experiencias", icon: Plane, grupo: "Catálogo" },
-  { href: "/admin/paquetes", label: "Paquetes", icon: Package, grupo: "Catálogo" },
   { href: "/admin/tarifas", label: "Tarifas", icon: Tag, grupo: "Catálogo" },
   { href: "/admin/calendario", label: "Calendario", icon: CalendarRange, grupo: "Catálogo" },
 ] as const;

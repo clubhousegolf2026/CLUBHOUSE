@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-// Destinos y Paquetes se unificaron: Tailandia y Utah se gestionan en Paquetes.
+// Destinos se unificó con Experiencias: ahí se ubica cada viaje en el globo.
 export default function DestinosAdminPage() {
-  redirect("/admin/paquetes");
+  redirect("/admin/experiencias");
 }

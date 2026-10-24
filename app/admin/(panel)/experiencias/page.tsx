@@ -4,12 +4,15 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { getExperienciasAdmin } from "@/lib/contenido/experiencias-editables";
 import { ImportarExperiencias } from "@/components/admin/experiencias/importar";
+import { LimpiarDemo } from "@/components/admin/limpiar-demo";
+import { contarDatosDemo } from "@/app/admin/(panel)/paquetes/demo-actions";
 
 export const dynamic = "force-dynamic";
 
 export default async function ExperienciasAdminPage() {
   const db = (await createServerSupabase()) as unknown as SupabaseClient;
   const { experiencias, enBase } = await getExperienciasAdmin(db);
+  const conteosDemo = await contarDatosDemo();
   const soloCodigo = experiencias.filter((e) => !enBase.has(e.slug)).length;
 
   return (
@@ -28,6 +31,8 @@ export default async function ExperienciasAdminPage() {
           <Plus size={16} /> Nueva experiencia
         </Link>
       </div>
+
+      <LimpiarDemo conteos={conteosDemo} />
 
       {soloCodigo > 0 && <ImportarExperiencias pendientes={soloCodigo} />}
 
