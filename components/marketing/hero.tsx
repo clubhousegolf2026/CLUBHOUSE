@@ -91,7 +91,7 @@ export function Hero({ destinos }: { destinos: DestinoConPaquetes[] }) {
           className="-z-10 absolute inset-0 bg-[radial-gradient(ellipse_at_62%_45%,transparent_30%,rgba(3,15,11,0.72)_100%)]"
         />
 
-        <div className="mx-auto grid w-full max-w-[1920px] items-center gap-6 px-6 sm:px-10 lg:grid-cols-[3fr_2fr] lg:gap-10 lg:px-16 xl:px-24">
+        <div className="mx-auto grid w-full max-w-[1920px] items-center gap-6 px-6 sm:px-10 lg:grid-cols-[1.15fr_1fr] lg:gap-10 lg:px-16 xl:px-24">
           <div className="order-2 pt-2 pb-6 lg:order-none lg:pt-8 lg:pb-6">
             <span className="entra-hero inline-flex items-center gap-3 text-[11px] font-medium uppercase tracking-[0.34em] text-[#e8d3a0]">
               <span className="h-px w-10 bg-gradient-to-r from-transparent to-[#e8d3a0]" />
@@ -154,7 +154,7 @@ export function Hero({ destinos }: { destinos: DestinoConPaquetes[] }) {
           </div>
 
           {/* Globo 3D — el mundo de la marca: 50 destinos en 5 continentes. */}
-          <div className="relative order-1 -mb-8 mt-2 flex w-full min-w-0 justify-center lg:order-none lg:mb-0 lg:mt-0 lg:justify-end">
+          <div className="relative order-1 -mb-8 mt-2 flex w-full min-w-0 justify-center lg:order-none lg:-my-12 lg:justify-end">
             <div aria-hidden className="pointer-events-none absolute inset-0 hidden lg:block">
               <div className="orbita orbita-gira aspect-square w-[96%]" />
               <div className="orbita orbita-gira-inversa aspect-square w-[118%] !border-white/10" />

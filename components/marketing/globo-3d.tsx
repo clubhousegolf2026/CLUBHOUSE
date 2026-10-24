@@ -168,7 +168,7 @@ export function Globo3D({
     // en pantallas anchas pero de poca altura.
     const aplicar = () => {
       const porAncho = mq.matches ? 820 : mqLg.matches ? 660 : 420;
-      const porAlto = Math.round(window.innerHeight * 0.56);
+      const porAlto = Math.round(window.innerHeight * 0.8);
       // En móviles angostos el ancho disponible real es menor que el
       // tamaño "por ancho" del breakpoint (p. ej. 360px de pantalla) — sin
       // este tope el globo se desborda de su caja en vez de encogerse con
