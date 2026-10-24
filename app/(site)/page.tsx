@@ -13,6 +13,7 @@ import {
   SeccionProceso,
 } from "@/components/marketing/secciones-marca";
 import type { PaquetePredefinido, Destino } from "@/lib/data/types";
+import { getDestinosConPaquetes } from "@/lib/data";
 
 export const revalidate = 300;
 
@@ -56,8 +57,16 @@ export default async function HomePage() {
     paquetes: tarjetasExperiencia.filter((t) => t.slug === e.slug),
     experiencia: { slug: e.slug, desde: e.desde, fechas: e.fechas, duracion: e.duracion },
   }));
-  // El globo no lista paquetes (la ficha de experiencia ya enlaza al itinerario).
-  const destinosGlobo = destinosExperiencia.map((d) => ({ ...d, paquetes: [] }));
+  // Banderines de los paquetes del admin (cada paquete puede marcar su campo en
+  // el mapa). Si la base falla, el inicio sigue con las experiencias firmadas.
+  let delAdmin: (Destino & { paquetes: PaquetePredefinido[] })[] = [];
+  try {
+    delAdmin = (await getDestinosConPaquetes()).filter((d) => d.disponible);
+  } catch {
+    delAdmin = [];
+  }
+  // El globo no lista paquetes de las experiencias (su ficha enlaza al itinerario).
+  const destinosGlobo = [...destinosExperiencia.map((d) => ({ ...d, paquetes: [] })), ...delAdmin];
   const destinos = destinosExperiencia;
   const campos = [...new Set(destinosGlobo.flatMap((d) => d.campos))];
 

@@ -13,7 +13,7 @@ export default async function NuevoPaquetePage() {
       .select("codigo, nombre")
       .eq("tipo", "campo_golf")
       .order("nombre"),
-    supabase.from("destinos").select("id, nombre").order("nombre"),
+    supabase.from("destinos").select("id, nombre, lat, lng").order("nombre"),
   ]);
 
   return (
@@ -26,7 +26,11 @@ export default async function NuevoPaquetePage() {
       </Link>
       <h1 className="font-serif text-2xl text-carbon">Nuevo paquete</h1>
 
-      <PaqueteForm campos={campos ?? []} destinos={destinos ?? []} />
+      <PaqueteForm
+        campos={campos ?? []}
+        destinos={(destinos ?? []).map((d) => ({ id: d.id, nombre: d.nombre }))}
+        ciudades={(destinos ?? []).map((d) => ({ id: d.id, nombre: d.nombre, lat: d.lat, lng: d.lng }))}
+      />
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { createServerSupabase } from "@/lib/supabase/server";
 
 export interface DatosPaquete {
@@ -19,6 +20,8 @@ export interface DatosPaquete {
   galeria: { url: string; alt: string }[];
   camposIds: string[]; // codigo de tarifas_componentes con tipo=campo_golf
   destinosIds: string[]; // id de destinos
+  /** Punto del campo en el globo del inicio. null = sin banderín; undefined = no tocar. */
+  ubicacion?: { nombre: string; pais: string; region: string; lat: number; lng: number } | null;
 }
 
 function revalidarTodo(id?: string) {
@@ -56,6 +59,34 @@ async function sincronizarRelaciones(
   }
 }
 
+/** El banderín del globo es un "destino" propio de este paquete (id estable). */
+async function sincronizarUbicacion(d: DatosPaquete) {
+  if (d.ubicacion === undefined) return;
+  const db = (await createServerSupabase()) as unknown as SupabaseClient;
+  const destinoId = `dest-${d.id}`;
+  if (d.ubicacion) {
+    const u = d.ubicacion;
+    const { error } = await db.from("destinos").upsert({
+      id: destinoId,
+      nombre: u.nombre,
+      region: u.region || u.pais,
+      pais: u.pais,
+      lat: u.lat,
+      lng: u.lng,
+      resumen: d.descripcion.slice(0, 400),
+      disponible: d.activo,
+      orden: 0,
+      foto_url: d.galeria[0]?.url ?? null,
+    });
+    if (error) throw new Error(error.message);
+    const r = await db.from("destino_paquetes").upsert({ destino_id: destinoId, paquete_id: d.id });
+    if (r.error) throw new Error(r.error.message);
+  } else {
+    await db.from("destino_paquetes").delete().eq("destino_id", destinoId);
+    await db.from("destinos").delete().eq("id", destinoId);
+  }
+}
+
 export async function crearPaquete(datos: DatosPaquete) {
   const supabase = await createServerSupabase();
 
@@ -76,6 +107,7 @@ export async function crearPaquete(datos: DatosPaquete) {
   if (error) throw new Error(error.message);
 
   await sincronizarRelaciones(datos.id, datos.camposIds, datos.destinosIds);
+  await sincronizarUbicacion(datos);
   revalidarTodo(datos.id);
   redirect("/admin/paquetes");
 }
@@ -102,6 +134,7 @@ export async function actualizarPaquete(datos: DatosPaquete) {
   if (error) throw new Error(error.message);
 
   await sincronizarRelaciones(datos.id, datos.camposIds, datos.destinosIds);
+  await sincronizarUbicacion(datos);
   revalidarTodo(datos.id);
 }
 
@@ -109,6 +142,8 @@ export async function eliminarPaquete(id: string) {
   const supabase = await createServerSupabase();
   const { error } = await supabase.from("paquetes").delete().eq("id", id);
   if (error) throw new Error(error.message);
+  // Su banderín del globo desaparece con él.
+  await (supabase as unknown as SupabaseClient).from("destinos").delete().eq("id", `dest-${id}`);
   revalidarTodo();
   redirect("/admin/paquetes");
 }

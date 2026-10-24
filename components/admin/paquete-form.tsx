@@ -2,7 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Check, ImageIcon, Link2, MapPinned, Rocket, Trash2, Wallet, X, FileText } from "lucide-react";
+import { ArrowLeft, Check, ImageIcon, Link2, MapPin, MapPinned, Rocket, Trash2, Wallet, X, FileText } from "lucide-react";
+import { MapaMundoPicker, type CiudadMapa } from "@/components/admin/mapa-mundo-picker";
 import { SubirFotos } from "@/components/admin/subir-fotos";
 import {
   AreaTexto,
@@ -35,10 +36,12 @@ export function PaqueteForm({
   paquete,
   campos,
   destinos,
+  ciudades = [],
 }: {
   paquete?: DatosPaquete;
   campos: CampoOpcion[];
   destinos: DestinoOpcion[];
+  ciudades?: CiudadMapa[];
 }) {
   const router = useRouter();
   const esNuevo = !paquete;
@@ -63,6 +66,12 @@ export function PaqueteForm({
   const [destinosIds, setDestinosIds] = useState<string[]>(
     paquete?.destinosIds ?? [],
   );
+  const [enGlobo, setEnGlobo] = useState(Boolean(paquete?.ubicacion));
+  const [uNombre, setUNombre] = useState(paquete?.ubicacion?.nombre ?? "");
+  const [uPais, setUPais] = useState(paquete?.ubicacion?.pais ?? "");
+  const [uRegion, setURegion] = useState(paquete?.ubicacion?.region ?? "");
+  const [lat, setLat] = useState(paquete?.ubicacion?.lat ?? 4.71);
+  const [lng, setLng] = useState(paquete?.ubicacion?.lng ?? -74.07);
 
   function alGuardar() {
     setError(null);
@@ -81,10 +90,17 @@ export function PaqueteForm({
       galeria: galeria.filter((g) => g.url.trim()),
       camposIds,
       destinosIds,
+      ubicacion: enGlobo
+        ? { nombre: uNombre.trim(), pais: uPais.trim(), region: uRegion.trim(), lat, lng }
+        : null,
     };
 
     if (!datos.nombre || !datos.slug || !datos.descripcion) {
       setError("Nombre, slug y descripción son obligatorios.");
+      return;
+    }
+    if (enGlobo && (!uNombre.trim() || !uPais.trim())) {
+      setError("Para mostrarlo en el globo escribe el nombre del lugar y el país, y marca el punto en el mapa.");
       return;
     }
     if (datos.activo && datos.galeria.length === 0) {
@@ -313,6 +329,46 @@ export function PaqueteForm({
                 ))}
               </div>
             </div>
+          </Seccion>
+          <Seccion
+            icono={<MapPin size={18} />}
+            titulo="Ubicación en el globo"
+            descripcion="Marca dónde está el campo: aparece como banderín en el globo del inicio."
+          >
+            <Interruptor
+              checked={enGlobo}
+              onChange={setEnGlobo}
+              titulo="Mostrar en el globo del inicio"
+              descripcion="Si lo apagas, el paquete no tiene banderín."
+            />
+            {enGlobo && (
+              <>
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <Campo label="Lugar o campo">
+                    <Entrada value={uNombre} onChange={(e) => setUNombre(e.target.value)} placeholder="Club Campestre" />
+                  </Campo>
+                  <Campo label="País">
+                    <Entrada value={uPais} onChange={(e) => setUPais(e.target.value)} placeholder="Colombia" />
+                  </Campo>
+                  <Campo label="Región (opcional)">
+                    <Entrada value={uRegion} onChange={(e) => setURegion(e.target.value)} placeholder="Cundinamarca" />
+                  </Campo>
+                </div>
+                <MapaMundoPicker
+                  lat={lat}
+                  lng={lng}
+                  nombre={uNombre}
+                  ciudades={ciudades}
+                  onCambiar={(a, o) => {
+                    setLat(a);
+                    setLng(o);
+                  }}
+                />
+                <p className="text-xs text-niebla">
+                  Punto elegido: {lat.toFixed(3)}, {lng.toFixed(3)} · haz clic en el mapa para moverlo; usa + / − para acercar.
+                </p>
+              </>
+            )}
           </Seccion>
         </div>
 

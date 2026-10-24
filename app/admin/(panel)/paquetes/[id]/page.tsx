@@ -30,7 +30,7 @@ export default async function EditarPaquetePage({
         .select("codigo, nombre")
         .eq("tipo", "campo_golf")
         .order("nombre"),
-      supabase.from("destinos").select("id, nombre").order("nombre"),
+      supabase.from("destinos").select("id, nombre, pais, region, lat, lng").order("nombre"),
       supabase
         .from("cotizaciones")
         .select("tipo, total, reservas(estado_pago)")
@@ -62,6 +62,10 @@ export default async function EditarPaquetePage({
       .sort((a, b) => a.orden - b.orden)
       .map((c) => c.tarifa_codigo),
     destinosIds: conRel.destino_paquetes.map((d) => d.destino_id),
+    ubicacion: (() => {
+      const u = (destinos ?? []).find((d) => d.id === `dest-${paquete.id}`);
+      return u ? { nombre: u.nombre, pais: u.pais, region: u.region, lat: u.lat, lng: u.lng } : null;
+    })(),
   };
 
   type FilaVenta = { tipo: string; total: number; reservas: { estado_pago: string } | { estado_pago: string }[] | null };
@@ -99,7 +103,14 @@ export default async function EditarPaquetePage({
         <CalendarRange size={15} /> Calendario propio de este paquete
       </Link>
 
-      <PaqueteForm paquete={datos} campos={campos ?? []} destinos={destinos ?? []} />
+      <PaqueteForm
+        paquete={datos}
+        campos={campos ?? []}
+        destinos={(destinos ?? []).map((d) => ({ id: d.id, nombre: d.nombre }))}
+        ciudades={(destinos ?? [])
+          .filter((d) => d.id !== `dest-${paquete.id}`)
+          .map((d) => ({ id: d.id, nombre: d.nombre, lat: d.lat, lng: d.lng }))}
+      />
     </div>
   );
 }
