@@ -5,6 +5,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { EXPERIENCIAS, type Experiencia } from "@/lib/contenido/experiencias";
 import type { CostosExperiencia } from "@/lib/contenido/costeo";
+import { slugificar } from "@/lib/contenido/fechas-viaje";
 
 type Res = { ok: true } | { ok: false; error: string };
 
@@ -71,25 +72,34 @@ function limpiar(e: Experiencia): Experiencia {
   };
 }
 
+/** Dirección web libre a partir del nombre: «Utah Experience» → utah-experience
+ *  (y utah-experience-2 si ya existe). */
+async function slugDisponible(db: SupabaseClient, nombre: string): Promise<string> {
+  const base = slugificar(nombre) || "experiencia";
+  for (let n = 1; n < 100; n++) {
+    const candidato = n === 1 ? base : `${base}-${n}`;
+    if (EXPERIENCIAS.some((x) => x.slug === candidato)) continue;
+    const { data } = await db.from("experiencias").select("slug").eq("slug", candidato).maybeSingle();
+    if (!data) return candidato;
+  }
+  return `${base}-${Date.now().toString(36)}`;
+}
+
 export async function guardarExperiencia(
   experiencia: Experiencia,
   esNueva: boolean,
-): Promise<Res> {
+): Promise<{ ok: true; slug: string } | { ok: false; error: string }> {
   const e = limpiar(experiencia);
   if (!e.nombre) return { ok: false, error: "Escribe el nombre del viaje." };
   if (!e.pais) return { ok: false, error: "Escribe el país." };
-  if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(e.slug)) {
-    return { ok: false, error: "La dirección web solo puede tener minúsculas, números y guiones." };
-  }
   const salidasMalas = (e.salidas ?? []).some((s) => s.fin < s.inicio);
   if (salidasMalas) return { ok: false, error: "Una salida termina antes de empezar." };
 
   const db = await cliente();
-  if (esNueva) {
-    const existe = await db.from("experiencias").select("slug").eq("slug", e.slug).maybeSingle();
-    if (existe.data || EXPERIENCIAS.some((x) => x.slug === e.slug)) {
-      return { ok: false, error: "Ya existe una experiencia con esa dirección web (slug)." };
-    }
+  // Una experiencia nueva recibe su dirección web automáticamente.
+  if (esNueva) e.slug = await slugDisponible(db, e.nombre);
+  if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(e.slug)) {
+    return { ok: false, error: "No se pudo generar la dirección web: revisa el nombre del viaje." };
   }
 
   const { coordenadas, publicada, destacada, orden, ...resto } = e;
@@ -106,7 +116,7 @@ export async function guardarExperiencia(
   if (error) return { ok: false, error: mensaje(error) };
 
   refrescar(e.slug);
-  return { ok: true };
+  return { ok: true, slug: e.slug };
 }
 
 /** Borra la fila. Si es una de las originales (Tailandia, Utah) vuelve al contenido del código. */

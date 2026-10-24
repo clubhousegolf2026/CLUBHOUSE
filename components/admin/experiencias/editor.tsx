@@ -34,7 +34,6 @@ import {
   escribirFechas,
   leerFechas,
   nochesEntre,
-  slugificar,
   textoDuracion,
 } from "@/lib/contenido/fechas-viaje";
 import type { EstadoSalida, Experiencia } from "@/lib/contenido/experiencias";
@@ -74,7 +73,6 @@ export function ExperienciaEditor({
   const router = useRouter();
   const [costos, setCostos] = useState<CostosExperiencia>(costosIniciales);
   const [e, setE] = useState<Experiencia>(inicial);
-  const [slugTocado, setSlugTocado] = useState(!esNueva);
   const [pendiente, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [guardado, setGuardado] = useState(false);
@@ -125,10 +123,10 @@ export function ExperienciaEditor({
       // Las hojas de costeo van aparte (tabla privada). Si no hay ninguna y
       // nunca se creó una, no hace falta tocar la tabla.
       if (costos.costeos.length > 0 || costosIniciales.costeos.length > 0) {
-        const rc = await guardarCostos(e.slug, costos);
+        const rc = await guardarCostos(r.slug, costos);
         if (!rc.ok) return setError(`La experiencia se guardó, pero los costos no: ${rc.error}`);
       }
-      if (esNueva) router.push(`/admin/experiencias/${e.slug}`);
+      if (esNueva) router.push(`/admin/experiencias/${r.slug}`);
       else {
         setGuardado(true);
         router.refresh();
@@ -155,31 +153,11 @@ export function ExperienciaEditor({
         <div className="space-y-5">
           <Seccion icono={<FileText size={18} />} titulo="Información general" descripcion="Lo que lee el viajero en las tarjetas y en la página del viaje.">
             <Campo label="Nombre del viaje *">
-              <Entrada
-                value={e.nombre}
-                placeholder="Utah Experience"
-                onChange={(ev) => {
-                  act({ nombre: ev.target.value });
-                  if (esNueva && !slugTocado) act({ slug: slugificar(ev.target.value) });
-                }}
-              />
+              <Entrada value={e.nombre} placeholder="Utah Experience" onChange={texto("nombre")} />
             </Campo>
             <div className="grid gap-4 sm:grid-cols-2">
               <Campo label="Subtítulo (ciudades o sedes)">
                 <Entrada value={e.subtitulo} onChange={texto("subtitulo")} placeholder="St. George & Black Desert" />
-              </Campo>
-              <Campo
-                label="Dirección web *"
-                ayuda={esNueva ? "Así se verá: /experiencias/…  Solo minúsculas, números y guiones." : "No se puede cambiar una vez creada."}
-              >
-                <Entrada
-                  value={e.slug}
-                  disabled={!esNueva}
-                  onChange={(ev) => {
-                    setSlugTocado(true);
-                    act({ slug: slugificar(ev.target.value) });
-                  }}
-                />
               </Campo>
               <Campo label="País *">
                 <Entrada value={e.pais} onChange={texto("pais")} placeholder="Estados Unidos" />
@@ -564,9 +542,12 @@ export function ExperienciaEditor({
               {esNueva ? "Nueva: aún no está guardada." : enBase ? "Guardada en Supabase." : "Solo existe en el código del sitio. Pulsa «Guardar en Supabase» para moverla a la base de datos."}
             </p>
             {!esNueva && (
-              <Link href={`/experiencias/${e.slug}`} target="_blank" className="mt-3 inline-block text-verde-golf hover:underline">
-                Ver en el sitio →
-              </Link>
+              <>
+                <p className="mt-3 break-all text-xs text-niebla">Dirección: /experiencias/{e.slug}</p>
+                <Link href={`/experiencias/${e.slug}`} target="_blank" className="mt-2 inline-block text-verde-golf hover:underline">
+                  Ver en el sitio →
+                </Link>
+              </>
             )}
           </div>
         </aside>
