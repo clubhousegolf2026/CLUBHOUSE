@@ -436,3 +436,38 @@ html {
   from { transform: translateY(18px); }
   to { transform: none; }
 }
+
+/* Aparición al hacer scroll (solo navegadores con animaciones ligadas al
+   scroll; en los demás el contenido simplemente está visible). */
+@keyframes revela-entra {
+  from { opacity: 0; transform: translateY(32px); }
+  to { opacity: 1; transform: none; }
+}
+@supports (animation-timeline: view()) {
+  .revela {
+    animation: revela-entra linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 38%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .revela { animation: none; }
+}
+
+/* Hoja imprimible de una experiencia (admin): solo se imprime la hoja. */
+@media print {
+  body * { visibility: hidden; }
+  .hoja-impresion, .hoja-impresion * { visibility: visible; }
+  .hoja-impresion {
+    position: absolute !important;
+    left: 0;
+    top: 0;
+    width: 100%;
+    overflow: visible !important;
+    background: #fff !important;
+  }
+  .no-imprimir { display: none !important; }
+  .hoja-impresion { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .evitar-corte { break-inside: avoid; }
+  @page { size: A4; margin: 12mm; }
+}

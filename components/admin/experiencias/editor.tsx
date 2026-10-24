@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useRef, useState, useTransition } from "react";
+import { createContext, useContext, useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -10,6 +10,7 @@ import {
   CalendarRange,
   FileText,
   Flag,
+  Globe,
   ImageIcon,
   MapPin,
   Rocket,
@@ -29,6 +30,12 @@ import {
 import { MapaMundoPicker, type CiudadMapa } from "@/components/admin/mapa-mundo-picker";
 import { CampoFoto, GaleriaFotos, Lineas, Lista } from "@/components/admin/experiencias/piezas";
 import { CosteoEditor } from "@/components/admin/experiencias/costeo-editor";
+import {
+  AccionesExperiencia,
+  ChecklistPublicacion,
+  HistorialVersiones,
+  type ItemChecklist,
+} from "@/components/admin/experiencias/herramientas";
 import { calcular, type CostosExperiencia } from "@/lib/contenido/costeo";
 import { eliminarExperiencia, guardarCostos, guardarExperiencia } from "@/app/admin/(panel)/experiencias/actions";
 import {
@@ -56,6 +63,36 @@ const POLITICAS_SUGERIDAS = [
 
 const idCorto = () => Math.random().toString(36).slice(2, 8);
 
+const DIAS_SEMANA = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+const MESES_CORTOS = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+const DIA_MS = 86_400_000;
+
+/** "2027-03-08" → "Lun 8 mar". */
+function etiquetaDia(iso: string) {
+  const d = new Date(`${iso}T12:00:00Z`);
+  return `${DIAS_SEMANA[d.getUTCDay()]} ${d.getUTCDate()} ${MESES_CORTOS[d.getUTCMonth()]}`;
+}
+
+const LISTAS_OBLIGATORIAS = ["claves", "cifras", "programa", "rondas", "alojamiento", "masAllaDelGolf", "tarifas", "incluye", "noIncluye"] as const;
+
+/** Mezcla datos importados o de una versión anterior sin romper el editor
+ *  (conserva la dirección web y completa las listas que falten). */
+function fusionar(prev: Experiencia, datos: Partial<Experiencia>): Experiencia {
+  const salida: Experiencia = {
+    ...prev,
+    ...datos,
+    slug: prev.slug,
+    publicada: prev.publicada,
+    destacada: prev.destacada,
+    orden: prev.orden,
+    coordenadas: Array.isArray(datos.coordenadas) ? datos.coordenadas : prev.coordenadas,
+  };
+  for (const k of LISTAS_OBLIGATORIAS) {
+    if (!Array.isArray(salida[k])) (salida as unknown as Record<string, unknown>)[k] = prev[k];
+  }
+  return salida;
+}
+
 const TITULOS_SECCIONES = [
   "Información general",
   "Ubicación en el globo",
@@ -70,6 +107,7 @@ const TITULOS_SECCIONES = [
   "Fotos",
   "Políticas y condiciones",
   "Preguntas frecuentes",
+  "SEO y buscadores",
 ];
 
 type NivelSeccion = "completa" | "parcial" | "vacia";
@@ -123,7 +161,7 @@ function Seccion({
   const estilo = ESTILO_NIVEL[nivel];
 
   return (
-    <section className={`overflow-hidden rounded-[var(--radius-panel)] border shadow-[var(--shadow-suave)] transition-colors ${estilo.tarjeta}`}>
+    <section data-seccion={titulo} className={`scroll-mt-6 overflow-hidden rounded-[var(--radius-panel)] border shadow-[var(--shadow-suave)] transition-colors ${estilo.tarjeta}`}>
       <button
         type="button"
         onClick={() => ctx.alternar(titulo)}
@@ -182,9 +220,13 @@ export function ExperienciaEditor({
   const [error, setError] = useState<string | null>(null);
   const [guardado, setGuardado] = useState(false);
   const [{ inicio, fin }, setRango] = useState(() => leerFechas(inicial.fechas));
+  const [sucio, setSucio] = useState(false);
+  const [borrador, setBorrador] = useState<{ e: Experiencia; costos: CostosExperiencia; t: number } | null>(null);
+  const claveBorrador = `exp-borrador:${inicial.slug || "nueva"}`;
 
   const act = (parche: Partial<Experiencia>) => {
     setGuardado(false);
+    setSucio(true);
     setE((prev) => ({ ...prev, ...parche }));
   };
   const texto =
@@ -217,6 +259,7 @@ export function ExperienciaEditor({
     "Fotos": plural((e.foto ? 1 : 0) + (e.fotoSecundaria ? 1 : 0) + galeria.length, "foto", "fotos"),
     "Políticas y condiciones": plural(politicas.length, "política", "políticas"),
     "Preguntas frecuentes": plural(faq.length, "pregunta", "preguntas"),
+    "SEO y buscadores": e.seoTitulo?.trim() || "Usa el nombre del viaje",
   };
 
   const lleno = (t: string | undefined) => Boolean(t && t.trim());
@@ -255,6 +298,7 @@ export function ExperienciaEditor({
       politicas.length > 0,
     ),
     "Preguntas frecuentes": nivelDe([faq.length > 0, faq.every((f) => lleno(f.q) && lleno(f.a))], faq.length > 0),
+    "SEO y buscadores": nivelDe([lleno(e.seoTitulo), lleno(e.seoDescripcion)], false),
   };
   const completas = Object.values(niveles).filter((n) => n === "completa").length;
 
@@ -277,6 +321,59 @@ export function ExperienciaEditor({
     act({ desde: menor.t.precio });
   }
 
+  const totalDias = inicio && fin && !rangoInvalido ? nochesEntre(inicio, fin) + 1 : 0;
+
+  /** Un día del programa por cada fecha del viaje que todavía no tenga el suyo. */
+  function generarDias() {
+    if (totalDias <= 0) return;
+    const dias = [...e.programa];
+    for (let i = dias.length; i < totalDias; i++) {
+      const f = new Date(Date.parse(`${inicio}T12:00:00Z`) + i * DIA_MS).toISOString().slice(0, 10);
+      dias.push({ fecha: etiquetaDia(f), titulo: "", detalle: [""] });
+    }
+    act({ programa: dias });
+  }
+
+  function agregarSalidaPrincipal() {
+    act({
+      salidas: [
+        ...salidas,
+        { id: idCorto(), inicio, fin, cupos: e.grupo?.max ?? null, estado: "abierta" as EstadoSalida, nota: "" },
+      ],
+    });
+  }
+
+  const checklist: ItemChecklist[] = [
+    { ok: lleno(e.nombre) && lleno(e.pais), etiqueta: "Nombre y país", seccion: "Información general" },
+    { ok: lleno(e.resumen), etiqueta: "Resumen para las tarjetas", seccion: "Información general" },
+    { ok: ubicacionTocada && (lat !== 0 || lng !== 0), etiqueta: "Ubicación en el globo", seccion: "Ubicación en el globo" },
+    { ok: lleno(e.fechas) && lleno(e.duracion), etiqueta: "Fechas y duración", seccion: "Fechas y salidas" },
+    { ok: lleno(e.desde), etiqueta: "Precio «desde»", seccion: "Precios y tarifas" },
+    { ok: e.tarifas.length > 0, etiqueta: "Al menos una tarifa", seccion: "Precios y tarifas" },
+    { ok: e.programa.length > 0, etiqueta: "Programa día a día", seccion: "Programa día a día" },
+    { ok: e.rondas.length > 0, etiqueta: "Campos de golf", seccion: "Campos de golf" },
+    { ok: lineasLlenas(e.incluye) > 0, etiqueta: "Qué incluye", seccion: "Qué incluye y qué no" },
+    { ok: lleno(e.foto), etiqueta: "Foto de portada", seccion: "Fotos" },
+  ];
+
+  function irA(titulo: string) {
+    setAbiertas((prev) => new Set(prev).add(titulo));
+    setTimeout(
+      () => document.querySelector(`[data-seccion="${titulo}"]`)?.scrollIntoView({ behavior: "smooth", block: "start" }),
+      60,
+    );
+  }
+
+  /** Carga en el editor datos de un archivo o de una versión anterior (sin guardar). */
+  function cargarDatos(datos: Partial<Experiencia>) {
+    const nueva = fusionar(e, datos);
+    setE(nueva);
+    setRango(leerFechas(nueva.fechas));
+    setUbicacionTocada(true);
+    setGuardado(false);
+    setSucio(true);
+  }
+
   function guardar() {
     setError(null);
     start(async () => {
@@ -288,6 +385,10 @@ export function ExperienciaEditor({
         const rc = await guardarCostos(r.slug, costos);
         if (!rc.ok) return setError(`La experiencia se guardó, pero los costos no: ${rc.error}`);
       }
+      setSucio(false);
+      try {
+        localStorage.removeItem(claveBorrador);
+      } catch {}
       if (esNueva) router.push(`/admin/experiencias/${r.slug}`);
       else {
         setGuardado(true);
@@ -309,9 +410,96 @@ export function ExperienciaEditor({
     });
   }
 
+  const guardarRef = useRef<() => void>(() => {});
+  useEffect(() => {
+    guardarRef.current = guardar;
+  });
+
+  // Atajo Ctrl/⌘ + S para guardar.
+  useEffect(() => {
+    const f = (ev: KeyboardEvent) => {
+      if ((ev.metaKey || ev.ctrlKey) && ev.key.toLowerCase() === "s") {
+        ev.preventDefault();
+        guardarRef.current();
+      }
+    };
+    window.addEventListener("keydown", f);
+    return () => window.removeEventListener("keydown", f);
+  }, []);
+
+  // Avisa antes de salir con cambios sin guardar.
+  useEffect(() => {
+    if (!sucio) return;
+    const f = (ev: BeforeUnloadEvent) => {
+      ev.preventDefault();
+      ev.returnValue = "";
+    };
+    window.addEventListener("beforeunload", f);
+    return () => window.removeEventListener("beforeunload", f);
+  }, [sucio]);
+
+  // Borrador automático en este navegador: se guarda mientras escribes.
+  useEffect(() => {
+    if (!sucio) return;
+    const t = setTimeout(() => {
+      try {
+        localStorage.setItem(claveBorrador, JSON.stringify({ e, costos, t: Date.now() }));
+      } catch {}
+    }, 800);
+    return () => clearTimeout(t);
+  }, [sucio, e, costos, claveBorrador]);
+
+  // Al abrir, ofrece recuperar un borrador que no llegó a guardarse.
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(claveBorrador);
+      if (!raw) return;
+      const b = JSON.parse(raw) as { e: Experiencia; costos: CostosExperiencia; t: number };
+      if (b?.e && JSON.stringify(b.e) !== JSON.stringify(inicial)) setBorrador(b);
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <AcordeonCtx.Provider value={{ abiertas, alternar, resumenes, niveles }}>
     <div className="max-w-6xl space-y-5">
+      {borrador && (
+        <div role="status" className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-champagne/60 bg-champagne/15 px-4 py-3 text-sm text-carbon">
+          <p>
+            Hay un borrador sin guardar de{" "}
+            <strong>{new Intl.DateTimeFormat("es-CO", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }).format(new Date(borrador.t))}</strong>
+            . ¿Quieres recuperarlo?
+          </p>
+          <span className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setE(borrador.e);
+                setCostos(borrador.costos);
+                setRango(leerFechas(borrador.e.fechas));
+                setUbicacionTocada(true);
+                setSucio(true);
+                setBorrador(null);
+              }}
+              className="rounded-lg bg-verde-golf px-3 py-1.5 text-xs font-semibold text-crema hover:bg-verde-calle"
+            >
+              Recuperar
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                try {
+                  localStorage.removeItem(claveBorrador);
+                } catch {}
+                setBorrador(null);
+              }}
+              className="rounded-lg border border-arena bg-white px-3 py-1.5 text-xs text-carbon hover:border-error/50"
+            >
+              Descartar
+            </button>
+          </span>
+        </div>
+      )}
       <div className="grid items-start gap-5 lg:grid-cols-[1fr_300px]">
         <div className="space-y-3">
           <div className="rounded-2xl border border-arena bg-blanco-roto p-4">
@@ -429,6 +617,11 @@ export function ExperienciaEditor({
             <div className="border-t border-arena pt-4">
               <h3 className="font-serif text-base text-carbon">Salidas</h3>
               <p className="mb-3 text-sm text-niebla">Opcional. Úsalo si el mismo viaje sale en varias fechas.</p>
+              {totalDias > 0 && !salidas.some((s) => s.inicio === inicio && s.fin === fin) && (
+                <button type="button" onClick={agregarSalidaPrincipal} className="mb-3 inline-flex items-center gap-2 rounded-xl border border-champagne/60 bg-champagne/10 px-4 py-2 text-sm font-medium text-[#8a6d1f] hover:bg-champagne/20">
+                  Agregar las fechas principales como salida
+                </button>
+              )}
               <Lista
                 items={salidas}
                 onChange={(s) => act({ salidas: s })}
@@ -513,6 +706,7 @@ export function ExperienciaEditor({
               costos={costos}
               onChange={(c) => {
                 setGuardado(false);
+                setSucio(true);
                 setCostos(c);
               }}
               tarifas={e.tarifas}
@@ -522,6 +716,11 @@ export function ExperienciaEditor({
           </Seccion>
 
           <Seccion icono={<CalendarRange size={18} />} titulo="Programa día a día" descripcion="El itinerario que ve el viajero.">
+            {totalDias > e.programa.length && (
+              <button type="button" onClick={generarDias} className="inline-flex items-center gap-2 rounded-xl border border-champagne/60 bg-champagne/10 px-4 py-2 text-sm font-medium text-[#8a6d1f] hover:bg-champagne/20">
+                Crear los días a partir de las fechas del viaje ({totalDias - e.programa.length} por crear)
+              </button>
+            )}
             <Lista
               items={e.programa}
               onChange={(p) => act({ programa: p })}
@@ -711,13 +910,32 @@ export function ExperienciaEditor({
               )}
             </Lista>
           </Seccion>
+
+          <Seccion icono={<Globe size={18} />} titulo="SEO y buscadores" descripcion="Cómo aparece el viaje en Google y al compartir el enlace. Si lo dejas vacío se usan el nombre y la descripción de la página.">
+            <Campo label="Título para buscadores" ayuda={`${(e.seoTitulo ?? "").length} de 60 caracteres recomendados.`}>
+              <Entrada value={e.seoTitulo ?? ""} onChange={texto("seoTitulo")} placeholder={e.nombre || "Utah Experience · Golf en rocas rojas"} maxLength={90} />
+            </Campo>
+            <Campo label="Descripción para buscadores" ayuda={`${(e.seoDescripcion ?? "").length} de 155 caracteres recomendados.`}>
+              <AreaTexto rows={3} value={e.seoDescripcion ?? ""} onChange={texto("seoDescripcion")} placeholder={e.descripcionLarga.slice(0, 155)} maxLength={200} />
+            </Campo>
+            <div className="rounded-xl border border-arena bg-white p-4">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-niebla">Así se vería en Google</p>
+              <p className="truncate text-xs text-[#188038]">clubhouse-lac.vercel.app › experiencias › {e.slug || "nueva"}</p>
+              <p className="mt-0.5 truncate text-lg text-[#1a0dab]">{e.seoTitulo?.trim() || e.nombre || "Título del viaje"}</p>
+              <p className="line-clamp-2 text-sm text-[#4d5156]">{e.seoDescripcion?.trim() || e.descripcionLarga || "Descripción del viaje."}</p>
+            </div>
+          </Seccion>
         </div>
 
         <aside className="space-y-5 lg:sticky lg:top-6">
           <SeccionFija icono={<Rocket size={18} />} titulo="Publicación">
             <Interruptor
               checked={e.publicada !== false}
-              onChange={(v) => act({ publicada: v })}
+              onChange={(v) => {
+                const faltan = checklist.filter((i) => !i.ok);
+                if (v && faltan.length > 0 && !window.confirm(`Aún falta: ${faltan.map((i) => i.etiqueta).join(", ")}.\n\n¿Publicar de todos modos?`)) return;
+                act({ publicada: v });
+              }}
               titulo="Publicada"
               descripcion="Visible en el inicio, planes, globo y buscadores. Apágala para dejarla en borrador."
             />
@@ -734,6 +952,8 @@ export function ExperienciaEditor({
             </Campo>
           </SeccionFija>
 
+          <ChecklistPublicacion items={checklist} onIr={irA} />
+
           <div className="rounded-[var(--radius-card)] border border-arena bg-blanco-roto p-4 text-sm">
             <p className="font-medium text-carbon">Estado</p>
             <p className={`mt-1 ${enBase ? "text-exito" : "text-alerta"}`}>
@@ -748,9 +968,15 @@ export function ExperienciaEditor({
               </>
             )}
           </div>
+
+          <AccionesExperiencia e={e} guardada={!esNueva && enBase} onImportar={cargarDatos} />
+          {!esNueva && enBase && <HistorialVersiones slug={e.slug} onRestaurar={cargarDatos} />}
         </aside>
       </div>
 
+      {sucio && !pendiente && !guardado && (
+        <p className="px-1 text-xs text-niebla">Tienes cambios sin guardar · pulsa Ctrl/⌘ + S para guardar.</p>
+      )}
       {guardado && (
         <p role="status" className="rounded-xl border border-exito/30 bg-exito/10 px-4 py-2.5 text-sm text-exito">
           Guardado en Supabase. Ya se ve en el sitio.

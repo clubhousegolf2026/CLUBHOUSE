@@ -6,6 +6,7 @@ import { createServerSupabase } from "@/lib/supabase/server";
 import { EXPERIENCIAS, type Experiencia } from "@/lib/contenido/experiencias";
 import type { CostosExperiencia } from "@/lib/contenido/costeo";
 import { slugificar } from "@/lib/contenido/fechas-viaje";
+import { getExperienciasAdmin } from "@/lib/contenido/experiencias-editables";
 
 type Res = { ok: true } | { ok: false; error: string };
 
@@ -69,6 +70,8 @@ function limpiar(e: Experiencia): Experiencia {
     salidas: (e.salidas ?? []).filter((s) => s.inicio && s.fin),
     politicas: (e.politicas ?? []).filter((p) => t(p.titulo) || t(p.texto)),
     faq: (e.faq ?? []).filter((p) => t(p.q)),
+    seoTitulo: t(e.seoTitulo ?? ""),
+    seoDescripcion: t(e.seoDescripcion ?? ""),
   };
 }
 
@@ -115,8 +118,98 @@ export async function guardarExperiencia(
   });
   if (error) return { ok: false, error: mensaje(error) };
 
+  await guardarVersion(db, e.slug, e);
   refrescar(e.slug);
   return { ok: true, slug: e.slug };
+}
+
+/* ───────────── Historial de versiones ───────────── */
+
+const MAX_VERSIONES = 30;
+
+/** Deja una copia de lo guardado. Es opcional: si la migración 0009 no está
+ *  aplicada, simplemente no hay historial y el guardado sigue funcionando. */
+async function guardarVersion(db: SupabaseClient, slug: string, datos: Experiencia) {
+  try {
+    const { error } = await db.from("experiencias_versiones").insert({
+      slug,
+      datos,
+      resumen: `${datos.nombre} · ${datos.programa.length} días · ${datos.tarifas.length} tarifas`,
+    });
+    if (error) return;
+    const { data } = await db
+      .from("experiencias_versiones")
+      .select("id")
+      .eq("slug", slug)
+      .order("created_at", { ascending: false })
+      .range(MAX_VERSIONES, MAX_VERSIONES + 200);
+    const sobran = (data ?? []).map((x: { id: number }) => x.id);
+    if (sobran.length > 0) await db.from("experiencias_versiones").delete().in("id", sobran);
+  } catch {}
+}
+
+export type VersionFila = { id: number; created_at: string; resumen: string | null };
+
+export async function obtenerVersiones(
+  slug: string,
+): Promise<{ ok: true; versiones: VersionFila[] } | { ok: false; error: string }> {
+  const db = await cliente();
+  const { data, error } = await db
+    .from("experiencias_versiones")
+    .select("id, created_at, resumen")
+    .eq("slug", slug)
+    .order("created_at", { ascending: false })
+    .limit(MAX_VERSIONES);
+  if (error) {
+    if (["42P01", "PGRST205"].includes(error.code ?? "")) {
+      return { ok: false, error: "Falta aplicar la migración 0009 (supabase/migrations/0009_experiencias_versiones.sql) para tener historial." };
+    }
+    return { ok: false, error: error.message };
+  }
+  return { ok: true, versiones: (data ?? []) as VersionFila[] };
+}
+
+export async function obtenerVersion(
+  id: number,
+): Promise<{ ok: true; datos: Experiencia } | { ok: false; error: string }> {
+  const db = await cliente();
+  const { data, error } = await db.from("experiencias_versiones").select("datos, slug").eq("id", id).single();
+  if (error || !data) return { ok: false, error: error?.message ?? "No se encontró esa versión." };
+  const datos = data.datos as Partial<Experiencia>;
+  return { ok: true, datos: { ...datos, slug: data.slug } as Experiencia };
+}
+
+/** Crea una copia en borrador (con sus hojas de costos) y devuelve su dirección. */
+export async function duplicarExperiencia(
+  slug: string,
+): Promise<{ ok: true; slug: string } | { ok: false; error: string }> {
+  const db = await cliente();
+  const { experiencias } = await getExperienciasAdmin(db);
+  const origen = experiencias.find((x) => x.slug === slug);
+  if (!origen) return { ok: false, error: "No se encontró la experiencia." };
+
+  const nombre = `${origen.nombre} (copia)`;
+  const nuevoSlug = await slugDisponible(db, nombre);
+  const { coordenadas, publicada: _p, destacada: _d, orden, slug: _s, ...resto } = origen;
+  void _p; void _d; void _s;
+  const { error } = await db.from("experiencias").insert({
+    slug: nuevoSlug,
+    orden: (orden ?? 0) + 1,
+    publicada: false,
+    destacada: false,
+    lng: coordenadas[0],
+    lat: coordenadas[1],
+    datos: { ...resto, nombre },
+  });
+  if (error) return { ok: false, error: mensaje(error) };
+
+  try {
+    const c = await db.from("experiencias_costos").select("datos").eq("slug", slug).maybeSingle();
+    if (c.data?.datos) await db.from("experiencias_costos").insert({ slug: nuevoSlug, datos: c.data.datos });
+  } catch {}
+
+  refrescar(nuevoSlug);
+  return { ok: true, slug: nuevoSlug };
 }
 
 /** Borra la fila. Si es una de las originales (Tailandia, Utah) vuelve al contenido del código. */

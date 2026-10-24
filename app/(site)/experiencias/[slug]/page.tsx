@@ -26,11 +26,13 @@ export async function generateMetadata({
   const { slug } = await params;
   const e = (await getExperiencias()).find((x) => x.slug === slug);
   if (!e) return { title: "Experiencia no encontrada" };
+  const titulo = e.seoTitulo?.trim() || e.nombre;
+  const descripcion = e.seoDescripcion?.trim() || e.descripcionLarga;
   return {
-    title: e.nombre,
-    description: e.descripcionLarga,
+    title: titulo,
+    description: descripcion,
     alternates: { canonical: `/experiencias/${e.slug}` },
-    openGraph: { title: e.nombre, description: e.descripcionLarga, images: e.foto ? [e.foto] : [] },
+    openGraph: { title: titulo, description: descripcion, images: e.foto ? [e.foto] : [] },
   };
 }
 

@@ -86,6 +86,9 @@ export interface Experiencia {
   grupo?: { min: number | null; max: number | null };
   idiomas?: string;
   anticipoPct?: number | null;
+  /** Título y descripción para buscadores (si están vacíos se usan el nombre y la descripción de la página). */
+  seoTitulo?: string;
+  seoDescripcion?: string;
 }
 
 export const EXPERIENCIAS: Experiencia[] = [

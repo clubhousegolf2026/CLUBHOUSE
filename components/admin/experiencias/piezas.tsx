@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowDown, ArrowUp, ImagePlus, Link2, Plus, X } from "lucide-react";
+import { ArrowDown, ArrowUp, Copy, ImagePlus, Link2, Plus, X } from "lucide-react";
 import { AreaTexto, Entrada } from "@/components/admin/form-ui";
 import { SubirFotos } from "@/components/admin/subir-fotos";
 
@@ -29,6 +29,15 @@ export function Lista<T>({
     onChange(copia);
   }
 
+  function duplicar(i: number) {
+    const copia = JSON.parse(JSON.stringify(items[i])) as T;
+    // Las salidas llevan un id propio: la copia necesita otro.
+    if (copia && typeof copia === "object" && "id" in copia) {
+      (copia as { id: string }).id = Math.random().toString(36).slice(2, 8);
+    }
+    onChange([...items.slice(0, i + 1), copia, ...items.slice(i + 1)]);
+  }
+
   return (
     <div className="space-y-3">
       {items.length === 0 && (
@@ -44,6 +53,9 @@ export function Lista<T>({
               </button>
               <button type="button" onClick={() => mover(i, 1)} disabled={i === items.length - 1} aria-label="Bajar" className="grid h-8 w-8 place-items-center rounded-lg text-niebla hover:bg-arena/50 disabled:opacity-30">
                 <ArrowDown size={15} />
+              </button>
+              <button type="button" onClick={() => duplicar(i)} aria-label="Duplicar" title="Duplicar" className="grid h-8 w-8 place-items-center rounded-lg text-niebla hover:bg-arena/50">
+                <Copy size={14} />
               </button>
               <button type="button" onClick={() => onChange(items.filter((_, j) => j !== i))} aria-label="Quitar" className="grid h-8 w-8 place-items-center rounded-lg text-error hover:bg-error/10">
                 <X size={15} />
