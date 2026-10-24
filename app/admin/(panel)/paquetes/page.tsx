@@ -3,6 +3,7 @@ import { Plus } from "lucide-react";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { cop } from "@/lib/format";
 import { ButtonLink } from "@/components/ui/button";
+import { EXPERIENCIAS } from "@/lib/contenido/experiencias";
 
 export const dynamic = "force-dynamic";
 
@@ -19,13 +20,50 @@ export default async function PaquetesAdminPage() {
         <div>
           <h1 className="font-serif text-2xl text-carbon">Paquetes</h1>
           <p className="text-sm text-niebla">
-            Itinerarios predefinidos que se muestran en el sitio.
+            Lo que se publica en el sitio.
           </p>
         </div>
         <ButtonLink href="/admin/paquetes/nuevo">
           <Plus size={16} /> Nuevo paquete
         </ButtonLink>
       </div>
+
+      <section>
+        <h2 className="font-serif text-lg text-carbon">Experiencias firmadas</h2>
+        <p className="text-sm text-niebla">
+          Los dos viajes que hoy se muestran en el inicio, en los planes y en el globo.
+          Su contenido vive en el código del sitio.
+        </p>
+        <ul className="mt-3 divide-y divide-arena overflow-hidden rounded-[var(--radius-panel)] border border-arena bg-blanco-roto">
+          {EXPERIENCIAS.map((e) => (
+            <li key={e.slug} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+              <span>
+                <span className="block font-medium text-carbon">
+                  <span aria-hidden>{e.bandera}</span> {e.nombre}
+                </span>
+                <span className="text-xs text-niebla">
+                  {e.subtitulo} · {e.fechas} · {e.duracion}
+                </span>
+              </span>
+              <span className="flex items-center gap-4">
+                <span className="tabular text-sm text-carbon">Desde {e.desde}</span>
+                <Etiqueta tono="verde">Publicado</Etiqueta>
+                <Link
+                  href={`/experiencias/${e.slug}`}
+                  target="_blank"
+                  className="text-verde-golf hover:underline"
+                >
+                  Ver en el sitio
+                </Link>
+              </span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section>
+        <h2 className="font-serif text-lg text-carbon">Paquetes en la base de datos</h2>
+      </section>
 
       <div className="overflow-hidden rounded-[var(--radius-panel)] border border-arena bg-blanco-roto">
         <table className="w-full text-sm">
