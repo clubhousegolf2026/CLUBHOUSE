@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { createContext, useContext, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   BedDouble,
   Check,
+  ChevronDown,
   CalendarRange,
   FileText,
   Flag,
@@ -23,7 +24,7 @@ import {
   Entrada,
   Interruptor,
   Selector,
-  Seccion,
+  Seccion as SeccionFija,
 } from "@/components/admin/form-ui";
 import { MapaMundoPicker, type CiudadMapa } from "@/components/admin/mapa-mundo-picker";
 import { CampoFoto, GaleriaFotos, Lineas, Lista } from "@/components/admin/experiencias/piezas";
@@ -55,6 +56,74 @@ const POLITICAS_SUGERIDAS = [
 
 const idCorto = () => Math.random().toString(36).slice(2, 8);
 
+const TITULOS_SECCIONES = [
+  "Información general",
+  "Ubicación en el globo",
+  "Fechas y salidas",
+  "Costos y precio al público",
+  "Precios y tarifas",
+  "Programa día a día",
+  "Campos de golf",
+  "Alojamiento",
+  "Destacados y más allá del golf",
+  "Qué incluye y qué no",
+  "Fotos",
+  "Políticas y condiciones",
+  "Preguntas frecuentes",
+];
+
+const AcordeonCtx = createContext<{
+  abiertas: Set<string>;
+  alternar: (titulo: string) => void;
+  resumenes: Record<string, string>;
+} | null>(null);
+
+/** Sección plegable: el contenido se monta la primera vez que se abre y luego
+ *  solo se oculta, para no perder lo que se haya escrito ni recargar el mapa. */
+function Seccion({
+  icono,
+  titulo,
+  descripcion,
+  children,
+}: {
+  icono?: React.ReactNode;
+  titulo: string;
+  descripcion?: string;
+  children: React.ReactNode;
+}) {
+  const ctx = useContext(AcordeonCtx)!;
+  const abierta = ctx.abiertas.has(titulo);
+  const montada = useRef(abierta);
+  if (abierta) montada.current = true;
+
+  return (
+    <section className="overflow-hidden rounded-[var(--radius-panel)] border border-arena bg-blanco-roto shadow-[var(--shadow-suave)]">
+      <button
+        type="button"
+        onClick={() => ctx.alternar(titulo)}
+        aria-expanded={abierta}
+        className="flex w-full items-center gap-3 p-4 text-left transition-colors hover:bg-arena/20 sm:p-5"
+      >
+        {icono && (
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-verde-golf/10 text-verde-golf">{icono}</span>
+        )}
+        <span className="min-w-0 flex-1">
+          <span className="block font-serif text-lg leading-tight text-carbon">{titulo}</span>
+          {ctx.resumenes[titulo] && <span className="mt-0.5 block truncate text-sm text-niebla">{ctx.resumenes[titulo]}</span>}
+        </span>
+        <ChevronDown size={20} className={`shrink-0 text-niebla transition-transform duration-200 ${abierta ? "rotate-180" : ""}`} />
+      </button>
+      {montada.current && (
+        <div hidden={!abierta} className="space-y-4 border-t border-arena p-5 sm:p-6">
+          {descripcion && <p className="-mt-1 text-sm text-niebla">{descripcion}</p>}
+          {children}
+        </div>
+      )}
+    </section>
+  );
+}
+
+
 export function ExperienciaEditor({
   inicial,
   esNueva,
@@ -72,6 +141,14 @@ export function ExperienciaEditor({
 }) {
   const router = useRouter();
   const [costos, setCostos] = useState<CostosExperiencia>(costosIniciales);
+  const [abiertas, setAbiertas] = useState<Set<string>>(() => new Set(["Información general"]));
+  const alternar = (titulo: string) =>
+    setAbiertas((prev) => {
+      const nuevo = new Set(prev);
+      if (nuevo.has(titulo)) nuevo.delete(titulo);
+      else nuevo.add(titulo);
+      return nuevo;
+    });
   const [e, setE] = useState<Experiencia>(inicial);
   const [pendiente, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -95,6 +172,24 @@ export function ExperienciaEditor({
   const politicas = e.politicas ?? [];
   const faq = e.faq ?? [];
   const carpeta = `experiencias/${e.slug || "nueva"}`;
+
+  const lineasLlenas = (a: string[]) => a.filter((x) => x.trim()).length;
+  const plural = (n: number, uno: string, varios: string) => `${n} ${n === 1 ? uno : varios}`;
+  const resumenes: Record<string, string> = {
+    "Información general": [e.nombre || "Sin nombre", e.pais].filter(Boolean).join(" · "),
+    "Ubicación en el globo": `${lat.toFixed(2)}, ${lng.toFixed(2)}`,
+    "Fechas y salidas": [e.fechas || "Sin fechas", salidas.length ? plural(salidas.length, "salida", "salidas") : ""].filter(Boolean).join(" · "),
+    "Costos y precio al público": costos.costeos.length ? plural(costos.costeos.length, "hoja de costos", "hojas de costos") : "Sin costos todavía",
+    "Precios y tarifas": [e.desde ? `Desde ${e.desde}` : "Sin precio", plural(e.tarifas.length, "tarifa", "tarifas")].join(" · "),
+    "Programa día a día": plural(e.programa.length, "día", "días"),
+    "Campos de golf": plural(e.rondas.length, "campo", "campos"),
+    "Alojamiento": plural(e.alojamiento.length, "alojamiento", "alojamientos"),
+    "Destacados y más allá del golf": `${plural(e.claves.length, "destacado", "destacados")} · ${plural(e.cifras.length, "cifra", "cifras")} · ${plural(e.masAllaDelGolf.length, "actividad", "actividades")}`,
+    "Qué incluye y qué no": `${lineasLlenas(e.incluye)} incluye · ${lineasLlenas(e.noIncluye)} no incluye`,
+    "Fotos": plural((e.foto ? 1 : 0) + (e.fotoSecundaria ? 1 : 0) + galeria.length, "foto", "fotos"),
+    "Políticas y condiciones": plural(politicas.length, "política", "políticas"),
+    "Preguntas frecuentes": plural(faq.length, "pregunta", "preguntas"),
+  };
 
   function cambiarRango(nuevo: { inicio: string; fin: string }) {
     setRango(nuevo);
@@ -148,9 +243,21 @@ export function ExperienciaEditor({
   }
 
   return (
+    <AcordeonCtx.Provider value={{ abiertas, alternar, resumenes }}>
     <div className="max-w-6xl space-y-5">
       <div className="grid items-start gap-5 lg:grid-cols-[1fr_300px]">
-        <div className="space-y-5">
+        <div className="space-y-3">
+          <div className="flex items-center justify-between px-1">
+            <p className="text-sm text-niebla">Abre cada sección para editarla.</p>
+            <span className="flex items-center gap-4 text-sm">
+              <button type="button" onClick={() => setAbiertas(new Set(TITULOS_SECCIONES))} className="text-verde-golf hover:underline">
+                Expandir todo
+              </button>
+              <button type="button" onClick={() => setAbiertas(new Set())} className="text-niebla hover:underline">
+                Contraer todo
+              </button>
+            </span>
+          </div>
           <Seccion icono={<FileText size={18} />} titulo="Información general" descripcion="Lo que lee el viajero en las tarjetas y en la página del viaje.">
             <Campo label="Nombre del viaje *">
               <Entrada value={e.nombre} placeholder="Utah Experience" onChange={texto("nombre")} />
@@ -516,7 +623,7 @@ export function ExperienciaEditor({
         </div>
 
         <aside className="space-y-5 lg:sticky lg:top-6">
-          <Seccion icono={<Rocket size={18} />} titulo="Publicación">
+          <SeccionFija icono={<Rocket size={18} />} titulo="Publicación">
             <Interruptor
               checked={e.publicada !== false}
               onChange={(v) => act({ publicada: v })}
@@ -534,7 +641,7 @@ export function ExperienciaEditor({
             <Campo label="Orden" ayuda="Menor número = aparece antes.">
               <Entrada type="number" value={e.orden ?? 0} onChange={(ev) => act({ orden: Number(ev.target.value) })} />
             </Campo>
-          </Seccion>
+          </SeccionFija>
 
           <div className="rounded-[var(--radius-card)] border border-arena bg-blanco-roto p-4 text-sm">
             <p className="font-medium text-carbon">Estado</p>
@@ -566,5 +673,6 @@ export function ExperienciaEditor({
         error={error}
       />
     </div>
+    </AcordeonCtx.Provider>
   );
 }
