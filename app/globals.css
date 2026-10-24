@@ -657,3 +657,222 @@ html {
 section[id] {
   scroll-margin-top: 8.5rem;
 }
+
+/* ───────────── Formularios de inscripción (plantillas) ─────────────
+   Cada formulario trae su color de acento (--ac), el texto sobre el acento
+   (--ac-t) y su redondeo (--fr) desde la configuración del admin. */
+.fm {
+  --ac: #a98745;
+  --ac-t: #ffffff;
+  --fr: 14px;
+  --fm-tinta: #1a1a1a;
+  --fm-suave: #5c6470;
+  --fm-borde: #e6ddc9;
+  --fm-campo: #ffffff;
+  color: var(--fm-tinta);
+}
+.fm-oscuro {
+  --fm-tinta: #f6f3ec;
+  --fm-suave: rgba(246, 243, 236, 0.62);
+  --fm-borde: rgba(255, 255, 255, 0.16);
+  --fm-campo: rgba(255, 255, 255, 0.07);
+}
+.fm-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--fm-tinta);
+}
+.fm-ayuda {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.75rem;
+  color: var(--fm-suave);
+}
+.fm-error {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #d92d20;
+}
+.fm-oscuro .fm-error { color: #ff8a80; }
+.fm-input {
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.7rem 1rem;
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--fm-tinta);
+  background: var(--fm-campo);
+  border: 1px solid var(--fm-borde);
+  border-radius: var(--fr);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+}
+.fm-input::placeholder { color: var(--fm-suave); opacity: 0.6; }
+.fm-input:hover { border-color: color-mix(in srgb, var(--ac) 55%, var(--fm-borde)); }
+.fm-input:focus {
+  border-color: var(--ac);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--ac) 18%, transparent);
+}
+.fm-input[aria-invalid="true"] { border-color: #d92d20; }
+select.fm-input { appearance: none; cursor: pointer; }
+.fm-oscuro select.fm-input option { color: #1a1a1a; }
+/* Estilo de línea (portada y conversacional) */
+.fm-linea .fm-input,
+.fm-grande .fm-input {
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid var(--fm-borde);
+  border-radius: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
+.fm-linea .fm-input:focus,
+.fm-grande .fm-input:focus { box-shadow: none; border-bottom-color: var(--ac); }
+.fm-grande .fm-input { min-height: 3.75rem; font-size: 1.6rem; }
+@media (min-width: 640px) { .fm-grande .fm-input { font-size: 2rem; } }
+/* Tarjetas de opción */
+.fm-opcion {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.8rem 1rem;
+  text-align: left;
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--fm-tinta);
+  background: var(--fm-campo);
+  border: 1px solid var(--fm-borde);
+  border-radius: var(--fr);
+  cursor: pointer;
+  transition: border-color 0.2s, background-color 0.2s, transform 0.2s;
+}
+.fm-opcion:hover { border-color: color-mix(in srgb, var(--ac) 60%, var(--fm-borde)); transform: translateY(-1px); }
+.fm-opcion[data-on="true"] {
+  border-color: var(--ac);
+  background: color-mix(in srgb, var(--ac) 14%, var(--fm-campo));
+}
+.fm-marca {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 1.4rem;
+  height: 1.4rem;
+  border: 1.5px solid var(--fm-borde);
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--fm-suave);
+  transition: all 0.2s;
+}
+.fm-marca-caja { border-radius: calc(var(--fr) * 0.4); }
+.fm-opcion[data-on="true"] .fm-marca {
+  background: var(--ac);
+  border-color: var(--ac);
+  color: var(--ac-t);
+}
+.fm-grande .fm-opcion { font-size: 1.15rem; padding: 1rem 1.25rem; }
+/* Botones */
+.fm-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 3.25rem;
+  padding: 0 2rem;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ac-t);
+  background: var(--ac);
+  border: 0;
+  border-radius: calc(var(--fr) * 2.4);
+  box-shadow: 0 14px 30px -12px color-mix(in srgb, var(--ac) 75%, transparent);
+  cursor: pointer;
+  transition: transform 0.2s, filter 0.2s, box-shadow 0.2s;
+}
+.fm-btn:hover { transform: translateY(-2px); filter: brightness(1.07); }
+.fm-btn:disabled { opacity: 0.55; pointer-events: none; }
+.fm-btn-sec {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 3.25rem;
+  padding: 0 1.25rem;
+  font: inherit;
+  font-size: 0.875rem;
+  color: var(--fm-suave);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.fm-btn-sec:hover { color: var(--fm-tinta); }
+.fm-chip-ac {
+  background: color-mix(in srgb, var(--ac) 16%, transparent);
+  color: var(--fm-tinta);
+}
+@keyframes fm-entra {
+  from { opacity: 0; transform: translateY(26px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes fm-entra-atras {
+  from { opacity: 0; transform: translateY(-26px); }
+  to { opacity: 1; transform: none; }
+}
+.fm-entra { animation: fm-entra 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.fm-entra-atras { animation: fm-entra-atras 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@keyframes fm-deslizar {
+  from { opacity: 0; transform: translateX(28px); }
+  to { opacity: 1; transform: none; }
+}
+.fm-desliza { animation: fm-deslizar 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@keyframes fm-orbe {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(40px, -30px) scale(1.12); }
+}
+.fm-orbe { animation: fm-orbe 14s ease-in-out infinite; }
+.fm-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  background: var(--fm-campo);
+  border: 1px solid var(--fm-borde);
+  border-radius: var(--fr);
+}
+.fm-stepper button {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-radius: calc(var(--fr) * 0.7);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.fm-stepper button:hover { background: color-mix(in srgb, var(--ac) 16%, transparent); }
+.fm-stepper input {
+  width: 3.5rem;
+  font: inherit;
+  font-size: 1.15rem;
+  text-align: center;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  outline: none;
+  -moz-appearance: textfield;
+}
+.fm-stepper input::-webkit-outer-spin-button,
+.fm-stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.fm-pago {
+  padding: 1rem 1.15rem;
+  background: color-mix(in srgb, var(--ac) 11%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ac) 35%, transparent);
+  border-radius: var(--fr);
+}

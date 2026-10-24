@@ -11,6 +11,8 @@ import {
   Tag,
   CalendarRange,
   Webhook,
+  FileInput,
+  CreditCard,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 
@@ -18,6 +20,8 @@ export const NAV = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, grupo: "Resumen" },
   { href: "/admin/crm", label: "CRM", icon: Users, grupo: "Ventas" },
   { href: "/admin/reservas", label: "Reservas", icon: CalendarCheck, grupo: "Ventas" },
+  { href: "/admin/formularios", label: "Formularios", icon: FileInput, grupo: "Ventas" },
+  { href: "/admin/pagos", label: "Pagos", icon: CreditCard, grupo: "Ventas" },
   { href: "/admin/experiencias", label: "Experiencias", icon: Plane, grupo: "Catálogo" },
   { href: "/admin/tarifas", label: "Tarifas", icon: Tag, grupo: "Catálogo" },
   { href: "/admin/calendario", label: "Calendario", icon: CalendarRange, grupo: "Catálogo" },

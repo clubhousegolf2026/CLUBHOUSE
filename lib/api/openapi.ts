@@ -335,6 +335,10 @@ function ejemploEvento(id: EventoId): unknown {
       return { ...base, evento: id, datos: { lead: { ...LEAD_EJEMPLO, estado: "cotizado" }, etapa_anterior: "contactado", etapa_nueva: "cotizado" } };
     case "reserva.creada":
       return { ...base, evento: id, datos: { id: "c3b1f2a0-0d6e-4c9a-8a77-5e1d0b9f4a22", estado_pago: "pendiente", total: 15000000, anticipo: 4500000, cliente: { nombre: "Carlos Gómez", email: "carlos@example.com" } } };
+    case "inscripcion.creada":
+      return { ...base, evento: id, datos: { inscripcion: "7a1d6f0e-0c2b-4b6e-9d3a-1f2e3d4c5b6a", formulario: "inscripcion-utah", nombre: "Carlos Gómez", email: "carlos@example.com", respuestas: { personas: "4" }, monto_cop: 12000000, pago_referencia: "CH-LX9K2-A1B2C3" } };
+    case "pago.aprobado":
+      return { ...base, evento: id, datos: { referencia: "CH-LX9K2-A1B2C3", monto_cop: 12000000, concepto: "Inscripción Utah Experience", metodo: "CARD", wompi_id: "1234-1700000000-12345", origen: "inscripcion" } };
     case "reserva.pago_cambiado":
       return { ...base, evento: id, datos: { id: "c3b1f2a0-0d6e-4c9a-8a77-5e1d0b9f4a22", estado_pago_anterior: "pendiente", estado_pago: "pagado", total: 15000000, anticipo: 4500000 } };
   }
