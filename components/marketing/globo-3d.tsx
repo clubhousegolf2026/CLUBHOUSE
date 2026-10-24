@@ -351,12 +351,35 @@ export function Globo3D({
     coords: { lat: number; lng: number; altitude: number },
   ) {
     if (Date.now() - clicPorObjetoRef.current < 60) return;
+    if (tocarSiHayBanderaCerca(coords.lat, coords.lng)) return;
     alTocarZona(coords.lat, coords.lng);
   }
 
   function alClicarGlobo(coords: { lat: number; lng: number }) {
     if (Date.now() - clicPorObjetoRef.current < 60) return;
+    if (tocarSiHayBanderaCerca(coords.lat, coords.lng)) return;
     alTocarZona(coords.lat, coords.lng);
+  }
+
+  // Los banderines son pequeños y el clic casi nunca cae exacto sobre el
+  // sprite: cualquier toque en tierra u océano cerca de uno cuenta como
+  // toque al banderín (≈ 50 px en pantalla). Así son muy sensibles al clic.
+  const RADIO_SENSIBLE = 0.16;
+  function tocarSiHayBanderaCerca(lat: number, lng: number): boolean {
+    let mejor: PuntoGlobo | null = null;
+    let mejorDistancia = Infinity;
+    for (const p of puntos) {
+      const d = geoDistance([lng, lat], [p.lng, p.lat]);
+      if (d < mejorDistancia) {
+        mejorDistancia = d;
+        mejor = p;
+      }
+    }
+    if (mejor && mejorDistancia < RADIO_SENSIBLE) {
+      alHacerClick(mejor);
+      return true;
+    }
+    return false;
   }
 
   return (
@@ -643,7 +666,7 @@ function crearBanderaSprite(
   });
   const sprite = new THREE.Sprite(material);
 
-  const escala = activo ? 17 : 13;
+  const escala = activo ? 20 : 16;
   sprite.scale.set(escala * (W / H), escala, 1);
   // El ancla queda en la base del asta (donde toca el globo), no al centro.
   sprite.center.set(0.5, (H - (H - 16) + 6) / H);

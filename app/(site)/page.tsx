@@ -1,9 +1,8 @@
 import { Hero } from "@/components/marketing/hero";
 import { MarquesinaCampos } from "@/components/marketing/marquesina-campos";
-import { FiltroPaquetes } from "@/components/marketing/filtro-paquetes";
+import { PackageCard } from "@/components/marketing/package-card";
 import { EncabezadoSeccion } from "@/components/marketing/encabezado-seccion";
 import { Oro } from "@/components/marketing/pagina-hero";
-import { Testimonios } from "@/components/marketing/testimonios";
 import { SuenosScroll } from "@/components/marketing/suenos-scroll";
 import { EXPERIENCIAS } from "@/lib/contenido/experiencias";
 import {
@@ -13,22 +12,13 @@ import {
   SeccionIncluye,
   SeccionProceso,
 } from "@/components/marketing/secciones-marca";
-import {
-  getDestinosConPaquetes,
-  getPaquetes,
-  getTestimonios,
-} from "@/lib/data";
+import type { PaquetePredefinido, Destino } from "@/lib/data/types";
 
 export const revalidate = 300;
 
-export default async function HomePage() {
-  const [destinosCatalogo, paquetes, testimonios] = await Promise.all([
-    getDestinosConPaquetes(),
-    getPaquetes(),
-    getTestimonios(),
-  ]);
+export default function HomePage() {
   // Las dos experiencias firmadas también se marcan en el globo.
-  const destinosExperiencia: typeof destinosCatalogo = EXPERIENCIAS.map((e) => ({
+  const destinosExperiencia: (Destino & { paquetes: PaquetePredefinido[] })[] = EXPERIENCIAS.map((e) => ({
     id: `exp-${e.slug}`,
     nombre: e.nombre,
     region: e.subtitulo,
@@ -42,9 +32,9 @@ export default async function HomePage() {
     paquetes: [],
     experiencia: { slug: e.slug, desde: e.desde, fechas: e.fechas, duracion: e.duracion },
   }));
-  const destinos = [...destinosCatalogo, ...destinosExperiencia];
+  const destinos = destinosExperiencia;
   // Las experiencias firmadas también salen como tarjetas junto a los paquetes.
-  const tarjetasExperiencia: typeof paquetes = EXPERIENCIAS.map((e) => {
+  const tarjetasExperiencia: PaquetePredefinido[] = EXPERIENCIAS.map((e) => {
     const noches = Number(/(\d+)\s*noches/.exec(e.duracion)?.[1] ?? 0);
     return {
       id: `exp-${e.slug}`,
@@ -74,29 +64,27 @@ export default async function HomePage() {
       </div>
 
       <SuenosScroll>
-        {paquetes.length > 0 && (
-          <section
-            id="planes"
-            className="scroll-mt-24 bg-blanco-roto px-6 py-24 sm:px-10 sm:py-28 lg:px-16 xl:px-24"
-          >
-            <div className="mx-auto max-w-[1600px]">
-              <EncabezadoSeccion
-                eyebrow="Listos para reservar"
-                titulo={
-                  <>
-                    Planes de golf <Oro>listos para reservar</Oro>
-                  </>
-                }
-                descripcion="Viajes internacionales con fecha, y itinerarios cortos para jugar cerca de casa. Filtre por destino, duración, presupuesto o campo."
-              />
-              <FiltroPaquetes
-                paquetes={paquetes}
-                destinos={destinos}
-                experiencias={tarjetasExperiencia}
-              />
+        <section
+          id="planes"
+          className="scroll-mt-24 bg-blanco-roto px-6 py-24 sm:px-10 sm:py-28 lg:px-16 xl:px-24"
+        >
+          <div className="mx-auto max-w-[1600px]">
+            <EncabezadoSeccion
+              eyebrow="Experiencias firmadas"
+              titulo={
+                <>
+                  Viajes que ya tienen <Oro>nombre y fecha</Oro>
+                </>
+              }
+              descripcion="Dos itinerarios armados por nuestro equipo, listos para salir con su grupo."
+            />
+            <div className="mx-auto grid max-w-5xl gap-6 sm:grid-cols-2 xl:gap-8">
+              {tarjetasExperiencia.map((p) => (
+                <PackageCard key={p.id} paquete={p} />
+              ))}
             </div>
-          </section>
-        )}
+          </div>
+        </section>
       </SuenosScroll>
       <SeccionIncluye />
       <SeccionDestinos />
@@ -104,27 +92,6 @@ export default async function HomePage() {
 
       <SeccionProceso />
       <SeccionDirector />
-
-      {testimonios.length > 0 && (
-        <section className="grano relative isolate overflow-hidden bg-[#061a13] px-6 py-24 sm:px-10 sm:py-28 lg:px-16 xl:px-24">
-          <div
-            aria-hidden
-            className="absolute inset-x-0 top-0 -z-10 h-px bg-gradient-to-r from-transparent via-[#c6a664]/60 to-transparent"
-          />
-          <div className="mx-auto max-w-[1400px]">
-            <EncabezadoSeccion
-              oscuro
-              eyebrow="Lo que dicen"
-              titulo={
-                <>
-                  Viajeros que ya <Oro>jugaron</Oro> con nosotros
-                </>
-              }
-            />
-            <Testimonios testimonios={testimonios} />
-          </div>
-        </section>
-      )}
 
       <SeccionContacto />
     </>

@@ -6,13 +6,14 @@ import { PageTransition } from "@/components/site/page-transition";
 import { RegistroServiceWorker } from "@/components/site/registro-service-worker";
 import { JsonLd } from "@/components/site/json-ld";
 import { SITE_NOMBRE, SITE_URL } from "@/lib/site";
+import { MARCA } from "@/lib/contenido/clubhouse";
 import "../globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   alternates: { canonical: "./" },
   title: {
-    default: "Clubhouse · Turismo de golf en Colombia",
+    default: "Clubhouse · Bespoke golf travel",
     template: "%s · Clubhouse",
   },
   description:
@@ -53,10 +54,10 @@ export default function RootLayout({
             url: SITE_URL,
             logo: `${SITE_URL}/icons/icon-512.png`,
             description:
-              "Paquetes de turismo de golf en Colombia: campos, hotel, transporte y anfitrión local.",
+              "Agencia bespoke de viajes de golf. Cada viaje se diseña desde cero, alrededor de su juego, su grupo y su forma de viajar.",
             areaServed: "CO",
-            email: "hola@clubhouse.co",
-            telephone: "+57 601 600 0000",
+            email: MARCA.email,
+            telephone: MARCA.whatsapp,
           }}
         />
         <RegistroServiceWorker />

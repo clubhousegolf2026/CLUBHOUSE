@@ -11,8 +11,6 @@ import { Logo } from "@/components/site/logo";
 const NAV = [
   { href: "/", label: "Inicio" },
   { href: "/#planes", label: "Experiencias" },
-  { href: "/paquetes", label: "Paquetes" },
-  { href: "/cotizador", label: "Arme su viaje" },
   { href: "/nosotros", label: "Nosotros" },
   { href: "/contacto", label: "Contacto" },
 ];

@@ -17,7 +17,6 @@ export function Hero({ destinos }: { destinos: DestinoConPaquetes[] }) {
   const estadisticas = [
     { valor: "50", etiqueta: "destinos" },
     { valor: "5", etiqueta: "continentes" },
-    { valor: "95+", etiqueta: "campos jugados" },
   ];
 
   const [seleccion, setSeleccion] = useState<DestinoConPaquetes | null>(null);

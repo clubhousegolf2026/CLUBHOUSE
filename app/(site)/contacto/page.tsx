@@ -1,5 +1,6 @@
 "use client";
 
+import { MARCA } from "@/lib/contenido/clubhouse";
 import { useState } from "react";
 import { CheckCircle2, Mail, Phone, MapPin } from "lucide-react";
 import { PaginaHero, Oro } from "@/components/marketing/pagina-hero";
@@ -103,9 +104,9 @@ export default function ContactoPage() {
 
           <aside className="space-y-4">
             {[
-              { icono: MapPin, titulo: "Oficina", texto: "Bogotá D.C., Colombia", href: undefined as string | undefined },
-              { icono: Mail, titulo: "Correo", texto: "hola@clubhouse.co", href: "mailto:hola@clubhouse.co" },
-              { icono: Phone, titulo: "Teléfono", texto: "+57 (601) 600 0000", href: "tel:+5716000000" },
+              { icono: MapPin, titulo: "Oficina", texto: MARCA.ciudad, href: undefined as string | undefined },
+              { icono: Mail, titulo: "Correo", texto: MARCA.email, href: `mailto:${MARCA.email}` },
+              { icono: Phone, titulo: "WhatsApp", texto: MARCA.whatsapp, href: MARCA.whatsappUrl },
             ].map(({ icono: Icono, titulo, texto, href }) => {
               const contenido = (
                 <>

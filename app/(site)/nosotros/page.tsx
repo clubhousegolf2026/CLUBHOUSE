@@ -1,36 +1,16 @@
 import type { Metadata } from "next";
-import { Flag, Plus, UserCheck, Zap } from "lucide-react";
+import { Flag, UserCheck, Zap } from "lucide-react";
 import { PaginaHero, Oro } from "@/components/marketing/pagina-hero";
-import { EncabezadoSeccion } from "@/components/marketing/encabezado-seccion";
 
 export const metadata: Metadata = {
   title: "Nosotros",
   description: "Quiénes somos y cómo funciona Clubhouse.",
 };
 
-const FAQ = [
-  {
-    q: "¿El precio del constructor es el precio final?",
-    a: "Es un precio de referencia muy cercano al final. Antes de confirmar la reserva verificamos disponibilidad y tarifas vigentes; si hay algún ajuste te lo informamos antes de cobrar.",
-  },
-  {
-    q: "¿Cómo pago?",
-    a: "En línea, con tarjeta o PSE, a través de una pasarela colombiana (Wompi, ePayco o PayU). Reservas con el 30% de anticipo y el saldo antes del viaje.",
-  },
-  {
-    q: "¿Qué pasa después de reservar?",
-    a: "Recibes una confirmación automática con tu código de reserva e itinerario. Un anfitrión local te contacta para coordinar horarios de salida y traslados.",
-  },
-  {
-    q: "¿Puedo cambiar la fecha?",
-    a: "Sí, sujeto a disponibilidad y a las políticas de cada campo y hotel. Escríbenos con al menos 72 horas de anticipación.",
-  },
-];
-
 const VALORES = [
-  { icono: Flag, titulo: "Campos seleccionados", texto: "Trabajamos en alianza con los mejores campos del mundo y las principales cadenas hoteleras." },
-  { icono: Zap, titulo: "Itinerario a la medida", texto: "Diseñamos su itinerario desde cero y le acompañamos de puerta a puerta." },
-  { icono: UserCheck, titulo: "Anfitrión local", texto: "Le acompañamos durante todo el viaje: horarios, traslados y detalles." },
+  { icono: Flag, titulo: "Itinerario a la medida", texto: "Cada viaje se diseña desde cero, alrededor de su juego, su grupo y su forma de viajar." },
+  { icono: Zap, titulo: "50 destinos en 5 continentes", texto: "América, Europa, Asia, África y Oceanía: los grandes campos del mundo en un mismo lugar." },
+  { icono: UserCheck, titulo: "Años en el golf", texto: "Fundada y dirigida por Juan Manuel Morales Calderón, con 10 años como Golf Manager en FROSCH Latinoamérica." },
 ];
 
 export default function NosotrosPage() {
@@ -40,7 +20,7 @@ export default function NosotrosPage() {
         eyebrow="Quiénes somos"
         titulo={
           <>
-            Golf en Colombia, <Oro>sin fricción</Oro>
+            Golf de clase mundial, <Oro>a su medida</Oro>
           </>
         }
         descripcion="Clubhouse es una agencia bespoke de viajes de golf. Cada viaje se diseña desde cero, alrededor de su juego, su grupo y su forma de viajar."
@@ -71,36 +51,6 @@ export default function NosotrosPage() {
         </div>
       </section>
 
-      <section className="grano relative isolate overflow-hidden bg-[#071d16] px-6 py-24 sm:px-10 sm:py-28 lg:px-16 xl:px-24">
-        <div className="hero-degradado absolute inset-0 -z-10 opacity-70" />
-        <div className="mx-auto max-w-3xl">
-          <EncabezadoSeccion
-            oscuro
-            eyebrow="Preguntas frecuentes"
-            titulo={
-              <>
-                Antes de <Oro>reservar</Oro>
-              </>
-            }
-          />
-          <div className="space-y-3">
-            {FAQ.map((f) => (
-              <details
-                key={f.q}
-                className="group rounded-2xl border border-white/10 bg-white/[0.05] backdrop-blur-md transition-colors open:border-[#c6a664]/40 open:bg-white/[0.09]"
-              >
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-6 [&::-webkit-details-marker]:hidden">
-                  <h3 className="font-serif text-lg text-white">{f.q}</h3>
-                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-white/20 text-[#e8d3a0] transition-transform duration-300 group-open:rotate-45">
-                    <Plus size={16} />
-                  </span>
-                </summary>
-                <p className="px-6 pb-6 leading-relaxed text-crema/70">{f.a}</p>
-              </details>
-            ))}
-          </div>
-        </div>
-      </section>
     </>
   );
 }

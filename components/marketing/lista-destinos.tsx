@@ -64,7 +64,9 @@ export function ListaDestinos({
                   {d.region} · {d.pais}
                   {d.paquetes.length > 0
                     ? ` · ${d.paquetes.length} paquete${d.paquetes.length > 1 ? "s" : ""}`
-                    : " · próximamente"}
+                    : d.experiencia
+                      ? ` · ${d.experiencia.fechas}`
+                      : " · próximamente"}
                 </span>
               </span>
               <ArrowRight

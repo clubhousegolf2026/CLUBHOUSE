@@ -53,19 +53,6 @@ export function Footer() {
             Agencia bespoke de viajes de golf. 50 destinos en 5 continentes,
             con itinerarios diseñados desde cero alrededor de su juego.
           </p>
-          <ul className="mt-6 flex gap-2.5">
-            {REDES.map(({ icono: Icono, etiqueta, href }) => (
-              <li key={etiqueta}>
-                <a
-                  href={href}
-                  aria-label={etiqueta}
-                  className="grid h-10 w-10 place-items-center rounded-full border border-white/15 bg-white/[0.05] text-crema/75 transition-all hover:-translate-y-0.5 hover:border-[#c6a664]/60 hover:bg-[#c6a664]/15 hover:text-[#ecd396]"
-                >
-                  <Icono size={17} />
-                </a>
-              </li>
-            ))}
-          </ul>
         </div>
 
         <nav>
@@ -74,8 +61,6 @@ export function Footer() {
           </h2>
           <ul className="mt-5 space-y-3 text-sm">
             <li><Link href="/#planes" className={enlace}>Experiencias</Link></li>
-            <li><Link href="/paquetes" className={enlace}>Paquetes</Link></li>
-            <li><Link href="/cotizador" className={enlace}>Arme su viaje</Link></li>
             <li><Link href="/nosotros" className={enlace}>Nosotros</Link></li>
             <li><Link href="/contacto" className={enlace}>Contacto</Link></li>
           </ul>
