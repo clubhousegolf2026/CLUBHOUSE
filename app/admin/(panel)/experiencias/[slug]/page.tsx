@@ -13,7 +13,7 @@ export default async function EditarExperienciaPage({ params }: { params: Promis
   return (
     <div className="space-y-6">
       <div>
-        <Link href="/admin/destinos" className="text-sm text-niebla hover:text-carbon">← Volver a destinos</Link>
+        <Link href="/admin/paquetes" className="text-sm text-niebla hover:text-carbon">← Volver a paquetes</Link>
         <h1 className="mt-2 font-serif text-2xl text-carbon"><span aria-hidden>{e.bandera}</span> {e.nombre}</h1>
         <p className="text-sm text-niebla">
           Lo que cambies aquí se actualiza en el inicio, en los planes, en el globo y en la página del viaje.{" "}

@@ -10,8 +10,7 @@ import {
   Package,
   Tag,
   CalendarRange,
-  Globe2,
-} from "lucide-react";
+  } from "lucide-react";
 import { cn } from "@/lib/cn";
 
 export const NAV = [
@@ -19,7 +18,6 @@ export const NAV = [
   { href: "/admin/crm", label: "CRM", icon: Users, grupo: "Ventas" },
   { href: "/admin/reservas", label: "Reservas", icon: CalendarCheck, grupo: "Ventas" },
   { href: "/admin/paquetes", label: "Paquetes", icon: Package, grupo: "Catálogo" },
-  { href: "/admin/destinos", label: "Destinos", icon: Globe2, grupo: "Catálogo" },
   { href: "/admin/tarifas", label: "Tarifas", icon: Tag, grupo: "Catálogo" },
   { href: "/admin/calendario", label: "Calendario", icon: CalendarRange, grupo: "Catálogo" },
 ] as const;
