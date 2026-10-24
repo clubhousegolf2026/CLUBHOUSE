@@ -20,6 +20,7 @@ export type Database = {
     Tables: {
       bloqueos_calendario: {
         Row: {
+          calendario_id: string | null
           created_at: string
           factor_precio: number | null
           fecha_fin: string
@@ -30,6 +31,7 @@ export type Database = {
           tipo: Database["public"]["Enums"]["tipo_bloqueo"]
         }
         Insert: {
+          calendario_id?: string | null
           created_at?: string
           factor_precio?: number | null
           fecha_fin: string
@@ -40,6 +42,7 @@ export type Database = {
           tipo: Database["public"]["Enums"]["tipo_bloqueo"]
         }
         Update: {
+          calendario_id?: string | null
           created_at?: string
           factor_precio?: number | null
           fecha_fin?: string

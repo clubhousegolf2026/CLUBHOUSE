@@ -92,13 +92,31 @@ export function SeccionIncluye() {
             return (
               <li
                 key={item.titulo}
-                className="group rounded-[1.75rem] border border-arena/70 bg-white/70 p-7 shadow-[0_20px_50px_-30px_rgba(11,43,33,0.4)] backdrop-blur-sm transition-all duration-500 hover:-translate-y-1.5 hover:border-champagne/50 hover:shadow-[0_30px_60px_-28px_rgba(11,43,33,0.5)]"
+                className="group relative isolate overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-[#10402f] via-[#0b2b21] to-[#061a13] p-7 shadow-[0_30px_60px_-32px_rgba(7,29,22,0.75)] ring-1 ring-[#c6a664]/25 transition-all duration-500 hover:-translate-y-2 hover:ring-[#c6a664]/60 hover:shadow-[0_40px_70px_-30px_rgba(7,29,22,0.85)] sm:p-8"
               >
-                <span className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-[#ecd396] to-[#a98745] text-[#1a1a1a] shadow-md shadow-champagne/30 transition-transform duration-500 group-hover:-rotate-6 group-hover:scale-110">
-                  <Icono size={21} />
+                {/* Resplandor dorado que crece al pasar el cursor */}
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute -right-14 -top-14 -z-10 h-48 w-48 rounded-full bg-[#c6a664]/20 blur-3xl transition-all duration-700 group-hover:scale-150 group-hover:bg-[#c6a664]/30"
+                />
+                {/* Numeral grande de fondo */}
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute right-5 top-2 -z-10 select-none font-serif text-[6rem] leading-none text-white/[0.05] transition-colors duration-500 group-hover:text-[#c6a664]/20"
+                >
+                  {String(i + 1).padStart(2, "0")}
                 </span>
-                <h3 className="mt-5 font-serif text-xl text-carbon">{item.titulo}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-niebla">{item.texto}</p>
+
+                <span className="grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-[#f3dfa8] via-[#d9b96a] to-[#a98745] text-[#14251d] shadow-lg shadow-[#c6a664]/30 ring-4 ring-[#c6a664]/10 transition-transform duration-500 group-hover:-rotate-6 group-hover:scale-110">
+                  <Icono size={24} strokeWidth={1.75} />
+                </span>
+
+                <h3 className="mt-7 font-serif text-2xl leading-tight text-white">{item.titulo}</h3>
+                <span
+                  aria-hidden
+                  className="mt-4 block h-px w-10 bg-gradient-to-r from-[#c6a664] to-transparent transition-all duration-500 group-hover:w-28"
+                />
+                <p className="mt-4 text-[15px] leading-relaxed text-crema/70">{item.texto}</p>
               </li>
             );
           })}

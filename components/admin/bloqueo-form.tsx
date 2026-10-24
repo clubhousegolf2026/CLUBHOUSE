@@ -6,7 +6,7 @@ import { CalendarPlus } from "lucide-react";
 import { AlertaError, Campo, Entrada, Selector } from "@/components/admin/form-ui";
 import { crearBloqueo } from "@/app/admin/(panel)/calendario/actions";
 
-export function BloqueoForm({ paqueteId }: { paqueteId: string | null }) {
+export function BloqueoForm({ paqueteId = null, calendarioId = null }: { paqueteId?: string | null; calendarioId?: string | null }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -35,6 +35,7 @@ export function BloqueoForm({ paqueteId }: { paqueteId: string | null }) {
           nota: nota || null,
           factorPrecio: factor,
           paqueteId,
+          calendarioId,
         });
         setFechaInicio("");
         setFechaFin("");

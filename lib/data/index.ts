@@ -211,11 +211,12 @@ export async function getDestinosConPaquetes(): Promise<
 export async function getBloqueos(): Promise<BloqueoCalendario[]> {
   if (FUENTE === "mock") return BLOQUEOS_MOCK;
 
-  const { data, error } = await getSupabase()
-    .from("bloqueos_calendario")
-    .select("*")
-    .is("paquete_id", null)
-    .order("fecha_inicio");
-  if (error) throw new Error(`getBloqueos: ${error.message}`);
-  return (data ?? []).map(mapBloqueo);
+  const consulta = () =>
+    getSupabase().from("bloqueos_calendario").select("*").is("paquete_id", null).order("fecha_inicio");
+  // Solo el "itinerario libre": los rangos de calendarios propios no afectan al cotizador.
+  let r = await consulta().is("calendario_id", null);
+  // Antes de la migración 0008 la columna no existe: se leen todos como antes.
+  if (r.error?.code === "42703") r = await consulta();
+  if (r.error) throw new Error(`getBloqueos: ${r.error.message}`);
+  return (r.data ?? []).map(mapBloqueo);
 }
