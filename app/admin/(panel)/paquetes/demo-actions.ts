@@ -1,7 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { createServerSupabase } from "@/lib/supabase/server";
+
+// Cliente sin tipos: las tablas se recorren por nombre en un arreglo.
+async function clienteLibre(): Promise<SupabaseClient> {
+  return (await createServerSupabase()) as unknown as SupabaseClient;
+}
 
 /** Tablas del catálogo que se sembraron con datos de demostración. Los leads,
  *  cotizaciones y reservas (CRM) NO se tocan nunca desde aquí. */
@@ -17,7 +23,7 @@ const TABLAS_DEMO = [
 ] as const;
 
 export async function contarDatosDemo(): Promise<{ etiqueta: string; total: number }[]> {
-  const supabase = await createServerSupabase();
+  const supabase = await clienteLibre();
   const conteos = await Promise.all(
     TABLAS_DEMO.map(async (t) => {
       const { count } = await supabase.from(t.tabla).select("*", { count: "exact", head: true });
@@ -30,7 +36,7 @@ export async function contarDatosDemo(): Promise<{ etiqueta: string; total: numb
 export async function eliminarDatosDemo(): Promise<
   { ok: true; borrados: { etiqueta: string; total: number }[] } | { ok: false; error: string }
 > {
-  const supabase = await createServerSupabase();
+  const supabase = await clienteLibre();
   const borrados: { etiqueta: string; total: number }[] = [];
 
   for (const t of TABLAS_DEMO) {

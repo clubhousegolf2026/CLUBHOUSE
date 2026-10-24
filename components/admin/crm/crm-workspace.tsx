@@ -169,6 +169,12 @@ export function CrmWorkspace({
     URL.revokeObjectURL(url);
   }
 
+  const opcionesInteres: [string, string, number][] = [
+    ["todos", "Todas las experiencias", leads.length],
+    ...INTERESES.map((i): [string, string, number] => [i.id, i.nombre, leads.filter((l) => interesDe(l) === i.id).length]),
+    ["sin", "Sin definir", leads.filter((l) => interesDe(l) === null).length],
+  ];
+
   const leadAbierto = abierto ? leads.find((l) => l.id === abierto) ?? null : null;
   const hayFiltros = q || filtroEstado !== "todos" || filtroOrigen !== "todos" || filtroInteres !== "todos" || soloVencidos;
 
@@ -214,11 +220,7 @@ export function CrmWorkspace({
       </div>
 
       <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Experiencia de interés">
-        {([
-          ["todos", "Todas las experiencias", leads.length],
-          ...INTERESES.map((i) => [i.id, i.nombre, leads.filter((l) => interesDe(l) === i.id).length] as const),
-          ["sin", "Sin definir", leads.filter((l) => interesDe(l) === null).length],
-        ] as const).map(([id, nombre, n]) => (
+        {opcionesInteres.map(([id, nombre, n]) => (
           <button
             key={id}
             onClick={() => setFiltroInteres(id)}
