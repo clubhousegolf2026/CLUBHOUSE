@@ -10,7 +10,8 @@ import {
   Plane,
   Tag,
   CalendarRange,
-  } from "lucide-react";
+  Webhook,
+} from "lucide-react";
 import { cn } from "@/lib/cn";
 
 export const NAV = [
@@ -20,6 +21,7 @@ export const NAV = [
   { href: "/admin/experiencias", label: "Experiencias", icon: Plane, grupo: "Catálogo" },
   { href: "/admin/tarifas", label: "Tarifas", icon: Tag, grupo: "Catálogo" },
   { href: "/admin/calendario", label: "Calendario", icon: CalendarRange, grupo: "Catálogo" },
+  { href: "/admin/integraciones", label: "APIs y webhooks", icon: Webhook, grupo: "Sistema" },
 ] as const;
 
 const esActivo = (pathname: string, href: string) =>

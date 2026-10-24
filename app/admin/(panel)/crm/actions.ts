@@ -1,6 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { programarEvento } from "@/lib/api/webhooks";
+import { leadApi } from "@/app/api/v1/_comun";
 import { createServerSupabase } from "@/lib/supabase/server";
 import type { Database } from "@/lib/data/database.types";
 
@@ -86,10 +89,11 @@ export async function crearContacto(datos: {
       ...(datos.etiquetas?.length ? { etiquetas: datos.etiquetas } : {}),
       origen: "contacto",
     })
-    .select("id")
+    .select("*")
     .single();
   if (error) return { ok: false, error: mensaje(error) };
 
+  programarEvento("lead.creado", leadApi(data), supabase as unknown as SupabaseClient);
   revalidatePath("/admin/crm");
   revalidatePath("/admin");
   return { ok: true, id: data.id };
@@ -132,12 +136,24 @@ export async function moverContacto(
   estado: EstadoContacto,
 ): Promise<Resultado> {
   const supabase = await createServerSupabase();
+  const { data: antes } = await supabase.from("contactos").select("estado").eq("id", id).maybeSingle();
   const { error } = await supabase.rpc("avanzar_estado_contacto", {
     p_contacto: id,
     p_nuevo: estado,
     p_nota: null,
   });
   if (error) return { ok: false, error: mensaje(error) };
+
+  if (antes && antes.estado !== estado) {
+    const { data: lead } = await supabase.from("contactos").select("*").eq("id", id).maybeSingle();
+    if (lead) {
+      programarEvento(
+        "lead.etapa_cambiada",
+        { lead: leadApi(lead), etapa_anterior: antes.estado, etapa_nueva: estado },
+        supabase as unknown as SupabaseClient,
+      );
+    }
+  }
   revalidatePath("/admin");
   return { ok: true };
 }

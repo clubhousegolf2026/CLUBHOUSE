@@ -3,6 +3,7 @@ import { z } from "zod";
 import { getSupabase } from "@/lib/data/supabase";
 import { rateLimit } from "@/lib/rate-limit";
 import { esBot, ipDe } from "@/lib/anti-spam";
+import { programarEvento } from "@/lib/api/webhooks";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -48,6 +49,16 @@ export async function POST(req: Request) {
   if (error) {
     return NextResponse.json({ error: "No se pudo guardar" }, { status: 502 });
   }
+
+  programarEvento("lead.creado", {
+    nombre,
+    email,
+    telefono: telefono || null,
+    estado: "nuevo",
+    origen: "contacto",
+    mensaje: mensaje || null,
+    fecha_tentativa: fechaTentativa || null,
+  });
 
   return NextResponse.json({ ok: true }, { headers: { "Cache-Control": "no-store" } });
 }

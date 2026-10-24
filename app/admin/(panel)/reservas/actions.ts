@@ -1,15 +1,21 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { createServerSupabase } from "@/lib/supabase/server";
+import { programarEvento } from "@/lib/api/webhooks";
+import { reservaApi, SELECT_RESERVA, type FilaReserva } from "@/app/api/v1/reservas/_forma";
 
 export async function marcarReservaPagada(reservaId: string, pagada: boolean) {
   const supabase = await createServerSupabase();
+  const db = supabase as unknown as SupabaseClient;
+  const antes = await estadoPagoActual(db, reservaId);
   const { error } = await supabase.rpc("marcar_reserva_pagada", {
     p_reserva: reservaId,
     p_pagada: pagada,
   });
   if (error) throw new Error(error.message);
+  await avisarPago(db, reservaId, antes);
 
   revalidatePath("/admin");
   revalidatePath("/admin/reservas");
@@ -17,6 +23,24 @@ export async function marcarReservaPagada(reservaId: string, pagada: boolean) {
 }
 
 type Res = { ok: true } | { ok: false; error: string };
+
+async function reservaParaEvento(db: SupabaseClient, id: string) {
+  const { data } = await db.from("reservas").select(SELECT_RESERVA).eq("id", id).maybeSingle();
+  return data ? reservaApi(data as unknown as FilaReserva) : null;
+}
+
+/** Avisa a los webhooks si el estado de pago cambió. */
+async function avisarPago(db: SupabaseClient, id: string, anterior: string | undefined) {
+  const r = await reservaParaEvento(db, id);
+  if (r && anterior && r.estado_pago !== anterior) {
+    programarEvento("reserva.pago_cambiado", { ...r, estado_pago_anterior: anterior }, db);
+  }
+}
+
+async function estadoPagoActual(db: SupabaseClient, id: string): Promise<string | undefined> {
+  const { data } = await db.from("reservas").select("estado_pago").eq("id", id).maybeSingle();
+  return data?.estado_pago as string | undefined;
+}
 
 export async function crearReserva(d: {
   contactoId: string;
@@ -60,6 +84,8 @@ export async function crearReserva(d: {
     return { ok: false, error: e2.message };
   }
 
+  const nueva = await reservaParaEvento(supabase as unknown as SupabaseClient, res.id);
+  if (nueva) programarEvento("reserva.creada", nueva, supabase as unknown as SupabaseClient);
   revalidatePath("/admin/reservas");
   revalidatePath("/admin");
   return { ok: true, id: res.id };
@@ -75,6 +101,7 @@ export async function actualizarReserva(
   },
 ): Promise<Res> {
   const supabase = await createServerSupabase();
+  const antes = await estadoPagoActual(supabase as unknown as SupabaseClient, id);
   const { error } = await supabase
     .from("reservas")
     .update({
@@ -93,6 +120,7 @@ export async function actualizarReserva(
     const r = await supabase.from("reservas").update({ estado_pago: d.estadoPago }).eq("id", id);
     if (r.error) return { ok: false, error: r.error.message };
   }
+  await avisarPago(supabase as unknown as SupabaseClient, id, antes);
 
   revalidatePath("/admin/reservas");
   revalidatePath(`/admin/reservas/${id}`);
@@ -121,6 +149,7 @@ export async function moverReserva(
   estado: "pendiente" | "pagado" | "fallido" | "reembolsado",
 ): Promise<Res> {
   const supabase = await createServerSupabase();
+  const antes = await estadoPagoActual(supabase as unknown as SupabaseClient, id);
   if (estado === "pagado" || estado === "fallido") {
     const r = await supabase.rpc("marcar_reserva_pagada", { p_reserva: id, p_pagada: estado === "pagado" });
     if (r.error) return { ok: false, error: r.error.message };
@@ -128,6 +157,7 @@ export async function moverReserva(
     const r = await supabase.from("reservas").update({ estado_pago: estado }).eq("id", id);
     if (r.error) return { ok: false, error: r.error.message };
   }
+  await avisarPago(supabase as unknown as SupabaseClient, id, antes);
   revalidatePath("/admin/reservas");
   revalidatePath("/admin");
   revalidatePath("/admin/crm");
