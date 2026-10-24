@@ -73,7 +73,7 @@ export function Footer() {
             Explora
           </h2>
           <ul className="mt-5 space-y-3 text-sm">
-            <li><Link href="/#experiencias" className={enlace}>Experiencias</Link></li>
+            <li><Link href="/#planes" className={enlace}>Experiencias</Link></li>
             <li><Link href="/paquetes" className={enlace}>Paquetes</Link></li>
             <li><Link href="/cotizador" className={enlace}>Arme su viaje</Link></li>
             <li><Link href="/nosotros" className={enlace}>Nosotros</Link></li>

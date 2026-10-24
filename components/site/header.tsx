@@ -10,7 +10,7 @@ import { Logo } from "@/components/site/logo";
 
 const NAV = [
   { href: "/", label: "Inicio" },
-  { href: "/#experiencias", label: "Experiencias" },
+  { href: "/#planes", label: "Experiencias" },
   { href: "/paquetes", label: "Paquetes" },
   { href: "/cotizador", label: "Arme su viaje" },
   { href: "/nosotros", label: "Nosotros" },
@@ -49,7 +49,7 @@ export function Header() {
       <header className="sticky top-0 z-50 bg-transparent px-3 pt-3 sm:px-5 sm:pt-4">
         <div
           className={cn(
-            "mx-auto flex h-16 max-w-[1600px] items-center justify-between rounded-full border pl-2 pr-2 backdrop-blur-xl transition-all duration-500 sm:pl-3 sm:pr-3",
+            "mx-auto flex h-16 max-w-[1600px] items-center justify-between rounded-full border md:grid md:grid-cols-[1fr_auto_1fr] pl-2 pr-2 backdrop-blur-xl transition-all duration-500 sm:pl-3 sm:pr-3",
             scrolled
               ? "border-white/15 bg-[#0a2a20]/95 shadow-[0_18px_50px_-14px_rgba(0,0,0,0.65)]"
               : "border-white/10 bg-[#0a2a20]/85 shadow-[0_10px_30px_-16px_rgba(0,0,0,0.4)]",
@@ -93,7 +93,7 @@ export function Header() {
             })}
           </nav>
 
-          <div className="hidden items-center gap-2 md:flex">
+          <div className="hidden items-center justify-end gap-2 md:flex">
             <Link
               href="/admin/login"
               aria-label="Panel de administración"

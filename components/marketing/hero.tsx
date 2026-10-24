@@ -70,7 +70,7 @@ export function Hero({ destinos }: { destinos: DestinoConPaquetes[] }) {
 
   return (
     <LazyMotion features={domAnimation}>
-      <section className="grano relative isolate -mt-20 flex min-h-[60dvh] flex-col justify-center overflow-hidden bg-[#061a13] pt-20 text-crema">
+      <section className="grano relative isolate -mt-20 flex min-h-[60dvh] flex-1 flex-col justify-center overflow-hidden bg-[#061a13] pt-20 text-crema">
         <div className="hero-degradado -z-30 absolute inset-0" />
         {/* Foto del brochure (Dubai Creek) de fondo, tamizada de verde para
             que el texto y el globo sigan leyéndose. */}
@@ -131,7 +131,7 @@ export function Hero({ destinos }: { destinos: DestinoConPaquetes[] }) {
                 <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
               </a>
               <a
-                href="#experiencias"
+                href="#planes"
                 className="boton-cristal inline-flex min-h-13 items-center gap-2 rounded-full px-8 text-sm font-medium"
               >
                 Ver experiencias

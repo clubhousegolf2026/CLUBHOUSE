@@ -10,7 +10,6 @@ import {
   SeccionContacto,
   SeccionDestinos,
   SeccionDirector,
-  SeccionExperiencias,
   SeccionIncluye,
   SeccionProceso,
 } from "@/components/marketing/secciones-marca";
@@ -69,8 +68,10 @@ export default async function HomePage() {
 
   return (
     <>
-      <Hero destinos={destinos} />
-      <MarquesinaCampos campos={campos} />
+      <div className="flex min-h-[calc(100dvh-4.75rem)] flex-col sm:min-h-[calc(100dvh-5rem)]">
+        <Hero destinos={destinos} />
+        <MarquesinaCampos campos={campos} />
+      </div>
 
       <SuenosScroll>
         {paquetes.length > 0 && (
@@ -98,7 +99,6 @@ export default async function HomePage() {
         )}
       </SuenosScroll>
       <SeccionIncluye />
-      <SeccionExperiencias />
       <SeccionDestinos />
 
 
