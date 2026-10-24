@@ -27,7 +27,9 @@ import {
 } from "@/components/admin/form-ui";
 import { MapaMundoPicker, type CiudadMapa } from "@/components/admin/mapa-mundo-picker";
 import { CampoFoto, GaleriaFotos, Lineas, Lista } from "@/components/admin/experiencias/piezas";
-import { eliminarExperiencia, guardarExperiencia } from "@/app/admin/(panel)/experiencias/actions";
+import { CosteoEditor } from "@/components/admin/experiencias/costeo-editor";
+import type { CostosExperiencia } from "@/lib/contenido/costeo";
+import { eliminarExperiencia, guardarCostos, guardarExperiencia } from "@/app/admin/(panel)/experiencias/actions";
 import {
   escribirFechas,
   leerFechas,
@@ -60,14 +62,17 @@ export function ExperienciaEditor({
   enBase,
   esDelCodigo,
   ciudades,
+  costosIniciales,
 }: {
   inicial: Experiencia;
   esNueva: boolean;
   enBase: boolean;
   esDelCodigo: boolean;
   ciudades: CiudadMapa[];
+  costosIniciales: CostosExperiencia;
 }) {
   const router = useRouter();
+  const [costos, setCostos] = useState<CostosExperiencia>(costosIniciales);
   const [e, setE] = useState<Experiencia>(inicial);
   const [slugTocado, setSlugTocado] = useState(!esNueva);
   const [pendiente, start] = useTransition();
@@ -117,6 +122,12 @@ export function ExperienciaEditor({
     start(async () => {
       const r = await guardarExperiencia(e, esNueva);
       if (!r.ok) return setError(r.error);
+      // Las hojas de costeo van aparte (tabla privada). Si no hay ninguna y
+      // nunca se creó una, no hace falta tocar la tabla.
+      if (costos.costeos.length > 0 || costosIniciales.costeos.length > 0) {
+        const rc = await guardarCostos(e.slug, costos);
+        if (!rc.ok) return setError(`La experiencia se guardó, pero los costos no: ${rc.error}`);
+      }
       if (esNueva) router.push(`/admin/experiencias/${e.slug}`);
       else {
         setGuardado(true);
@@ -315,6 +326,23 @@ export function ExperienciaEditor({
                 </div>
               )}
             </Lista>
+          </Seccion>
+
+          <Seccion
+            icono={<Wallet size={18} />}
+            titulo="Costos y precio al público"
+            descripcion="Carga lo que te cuesta el viaje, define cuánto quieres ganar y el sistema calcula el precio. Solo lo ve el equipo."
+          >
+            <CosteoEditor
+              costos={costos}
+              onChange={(c) => {
+                setGuardado(false);
+                setCostos(c);
+              }}
+              tarifas={e.tarifas}
+              onAplicarPrecio={(i, texto) => act({ tarifas: e.tarifas.map((t, j) => (j === i ? { ...t, precio: texto } : t)) })}
+              onUsarDesde={(texto) => act({ desde: texto })}
+            />
           </Seccion>
 
           <Seccion icono={<CalendarRange size={18} />} titulo="Programa día a día" descripcion="El itinerario que ve el viajero.">

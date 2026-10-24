@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { EXPERIENCIAS, type Experiencia } from "@/lib/contenido/experiencias";
+import type { CostosExperiencia } from "@/lib/contenido/costeo";
 
 type Res = { ok: true } | { ok: false; error: string };
 
@@ -161,4 +162,23 @@ export async function importarExperienciasDeCodigo(): Promise<
   }
   refrescar();
   return { ok: true, importadas: filas.length };
+}
+
+/** Hojas de costeo: tabla aparte y solo para el staff (nunca se publican). */
+export async function guardarCostos(slug: string, costos: CostosExperiencia): Promise<Res> {
+  const db = await cliente();
+  const { error } = await db
+    .from("experiencias_costos")
+    .upsert({ slug, datos: costos, updated_at: new Date().toISOString() });
+  if (error) {
+    if (["42P01", "PGRST205"].includes(error.code ?? "")) {
+      return {
+        ok: false,
+        error: "Falta aplicar la migración 0006 (supabase/migrations/0006_experiencias_costos.sql) en Supabase.",
+      };
+    }
+    return { ok: false, error: error.message };
+  }
+  revalidatePath(`/admin/experiencias/${slug}`);
+  return { ok: true };
 }

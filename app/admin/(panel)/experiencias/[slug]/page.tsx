@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { getExperienciasAdmin } from "@/lib/contenido/experiencias-editables";
 import { EXPERIENCIAS } from "@/lib/contenido/experiencias";
+import type { CostosExperiencia } from "@/lib/contenido/costeo";
 import { ExperienciaEditor } from "@/components/admin/experiencias/editor";
 
 export const dynamic = "force-dynamic";
@@ -14,6 +15,13 @@ export default async function EditarExperienciaPage({ params }: { params: Promis
   const { experiencias, enBase } = await getExperienciasAdmin(db);
   const e = experiencias.find((x) => x.slug === slug);
   if (!e) notFound();
+
+  let costos: CostosExperiencia = { costeos: [] };
+  try {
+    const c = await db.from("experiencias_costos").select("datos").eq("slug", slug).maybeSingle();
+    const d = c.data?.datos as Partial<CostosExperiencia> | undefined;
+    if (d?.costeos) costos = { costeos: d.costeos };
+  } catch {}
 
   const ciudades = experiencias
     .filter((x) => x.slug !== slug)
@@ -35,6 +43,7 @@ export default async function EditarExperienciaPage({ params }: { params: Promis
         enBase={enBase.has(e.slug)}
         esDelCodigo={EXPERIENCIAS.some((x) => x.slug === e.slug)}
         ciudades={ciudades}
+        costosIniciales={costos}
       />
     </div>
   );

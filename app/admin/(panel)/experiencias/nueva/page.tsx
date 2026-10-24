@@ -33,7 +33,7 @@ export default async function NuevaExperienciaPage() {
         <h1 className="mt-2 font-serif text-2xl text-carbon">Nueva experiencia</h1>
         <p className="text-sm text-niebla">Se crea como borrador: publícala cuando esté lista.</p>
       </div>
-      <ExperienciaEditor inicial={vacia} esNueva enBase={false} esDelCodigo={false} ciudades={ciudades} />
+      <ExperienciaEditor inicial={vacia} esNueva enBase={false} esDelCodigo={false} ciudades={ciudades} costosIniciales={{ costeos: [] }} />
     </div>
   );
 }
