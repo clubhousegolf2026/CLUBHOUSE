@@ -8,6 +8,7 @@ import {
   Users,
   CalendarCheck,
   Package,
+  Plane,
   Tag,
   CalendarRange,
   } from "lucide-react";
@@ -17,6 +18,7 @@ export const NAV = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, grupo: "Resumen" },
   { href: "/admin/crm", label: "CRM", icon: Users, grupo: "Ventas" },
   { href: "/admin/reservas", label: "Reservas", icon: CalendarCheck, grupo: "Ventas" },
+  { href: "/admin/experiencias", label: "Experiencias", icon: Plane, grupo: "Catálogo" },
   { href: "/admin/paquetes", label: "Paquetes", icon: Package, grupo: "Catálogo" },
   { href: "/admin/tarifas", label: "Tarifas", icon: Tag, grupo: "Catálogo" },
   { href: "/admin/calendario", label: "Calendario", icon: CalendarRange, grupo: "Catálogo" },

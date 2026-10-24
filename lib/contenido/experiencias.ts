@@ -25,6 +25,28 @@ export interface Tarifa {
   destacada?: boolean;
 }
 
+export type EstadoSalida = "abierta" | "ultimos" | "llena" | "cerrada";
+
+/** Una fecha concreta de salida del viaje (un mismo viaje puede tener varias). */
+export interface Salida {
+  id: string;
+  inicio: string; // YYYY-MM-DD
+  fin: string; // YYYY-MM-DD
+  cupos: number | null;
+  estado: EstadoSalida;
+  nota?: string;
+}
+
+export interface Politica {
+  titulo: string;
+  texto: string;
+}
+
+export interface PreguntaFrecuente {
+  q: string;
+  a: string;
+}
+
 export interface Experiencia {
   slug: string;
   pais: string;
@@ -51,6 +73,19 @@ export interface Experiencia {
   tarifas: Tarifa[];
   incluye: string[];
   noIncluye: string[];
+  /** Campos opcionales: las experiencias del código no los traen. */
+  publicada?: boolean;
+  destacada?: boolean;
+  orden?: number;
+  galeria?: { url: string; alt: string }[];
+  salidas?: Salida[];
+  politicas?: Politica[];
+  faq?: PreguntaFrecuente[];
+  /** Nivel de juego recomendado, p. ej. «Handicap hasta 28». */
+  nivel?: string;
+  grupo?: { min: number | null; max: number | null };
+  idiomas?: string;
+  anticipoPct?: number | null;
 }
 
 export const EXPERIENCIAS: Experiencia[] = [

@@ -62,7 +62,7 @@ export default async function PaquetesAdminPage() {
                   Ver en el sitio
                 </Link>
                 <Link href={`/admin/experiencias/${e.slug}`} className="text-verde-golf hover:underline">
-                  Editar
+                  Editar ficha completa
                 </Link>
               </span>
             </li>

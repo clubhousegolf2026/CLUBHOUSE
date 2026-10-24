@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { FotoSegura } from "@/components/marketing/foto-segura";
 import Link from "next/link";
 import { ArrowUpRight, MapPin, Moon } from "lucide-react";
 import { cop } from "@/lib/format";
@@ -27,7 +27,7 @@ export function PackageCard({
       className="tarjeta-luz group relative flex aspect-[4/5] flex-col justify-between overflow-hidden rounded-[1.75rem] bg-[#0b2b21] shadow-[0_20px_50px_-24px_rgba(11,43,33,0.7)] ring-1 ring-black/5 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_34px_70px_-26px_rgba(11,43,33,0.85)]"
     >
       {paquete.galeria[0] && (
-        <Image
+        <FotoSegura
           src={paquete.galeria[0].url}
           alt={paquete.galeria[0].alt}
           fill

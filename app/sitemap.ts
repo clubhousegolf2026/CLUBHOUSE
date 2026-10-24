@@ -1,10 +1,11 @@
 import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/site";
-import { EXPERIENCIAS } from "@/lib/contenido/experiencias";
+import { getExperiencias } from "@/lib/contenido/experiencias-editables";
 
 export const revalidate = 3600;
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const experiencias = await getExperiencias();
   const fijas = ["", "/nosotros", "/contacto"].map(
     (ruta) => ({
       url: `${SITE_URL}${ruta}`,
@@ -14,7 +15,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   );
   return [
     ...fijas,
-    ...EXPERIENCIAS.map((e) => ({
+    ...experiencias.map((e) => ({
       url: `${SITE_URL}/experiencias/${e.slug}`,
       changeFrequency: "monthly" as const,
       priority: 0.9,

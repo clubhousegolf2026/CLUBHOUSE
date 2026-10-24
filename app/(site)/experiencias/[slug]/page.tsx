@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import Image from "next/image";
+import { FotoSegura } from "@/components/marketing/foto-segura";
+import { escribirFechas } from "@/lib/contenido/fechas-viaje";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight, Check, X } from "lucide-react";
@@ -29,7 +30,7 @@ export async function generateMetadata({
     title: e.nombre,
     description: e.descripcionLarga,
     alternates: { canonical: `/experiencias/${e.slug}` },
-    openGraph: { title: e.nombre, description: e.descripcionLarga, images: [e.foto] },
+    openGraph: { title: e.nombre, description: e.descripcionLarga, images: e.foto ? [e.foto] : [] },
   };
 }
 
@@ -53,7 +54,7 @@ export default async function ExperienciaPage({
           "@type": "TouristTrip",
           name: e.nombre,
           description: e.descripcionLarga,
-          image: `${SITE_URL}${e.foto}`,
+          image: e.foto.startsWith("http") ? e.foto : `${SITE_URL}${e.foto}`,
           url: `${SITE_URL}/experiencias/${e.slug}`,
           provider: { "@type": "TravelAgency", name: "Clubhouse" },
         }}
@@ -61,7 +62,7 @@ export default async function ExperienciaPage({
 
       {/* Portada */}
       <header className="grano relative isolate -mt-20 flex min-h-[85dvh] items-end overflow-hidden bg-[#061a13] pb-14 pt-32 text-crema">
-        <Image
+        <FotoSegura
           src={e.foto}
           alt={e.fotoAlt}
           fill
@@ -76,7 +77,7 @@ export default async function ExperienciaPage({
 
         <div className="mx-auto w-full max-w-[1400px] px-6 sm:px-10 lg:px-16">
           <Link
-            href="/#experiencias"
+            href="/#planes"
             className="entra-hero inline-flex items-center gap-1.5 text-sm text-crema/70 transition-colors hover:text-[#ecd396]"
           >
             <ArrowLeft size={15} /> Todas las experiencias
@@ -141,7 +142,7 @@ export default async function ExperienciaPage({
           </div>
 
           <div className="relative min-h-[22rem] overflow-hidden rounded-[2rem] bg-arena shadow-[0_30px_70px_-35px_rgba(11,43,33,0.55)]">
-            <Image
+            <FotoSegura
               src={e.fotoSecundaria}
               alt=""
               aria-hidden
@@ -165,6 +166,19 @@ export default async function ExperienciaPage({
             </div>
           ))}
         </dl>
+
+        {(e.nivel || e.idiomas || e.grupo?.min || e.grupo?.max || e.anticipoPct) && (
+          <ul className="mx-auto mt-8 flex max-w-[1400px] flex-wrap gap-3 text-sm text-carbon">
+            {e.nivel && <li className="rounded-full border border-arena bg-white/70 px-4 py-2">Nivel: {e.nivel}</li>}
+            {(e.grupo?.min || e.grupo?.max) && (
+              <li className="rounded-full border border-arena bg-white/70 px-4 py-2">
+                Grupo: {e.grupo?.min && e.grupo?.max ? `${e.grupo.min} a ${e.grupo.max} personas` : e.grupo?.max ? `hasta ${e.grupo.max} personas` : `desde ${e.grupo?.min} personas`}
+              </li>
+            )}
+            {e.idiomas && <li className="rounded-full border border-arena bg-white/70 px-4 py-2">Idioma: {e.idiomas}</li>}
+            {e.anticipoPct ? <li className="rounded-full border border-arena bg-white/70 px-4 py-2">Reserva con el {e.anticipoPct}%</li> : null}
+          </ul>
+        )}
       </section>
 
       {/* Programa */}
@@ -221,7 +235,7 @@ export default async function ExperienciaPage({
                 }`}
               >
                 <figure className="relative aspect-[4/3] bg-arena lg:aspect-auto lg:h-full lg:min-h-[22rem]">
-                  <Image
+                  <FotoSegura
                     src={r.foto}
                     alt={`${r.nombre}, ${e.pais}`}
                     fill
@@ -423,6 +437,115 @@ export default async function ExperienciaPage({
         </div>
       </section>
 
+      {/* Salidas */}
+      {(e.salidas ?? []).length > 0 && (
+        <section className="bg-blanco-roto px-6 py-24 sm:px-10 lg:px-16 xl:px-24">
+          <div className="mx-auto max-w-[1100px]">
+            <EncabezadoSeccion
+              eyebrow="Fechas de salida"
+              titulo={
+                <>
+                  Elija su <Oro>salida</Oro>
+                </>
+              }
+            />
+            <ul className="space-y-3">
+              {(e.salidas ?? []).map((sa) => (
+                <li key={sa.id} className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-arena bg-white p-5">
+                  <span>
+                    <span className="block font-serif text-xl text-carbon">{escribirFechas(sa.inicio, sa.fin)}</span>
+                    {sa.nota && <span className="text-sm text-niebla">{sa.nota}</span>}
+                  </span>
+                  <span className="flex items-center gap-3 text-sm">
+                    {sa.cupos !== null && sa.estado !== "llena" && sa.estado !== "cerrada" && (
+                      <span className="text-niebla">{sa.cupos} cupos</span>
+                    )}
+                    <span
+                      className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                        sa.estado === "abierta"
+                          ? "bg-exito/10 text-exito"
+                          : sa.estado === "ultimos"
+                            ? "bg-champagne/20 text-[#8a6d1f]"
+                            : "bg-niebla/10 text-niebla"
+                      }`}
+                    >
+                      {sa.estado === "abierta" ? "Abierta" : sa.estado === "ultimos" ? "Últimos cupos" : sa.estado === "llena" ? "Llena" : "Cerrada"}
+                    </span>
+                    {(sa.estado === "abierta" || sa.estado === "ultimos") && (
+                      <a
+                        href={`${MARCA.whatsappUrl}?text=${encodeURIComponent(`Hola, me interesa ${e.nombre} (${escribirFechas(sa.inicio, sa.fin)}).`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-medium text-verde-golf hover:underline"
+                      >
+                        Reservar
+                      </a>
+                    )}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
+
+      {/* Galería */}
+      {(e.galeria ?? []).length > 0 && (
+        <section className="px-6 py-24 sm:px-10 lg:px-16 xl:px-24">
+          <div className="mx-auto max-w-[1400px]">
+            <EncabezadoSeccion
+              eyebrow="Galería"
+              titulo={
+                <>
+                  Así se <Oro>vive</Oro>
+                </>
+              }
+            />
+            <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {(e.galeria ?? []).map((g, i) => (
+                <li key={`${g.url}-${i}`} className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-arena">
+                  <FotoSegura src={g.url} alt={g.alt || e.nombre} fill sizes="(max-width: 640px) 100vw, 33vw" className="object-cover" />
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
+
+      {/* Políticas y preguntas */}
+      {((e.politicas ?? []).length > 0 || (e.faq ?? []).length > 0) && (
+        <section className="bg-blanco-roto px-6 py-24 sm:px-10 lg:px-16 xl:px-24">
+          <div className="mx-auto grid max-w-[1200px] gap-12 lg:grid-cols-2">
+            {(e.politicas ?? []).length > 0 && (
+              <div>
+                <h2 className="font-serif text-3xl text-carbon">Condiciones</h2>
+                <dl className="mt-6 space-y-5">
+                  {(e.politicas ?? []).map((p) => (
+                    <div key={p.titulo}>
+                      <dt className="font-medium text-carbon">{p.titulo}</dt>
+                      <dd className="mt-1 whitespace-pre-line text-sm leading-relaxed text-niebla">{p.texto}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            )}
+            {(e.faq ?? []).length > 0 && (
+              <div>
+                <h2 className="font-serif text-3xl text-carbon">Preguntas frecuentes</h2>
+                <div className="mt-6 space-y-3">
+                  {(e.faq ?? []).map((f) => (
+                    <details key={f.q} className="group rounded-2xl border border-arena bg-white p-5 open:border-champagne/50">
+                      <summary className="cursor-pointer list-none font-medium text-carbon [&::-webkit-details-marker]:hidden">{f.q}</summary>
+                      <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-niebla">{f.a}</p>
+                    </details>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
       {/* Cierre */}
       <section className="px-6 pb-24 sm:px-10 lg:px-16 xl:px-24">
         <div className="grano relative isolate mx-auto max-w-[1400px] overflow-hidden rounded-[2.5rem] bg-[#071d16] px-8 py-16 text-center text-crema sm:px-16 sm:py-20">
@@ -435,7 +558,7 @@ export default async function ExperienciaPage({
           </p>
           <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
             <a
-              href={MARCA.whatsappUrl}
+              href={`${MARCA.whatsappUrl}?text=${encodeURIComponent(`Hola, me interesa ${e.nombre}.`)}`}
               target="_blank"
               rel="noopener noreferrer"
               className="boton-oro group inline-flex min-h-13 items-center gap-2 rounded-full px-8 text-sm font-semibold"

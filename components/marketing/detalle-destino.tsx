@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { FotoSegura } from "@/components/marketing/foto-segura";
 import Link from "next/link";
 import { m } from "framer-motion";
 import { MapPin, X, ArrowRight, ArrowLeft } from "lucide-react";
@@ -58,7 +58,7 @@ export function DetalleDestino({
 
       {destino.foto && (
         <div className="relative mt-4 aspect-[16/7] overflow-hidden rounded-[var(--radius-card)] bg-arena">
-          <Image
+          <FotoSegura
             src={destino.foto}
             alt={destino.nombre}
             fill
