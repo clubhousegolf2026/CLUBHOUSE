@@ -2,11 +2,13 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { AlertTriangle, Check, CircleCheck, CircleX, Copy, CreditCard, Link2, Loader2, MessageCircle, Plus, Trash2 } from "lucide-react";
+import { AlertTriangle, Check, CircleCheck, CircleX, Copy, CreditCard, Link2, Loader2, MessageCircle, Plus, RefreshCw, Trash2, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { alturaInput, estiloInput } from "@/components/admin/form-ui";
 import { pesos } from "@/lib/formularios/esquema";
-import { crearEnlacePago, eliminarPago } from "@/app/admin/(panel)/pagos/actions";
+import { parsePrecio, trmTexto, usd, type ViajeTarifas } from "@/lib/precios";
+import type { Trm } from "@/lib/trm";
+import { crearEnlacePago, eliminarPago, obtenerTrmActual } from "@/app/admin/(panel)/pagos/actions";
 
 export type FilaPago = {
   id: string;
@@ -66,12 +68,16 @@ function Copiar({ texto, etiqueta = "Copiar" }: { texto: string; etiqueta?: stri
 export function PagosWorkspace({
   pagos,
   reservas,
+  viajes,
+  trmInicial,
   conexion,
   origen,
   migracionPendiente,
 }: {
   pagos: FilaPago[];
   reservas: ReservaPendiente[];
+  viajes: ViajeTarifas[];
+  trmInicial: Trm;
   conexion: EstadoConexion;
   origen: string;
   migracionPendiente: boolean;
@@ -82,6 +88,31 @@ export function PagosWorkspace({
   const [error, setError] = useState<string | null>(null);
   const [verPasos, setVerPasos] = useState(false);
   const [pendiente, empezar] = useTransition();
+
+  // Generador «desde un viaje»: la tarifa actual del viaje, en pesos a la TRM del día.
+  const [modo, setModo] = useState<"viaje" | "libre">(viajes.length > 0 ? "viaje" : "libre");
+  const [viajeSlug, setViajeSlug] = useState(viajes[0]?.slug ?? "");
+  const [tarifaIdx, setTarifaIdx] = useState(0);
+  const [personas, setPersonas] = useState(2);
+  const [anticipo, setAnticipo] = useState("");
+  const [ajuste, setAjuste] = useState("");
+  const [trm, setTrm] = useState<Trm>(trmInicial);
+  const [conceptoTocado, setConceptoTocado] = useState(false);
+
+  const viaje = viajes.find((v) => v.slug === viajeSlug);
+  const tarifa = viaje?.tarifas[tarifaIdx] ?? viaje?.tarifas[0];
+  const precio = tarifa ? parsePrecio(tarifa.precio) : null;
+  const subtotal = precio ? precio.valor * personas : 0;
+  const totalCop = precio ? Math.round(precio.moneda === "USD" ? subtotal * trm.valor : subtotal) : 0;
+  const pct = Number(anticipo);
+  const conAnticipo = pct > 0 && pct < 100;
+  const cobrarCalculado = conAnticipo ? Math.round((totalCop * pct) / 100) : totalCop;
+  const montoViaje = ajuste ? Number(ajuste.replace(/\D/g, "")) : cobrarCalculado;
+  const conceptoAuto =
+    viaje && tarifa
+      ? `${viaje.nombre} · ${tarifa.perfil}${personas > 1 ? ` ×${personas}` : ""}${conAnticipo ? ` · anticipo ${pct}%` : ""}${form.nombre ? ` · ${form.nombre}` : ""}`
+      : "";
+  const FUENTE_TRM = { superfinanciera: "Superfinanciera (oficial)", mercado: "mercado (la fuente oficial no respondió)", respaldo: "valor de respaldo (sin conexión a las fuentes)" } as const;
 
   const listo = conexion.publica && conexion.integridad;
   const aprobados = pagos.filter((p) => p.estado === "APPROVED");
@@ -106,18 +137,39 @@ export function PagosWorkspace({
   function crear() {
     setError(null);
     setNuevo(null);
+    const delViaje = modo === "viaje";
+    const monto = delViaje ? montoViaje : Number(form.monto.replace(/\D/g, ""));
+    const concepto = delViaje && !conceptoTocado ? conceptoAuto : form.concepto;
     empezar(async () => {
       const r = await crearEnlacePago({
-        concepto: form.concepto,
-        montoCop: Number(form.monto.replace(/\D/g, "")),
+        concepto,
+        montoCop: monto,
         nombre: form.nombre,
         email: form.email,
         telefono: form.telefono,
-        reservaId: form.reservaId || null,
+        reservaId: delViaje ? null : form.reservaId || null,
+        detalle:
+          delViaje && viaje && tarifa
+            ? {
+                fuente: "viaje",
+                viaje: viaje.nombre,
+                slug: viaje.slug,
+                perfil: tarifa.perfil,
+                precio: tarifa.precio,
+                usd: precio?.moneda === "USD" ? precio.valor : null,
+                personas,
+                trm: precio?.moneda === "USD" ? trm.valor : null,
+                trmFecha: trm.fecha,
+                totalCop,
+                anticipoPct: conAnticipo ? pct : null,
+              }
+            : null,
       });
       if (!r.ok) return setError(r.error);
-      setNuevo({ referencia: r.referencia, monto: Number(form.monto.replace(/\D/g, "")), concepto: form.concepto });
+      setNuevo({ referencia: r.referencia, monto, concepto });
       setForm({ concepto: "", monto: "", nombre: "", email: "", telefono: "", reservaId: "" });
+      setConceptoTocado(false);
+      setAjuste("");
       router.refresh();
     });
   }
@@ -199,29 +251,141 @@ export function PagosWorkspace({
         ))}
       </div>
 
-      {/* Nuevo enlace */}
-      <section className="space-y-4 rounded-[var(--radius-panel)] border border-arena bg-blanco-roto p-5 shadow-[var(--shadow-suave)] sm:p-6">
-        <h2 className="flex items-center gap-2 font-serif text-lg text-carbon"><Link2 size={18} className="text-verde-golf" /> Nuevo enlace de cobro</h2>
-        {reservas.length > 0 && (
-          <label className="block">
-            <span className="text-sm font-medium text-carbon">Cobrar una reserva pendiente (opcional)</span>
-            <select value={form.reservaId} onChange={(e) => elegirReserva(e.target.value)} className={cn(estiloInput, alturaInput, "mt-1.5")}>
-              <option value="">Ninguna: enlace suelto</option>
-              {reservas.map((r) => <option key={r.id} value={r.id}>{r.etiqueta} · anticipo {pesos(r.monto)}</option>)}
-            </select>
-            <span className="mt-1 block text-xs text-niebla">Al pagarse, la reserva pasa sola a «pagado».</span>
-          </label>
-        )}
-        <div className="grid gap-4 sm:grid-cols-2">
-          <label className="block sm:col-span-2"><span className="text-sm font-medium text-carbon">Concepto</span><input value={form.concepto} onChange={(e) => setForm({ ...form, concepto: e.target.value })} placeholder="Anticipo Utah Experience · Carlos Gómez" className={cn(estiloInput, alturaInput, "mt-1.5")} /></label>
-          <label className="block"><span className="text-sm font-medium text-carbon">Valor (COP)</span><input inputMode="numeric" value={form.monto} onChange={(e) => setForm({ ...form, monto: e.target.value })} placeholder="4500000" className={cn(estiloInput, alturaInput, "mt-1.5")} /></label>
-          <label className="block"><span className="text-sm font-medium text-carbon">Nombre del cliente</span><input value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} className={cn(estiloInput, alturaInput, "mt-1.5")} /></label>
-          <label className="block"><span className="text-sm font-medium text-carbon">Correo</span><input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className={cn(estiloInput, alturaInput, "mt-1.5")} /></label>
-          <label className="block"><span className="text-sm font-medium text-carbon">Celular</span><input value={form.telefono} onChange={(e) => setForm({ ...form, telefono: e.target.value })} className={cn(estiloInput, alturaInput, "mt-1.5")} /></label>
+      {/* TRM del día */}
+      <section className="flex flex-wrap items-center justify-between gap-4 rounded-[var(--radius-panel)] border border-champagne/40 bg-champagne/[0.08] p-5">
+        <div className="flex items-center gap-3">
+          <span className="grid h-10 w-10 place-items-center rounded-xl bg-champagne/25 text-[#8a6d1f]"><TrendingUp size={20} /></span>
+          <div>
+            <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-niebla">TRM de hoy · dólar a peso</p>
+            <p className="font-serif text-3xl leading-tight tabular-nums text-carbon">{trmTexto(trm.valor)}</p>
+            <p className="text-xs text-niebla">Rige desde el {trm.fecha} · fuente: {FUENTE_TRM[trm.fuente]}</p>
+          </div>
         </div>
+        <button
+          type="button"
+          disabled={pendiente}
+          onClick={() => empezar(async () => setTrm(await obtenerTrmActual()))}
+          className="inline-flex items-center gap-2 rounded-xl border border-arena bg-white px-4 py-2 text-sm font-medium text-carbon hover:border-verde-golf/50 disabled:opacity-60"
+        >
+          <RefreshCw size={14} className={pendiente ? "animate-spin" : ""} /> Actualizar
+        </button>
+      </section>
+
+      {/* Nuevo enlace */}
+      <section className="space-y-5 rounded-[var(--radius-panel)] border border-arena bg-blanco-roto p-5 shadow-[var(--shadow-suave)] sm:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="flex items-center gap-2 font-serif text-lg text-carbon"><Link2 size={18} className="text-verde-golf" /> Nuevo enlace de pago</h2>
+          <div className="inline-flex rounded-xl border border-arena bg-white p-1 text-sm">
+            {(
+              [
+                ["viaje", "Desde un viaje"],
+                ["libre", "Valor libre"],
+              ] as const
+            ).map(([id, etiqueta]) => (
+              <button key={id} type="button" disabled={id === "viaje" && viajes.length === 0} onClick={() => setModo(id)} className={cn("rounded-lg px-3.5 py-1.5 transition disabled:opacity-40", modo === id ? "bg-verde-golf text-crema" : "text-niebla hover:text-carbon")}>
+                {etiqueta}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {modo === "viaje" ? (
+          <div className="space-y-5">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label className="block">
+                <span className="text-sm font-medium text-carbon">Viaje (plan)</span>
+                <select value={viajeSlug} onChange={(e) => { setViajeSlug(e.target.value); setTarifaIdx(0); setAjuste(""); }} className={cn(estiloInput, alturaInput, "mt-1.5")}>
+                  {viajes.map((v) => <option key={v.slug} value={v.slug}>{v.nombre}</option>)}
+                </select>
+              </label>
+              <label className="block">
+                <span className="text-sm font-medium text-carbon">Tarifa</span>
+                <select value={tarifaIdx} onChange={(e) => { setTarifaIdx(Number(e.target.value)); setAjuste(""); }} className={cn(estiloInput, alturaInput, "mt-1.5")}>
+                  {(viaje?.tarifas ?? []).map((t, i) => <option key={`${t.perfil}-${i}`} value={i}>{t.perfil}{t.detalle ? ` · ${t.detalle}` : ""} · {t.precio}</option>)}
+                </select>
+              </label>
+              <label className="block">
+                <span className="text-sm font-medium text-carbon">Personas</span>
+                <input type="number" min={1} max={99} value={personas} onChange={(e) => { setPersonas(Math.max(1, Number(e.target.value) || 1)); setAjuste(""); }} className={cn(estiloInput, alturaInput, "mt-1.5")} />
+              </label>
+              <label className="block">
+                <span className="text-sm font-medium text-carbon">Cobrar solo un anticipo (%)</span>
+                <input type="number" min={1} max={99} placeholder="Vacío = cobrar todo" value={anticipo} onChange={(e) => { setAnticipo(e.target.value); setAjuste(""); }} className={cn(estiloInput, alturaInput, "mt-1.5")} />
+              </label>
+            </div>
+
+            {/* Cuenta clara: de dólares a pesos */}
+            {precio ? (
+              <div className="space-y-2 rounded-2xl border border-champagne/40 bg-white p-4 text-sm">
+                <div className="flex items-baseline justify-between gap-3">
+                  <span className="text-niebla">{tarifa?.precio}{personas > 1 ? ` × ${personas} personas` : ""}</span>
+                  <span className="font-medium tabular-nums text-carbon">{precio.moneda === "USD" ? usd(subtotal) : `$${new Intl.NumberFormat("es-CO").format(subtotal)}`}</span>
+                </div>
+                {precio.moneda === "USD" && (
+                  <div className="flex items-baseline justify-between gap-3">
+                    <span className="text-niebla">× TRM de hoy</span>
+                    <span className="tabular-nums text-carbon">{trmTexto(trm.valor)}</span>
+                  </div>
+                )}
+                <div className="flex items-baseline justify-between gap-3 border-t border-arena pt-2">
+                  <span className="text-niebla">Total en pesos</span>
+                  <span className="font-medium tabular-nums text-carbon">${new Intl.NumberFormat("es-CO").format(totalCop)}</span>
+                </div>
+                {conAnticipo && (
+                  <div className="flex items-baseline justify-between gap-3">
+                    <span className="text-niebla">Anticipo {pct}%</span>
+                    <span className="tabular-nums text-carbon">${new Intl.NumberFormat("es-CO").format(cobrarCalculado)}</span>
+                  </div>
+                )}
+                <div className="flex items-baseline justify-between gap-3 border-t border-arena pt-2">
+                  <span className="font-medium text-carbon">Se cobra</span>
+                  <span className="font-serif text-3xl tabular-nums text-verde-golf">{pesos(montoViaje)}</span>
+                </div>
+                <label className="block pt-1">
+                  <span className="text-xs text-niebla">¿Prefieres otro valor? Escríbelo aquí (reemplaza el cálculo):</span>
+                  <input inputMode="numeric" value={ajuste} onChange={(e) => setAjuste(e.target.value)} placeholder={String(cobrarCalculado)} className={cn(estiloInput, "mt-1 h-10 max-w-xs")} />
+                </label>
+              </div>
+            ) : (
+              <p className="rounded-xl border border-alerta/30 bg-alerta/10 px-4 py-2.5 text-sm text-alerta">Esa tarifa no tiene un precio que se pueda leer. Corrígelo en la experiencia o usa «Valor libre».</p>
+            )}
+
+            <label className="block">
+              <span className="text-sm font-medium text-carbon">Concepto</span>
+              <input value={conceptoTocado ? form.concepto : conceptoAuto} onChange={(e) => { setConceptoTocado(true); setForm({ ...form, concepto: e.target.value }); }} className={cn(estiloInput, alturaInput, "mt-1.5")} />
+              <span className="mt-1 block text-xs text-niebla">Se arma solo con el viaje, la tarifa y el nombre del cliente. Puedes editarlo.</span>
+            </label>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <label className="block"><span className="text-sm font-medium text-carbon">Nombre del cliente</span><input value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} className={cn(estiloInput, alturaInput, "mt-1.5")} /></label>
+              <label className="block"><span className="text-sm font-medium text-carbon">Correo</span><input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className={cn(estiloInput, alturaInput, "mt-1.5")} /></label>
+              <label className="block"><span className="text-sm font-medium text-carbon">Celular</span><input value={form.telefono} onChange={(e) => setForm({ ...form, telefono: e.target.value })} className={cn(estiloInput, alturaInput, "mt-1.5")} /></label>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {reservas.length > 0 && (
+              <label className="block">
+                <span className="text-sm font-medium text-carbon">Cobrar una reserva pendiente (opcional)</span>
+                <select value={form.reservaId} onChange={(e) => elegirReserva(e.target.value)} className={cn(estiloInput, alturaInput, "mt-1.5")}>
+                  <option value="">Ninguna: enlace suelto</option>
+                  {reservas.map((r) => <option key={r.id} value={r.id}>{r.etiqueta} · anticipo {pesos(r.monto)}</option>)}
+                </select>
+                <span className="mt-1 block text-xs text-niebla">Al pagarse, la reserva pasa sola a «pagado».</span>
+              </label>
+            )}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label className="block sm:col-span-2"><span className="text-sm font-medium text-carbon">Concepto</span><input value={form.concepto} onChange={(e) => setForm({ ...form, concepto: e.target.value })} placeholder="Anticipo Utah Experience · Carlos Gómez" className={cn(estiloInput, alturaInput, "mt-1.5")} /></label>
+              <label className="block"><span className="text-sm font-medium text-carbon">Valor (COP)</span><input inputMode="numeric" value={form.monto} onChange={(e) => setForm({ ...form, monto: e.target.value })} placeholder="4500000" className={cn(estiloInput, alturaInput, "mt-1.5")} /></label>
+              <label className="block"><span className="text-sm font-medium text-carbon">Nombre del cliente</span><input value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} className={cn(estiloInput, alturaInput, "mt-1.5")} /></label>
+              <label className="block"><span className="text-sm font-medium text-carbon">Correo</span><input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className={cn(estiloInput, alturaInput, "mt-1.5")} /></label>
+              <label className="block"><span className="text-sm font-medium text-carbon">Celular</span><input value={form.telefono} onChange={(e) => setForm({ ...form, telefono: e.target.value })} className={cn(estiloInput, alturaInput, "mt-1.5")} /></label>
+            </div>
+          </div>
+        )}
+
         {error && <p className="text-sm text-error">{error}</p>}
         <button type="button" disabled={pendiente} onClick={crear} className="inline-flex items-center gap-2 rounded-xl bg-verde-golf px-5 py-2.5 text-sm font-semibold text-crema hover:bg-verde-calle disabled:opacity-60">
-          {pendiente ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />} Crear enlace
+          {pendiente ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />} Crear enlace de pago
         </button>
 
         {nuevo && (

@@ -74,7 +74,7 @@ export default function ContactoPage() {
         descripcion="Cuéntenos qué tiene en mente y un asesor le responde el mismo día hábil."
       />
 
-      <section className="px-6 pb-24 sm:px-10 lg:px-16 xl:px-24">
+      <section className="perla px-6 pb-24 sm:px-10 lg:px-16 xl:px-24">
         <div className="relative z-10 mx-auto -mt-8 grid max-w-[1200px] gap-8 lg:grid-cols-[1fr_340px]">
           {enviado ? (
             <div className={`${tarjeta} relative overflow-hidden p-10 text-center sm:p-14`}>

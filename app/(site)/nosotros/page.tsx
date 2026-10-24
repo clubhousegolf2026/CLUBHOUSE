@@ -153,7 +153,7 @@ export default function NosotrosPage() {
       </section>
 
       {/* ───────── Manifiesto ───────── */}
-      <section className="px-6 py-24 sm:px-10 sm:py-32 lg:px-16 xl:px-24">
+      <section className="perla px-6 py-24 sm:px-10 sm:py-32 lg:px-16 xl:px-24">
         <div className="mx-auto max-w-[1300px]">
           <div className="revela mx-auto max-w-4xl text-center">
             <span className="inline-flex items-center gap-3 text-xs font-medium uppercase tracking-[0.28em] text-champagne">
@@ -247,7 +247,7 @@ export default function NosotrosPage() {
       </section>
 
       {/* ───────── Fundador ───────── */}
-      <section className="px-6 py-24 sm:px-10 sm:py-32 lg:px-16 xl:px-24">
+      <section className="perla px-6 py-24 sm:px-10 sm:py-32 lg:px-16 xl:px-24">
         <div className="mx-auto grid max-w-[1300px] items-start gap-14 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20">
           <div className="revela relative lg:sticky lg:top-28">
             <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] bg-arena shadow-[0_40px_90px_-40px_rgba(11,43,33,0.65)]">

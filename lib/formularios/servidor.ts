@@ -5,6 +5,7 @@ import { leadApi } from "@/app/api/v1/_comun";
 import { nuevaReferencia } from "@/lib/wompi";
 import { calcularCobro, cobraAlgo, resumenTexto, validar, vacio, type Valores } from "./esquema";
 import { normalizarConfig, type ConfigFormulario, type FormularioFila } from "./tipos";
+import { resolverPago } from "./precios-servidor";
 
 const ERRORES_TABLA = ["42P01", "PGRST205"];
 
@@ -41,7 +42,9 @@ export async function procesarInscripcion(slug: string, valores: Valores): Promi
   }
   if (!fila || !fila.publicado) return { ok: false, status: 404, error: "Este formulario no está disponible." };
   const f = filaAFormulario(fila);
-  const cfg = f.config;
+  // El cobro se calcula con los valores de HOY (tarifa actual del viaje y TRM del día).
+  const resuelto = await resolverPago(f.config);
+  const cfg: ConfigFormulario = { ...f.config, pago: resuelto.pago };
 
   if (cfg.cierre && new Date().toISOString().slice(0, 10) > cfg.cierre) {
     return { ok: false, status: 410, error: "Las inscripciones de este formulario ya cerraron." };
@@ -114,7 +117,7 @@ export async function procesarInscripcion(slug: string, valores: Valores): Promi
 
   // 3) El cobro
   if (cobra && referencia) {
-    const { error: ePago } = await db.from("pagos").insert({
+    const fila = {
       referencia,
       monto_cop: cobro.cobrarCop,
       concepto: cfg.pago.concepto || f.nombre,
@@ -123,7 +126,18 @@ export async function procesarInscripcion(slug: string, valores: Valores): Promi
       telefono,
       origen: "inscripcion",
       origen_id: insc.id,
-    });
+    };
+    const detalle = {
+      ...resuelto.detalle,
+      personas: cobro.personas,
+      totalCop: cobro.totalCop,
+      anticipoPct: cfg.pago.anticipoPct,
+    };
+    let { error: ePago } = await db.from("pagos").insert({ ...fila, detalle });
+    // Antes de la migración 0011 no existe la columna: se guarda sin desglose.
+    if (ePago && ["42703", "PGRST204"].includes(ePago.code ?? "")) {
+      ({ error: ePago } = await db.from("pagos").insert(fila));
+    }
     if (ePago) return { ok: false, status: 500, error: "Se guardó su inscripción, pero no se pudo preparar el pago. Un asesor le contactará." };
   }
 

@@ -79,7 +79,7 @@ export default async function HomePage() {
       <SuenosScroll>
         <section
           id="planes"
-          className="scroll-mt-24 bg-blanco-roto px-6 py-24 sm:px-10 sm:py-28 lg:px-16 xl:px-24"
+          className="perla scroll-mt-24 bg-blanco-roto px-6 py-24 sm:px-10 sm:py-28 lg:px-16 xl:px-24"
         >
           <div className="mx-auto max-w-[1600px]">
             <EncabezadoSeccion

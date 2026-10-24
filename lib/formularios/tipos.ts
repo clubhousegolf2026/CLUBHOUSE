@@ -87,6 +87,13 @@ export interface ConfigPago {
   tasaUsd: number;
   /** Si se cobra solo un anticipo: porcentaje 1–100. */
   anticipoPct: number | null;
+  /** De dónde sale la tarifa: escrita a mano o tomada de un viaje (siempre actualizada). */
+  fuente: "fijo" | "viaje";
+  viajeSlug: string;
+  /** Perfil de la tarifa del viaje (p. ej. «Golfista»). */
+  viajePerfil: string;
+  /** Si la tarifa está en USD: convertir con la TRM del día en lugar de `tasaUsd`. */
+  trmAuto: boolean;
 }
 
 export interface ConfigFormulario {
@@ -176,7 +183,7 @@ export function configPorDefecto(plantilla: Plantilla, nombre = "Inscripción"):
       mostrarMarca: true,
     },
     campos,
-    pago: { activo: false, concepto: nombre, moneda: "COP", base: 0, tasaUsd: 4000, anticipoPct: null },
+    pago: { activo: false, concepto: nombre, moneda: "COP", base: 0, tasaUsd: 4000, anticipoPct: null, fuente: "fijo", viajeSlug: "", viajePerfil: "", trmAuto: true },
     cupos: null,
     cierre: "",
     experiencia: "",

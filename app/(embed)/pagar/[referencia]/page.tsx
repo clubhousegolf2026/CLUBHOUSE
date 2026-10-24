@@ -4,6 +4,7 @@ import { CheckCircle2, CreditCard, ShieldCheck } from "lucide-react";
 import { createServiceClient } from "@/lib/supabase/service";
 import { configWompi, urlCheckout } from "@/lib/wompi";
 import { pesos } from "@/lib/formularios/esquema";
+import { trmTexto, usd } from "@/lib/precios";
 import { MARCA } from "@/lib/contenido/clubhouse";
 
 export const dynamic = "force-dynamic";
@@ -68,6 +69,16 @@ export default async function PagarPage({
   if (ir && url && pago.estado === "PENDING") redirect(url);
 
   const { sandbox } = configWompi();
+  const desglose = (pago.detalle ?? null) as {
+    viaje?: string | null;
+    perfil?: string | null;
+    usd?: number | null;
+    personas?: number | null;
+    trm?: number | null;
+    trmFecha?: string | null;
+    totalCop?: number | null;
+    anticipoPct?: number | null;
+  } | null;
   return (
     <Marco>
       <span className="mx-auto mt-6 grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-[#f3dfa8] via-[#d9b96a] to-[#a98745] text-[#14251d]">
@@ -76,6 +87,25 @@ export default async function PagarPage({
       <h1 className="mt-5 font-serif text-3xl leading-tight text-carbon">{pago.concepto}</h1>
       {pago.nombre && <p className="mt-1 text-sm text-niebla">{pago.nombre}</p>}
       <p className="mt-6 font-serif text-5xl text-verde-golf">{pesos(pago.monto_cop)}</p>
+      {desglose && (
+        <dl className="mx-auto mt-5 max-w-xs space-y-1.5 rounded-2xl border border-[#e6ddc9] bg-[#fdfcf9] p-4 text-left text-xs text-niebla">
+          {desglose.perfil && (
+            <div className="flex justify-between gap-3"><dt>Plan</dt><dd className="text-right text-carbon">{desglose.viaje} · {desglose.perfil}</dd></div>
+          )}
+          {desglose.usd != null && (
+            <div className="flex justify-between gap-3"><dt>Valor en dólares</dt><dd className="text-carbon">{usd(desglose.usd * (desglose.personas ?? 1))}{(desglose.personas ?? 1) > 1 ? ` (${desglose.personas} personas)` : ""}</dd></div>
+          )}
+          {desglose.trm != null && (
+            <div className="flex justify-between gap-3"><dt>TRM del día{desglose.trmFecha ? ` (${desglose.trmFecha})` : ""}</dt><dd className="text-carbon">{trmTexto(desglose.trm)}</dd></div>
+          )}
+          {desglose.totalCop != null && desglose.anticipoPct ? (
+            <div className="flex justify-between gap-3"><dt>Total del plan</dt><dd className="text-carbon">{pesos(desglose.totalCop)}</dd></div>
+          ) : null}
+          {desglose.anticipoPct ? (
+            <div className="flex justify-between gap-3"><dt>Anticipo</dt><dd className="text-carbon">{desglose.anticipoPct}%</dd></div>
+          ) : null}
+        </dl>
+      )}
       <p className="mt-1 text-xs uppercase tracking-[0.16em] text-niebla">Referencia {pago.referencia}</p>
 
       {pago.estado === "DECLINED" || pago.estado === "ERROR" ? (

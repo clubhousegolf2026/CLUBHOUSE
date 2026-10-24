@@ -5,6 +5,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { MIN_PAGO_COP } from "@/lib/formularios/tipos";
 import { nuevaReferencia } from "@/lib/wompi";
+import { obtenerTrm, type Trm } from "@/lib/trm";
 
 type Res<T = object> = ({ ok: true } & T) | { ok: false; error: string };
 
@@ -16,6 +17,8 @@ export async function crearEnlacePago(d: {
   email: string;
   telefono: string;
   reservaId?: string | null;
+  /** Desglose (viaje, USD, TRM…) que se muestra al cliente en la página de pago. */
+  detalle?: Record<string, unknown> | null;
 }): Promise<Res<{ referencia: string }>> {
   const concepto = d.concepto.trim();
   if (!concepto) return { ok: false, error: "Escribe el concepto del cobro." };
@@ -25,7 +28,7 @@ export async function crearEnlacePago(d: {
   }
   const referencia = nuevaReferencia();
   const db = (await createServerSupabase()) as unknown as SupabaseClient;
-  const { error } = await db.from("pagos").insert({
+  const fila = {
     referencia,
     monto_cop: monto,
     concepto,
@@ -34,7 +37,10 @@ export async function crearEnlacePago(d: {
     telefono: d.telefono.trim() || null,
     origen: d.reservaId ? "reserva" : "manual",
     origen_id: d.reservaId || null,
-  });
+  };
+  let { error } = await db.from("pagos").insert({ ...fila, detalle: d.detalle ?? null });
+  // Antes de la migración 0011 no existe la columna `detalle`.
+  if (error && ["42703", "PGRST204"].includes(error.code ?? "")) ({ error } = await db.from("pagos").insert(fila));
   if (error) {
     const falta = ["42P01", "PGRST205"].includes(error.code ?? "");
     return { ok: false, error: falta ? "Falta aplicar la migración 0010 en Supabase." : error.message };
@@ -49,4 +55,9 @@ export async function eliminarPago(id: string): Promise<Res> {
   if (error) return { ok: false, error: error.message };
   revalidatePath("/admin/pagos");
   return { ok: true };
+}
+
+/** TRM de hoy, recién consultada (botón «Actualizar» del panel). */
+export async function obtenerTrmActual(): Promise<Trm> {
+  return obtenerTrm({ fresco: true });
 }

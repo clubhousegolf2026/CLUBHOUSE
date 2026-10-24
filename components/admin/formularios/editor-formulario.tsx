@@ -37,6 +37,8 @@ import { alturaInput, estiloInput } from "@/components/admin/form-ui";
 import { MiniaturaPlantilla } from "@/components/admin/formularios/miniaturas";
 import { VistaPrevia } from "@/components/admin/formularios/vista-previa";
 import { calcularCobro, pesos } from "@/lib/formularios/esquema";
+import { parsePrecio, trmTexto, usd, type ViajeTarifas } from "@/lib/precios";
+import type { Trm } from "@/lib/trm";
 import {
   campoNuevo,
   PALETA_ACENTOS,
@@ -302,12 +304,16 @@ export function EditorFormulario({
   wompiListo,
   respuestas,
   origen,
+  viajes,
+  trm,
 }: {
   inicial: FormularioFila;
   experiencias: { slug: string; nombre: string }[];
   wompiListo: boolean;
   respuestas: number;
   origen: string;
+  viajes: ViajeTarifas[];
+  trm: Trm;
 }) {
   const router = useRouter();
   const [nombre, setNombre] = useState(inicial.nombre);
@@ -428,7 +434,15 @@ export function EditorFormulario({
 
   // Simulador del cobro con N personas
   const campoPersonas = campos.find((c) => c.personas && c.tipo === "numero");
-  const simulado = calcularCobro(cfg, campoPersonas ? { [campoPersonas.id]: String(personasSim) } : {});
+  const viajePago = cfg.pago.fuente === "viaje" ? viajes.find((v) => v.slug === cfg.pago.viajeSlug) : undefined;
+  const tarifaPago = viajePago?.tarifas.find((t) => t.perfil === cfg.pago.viajePerfil) ?? viajePago?.tarifas[0];
+  const precioViaje = tarifaPago ? parsePrecio(tarifaPago.precio) : null;
+  const pagoEfectivo = {
+    ...cfg.pago,
+    ...(precioViaje ? { base: precioViaje.valor, moneda: precioViaje.moneda } : {}),
+  };
+  if (pagoEfectivo.moneda === "USD" && pagoEfectivo.trmAuto) pagoEfectivo.tasaUsd = trm.valor;
+  const simulado = calcularCobro({ ...cfg, pago: pagoEfectivo }, campoPersonas ? { [campoPersonas.id]: String(personasSim) } : {});
 
   const pestanas: { id: Pestana; etiqueta: string; icono: React.ComponentType<{ size?: number }> }[] = [
     { id: "campos", etiqueta: "Campos", icono: List },
@@ -650,37 +664,99 @@ export function EditorFormulario({
 
               {cfg.pago.activo && (
                 <>
-                  <section className="space-y-4 rounded-2xl border border-arena bg-blanco-roto p-5">
+                  <section className="space-y-5 rounded-2xl border border-arena bg-blanco-roto p-5">
                     <label className="block">
                       <Etiqueta>Concepto del cobro</Etiqueta>
                       <input value={cfg.pago.concepto} onChange={(e) => actPago({ concepto: e.target.value })} placeholder="Inscripción Utah Experience" className={cn(estiloInput, alturaInput, "mt-1.5")} />
                       <Ayuda>Es lo que verá la persona en el resumen y en Wompi.</Ayuda>
                     </label>
-                    <div className="grid gap-4 sm:grid-cols-3">
-                      <label className="block">
-                        <Etiqueta>Moneda de la tarifa</Etiqueta>
-                        <select value={cfg.pago.moneda} onChange={(e) => actPago({ moneda: e.target.value as "COP" | "USD" })} className={cn(estiloInput, alturaInput, "mt-1.5")}>
-                          <option value="COP">Pesos (COP)</option>
-                          <option value="USD">Dólares (USD)</option>
-                        </select>
-                      </label>
-                      <label className="block">
-                        <Etiqueta>Tarifa base {campoPersonas ? "por persona" : "total"}</Etiqueta>
-                        <input type="number" min={0} value={cfg.pago.base || ""} onChange={(e) => actPago({ base: Number(e.target.value) })} className={cn(estiloInput, alturaInput, "mt-1.5")} />
-                      </label>
-                      {cfg.pago.moneda === "USD" && (
-                        <label className="block">
-                          <Etiqueta>Pesos por dólar</Etiqueta>
-                          <input type="number" min={0} value={cfg.pago.tasaUsd || ""} onChange={(e) => actPago({ tasaUsd: Number(e.target.value) })} className={cn(estiloInput, alturaInput, "mt-1.5")} />
-                        </label>
-                      )}
+
+                    <div>
+                      <Etiqueta>¿De dónde sale el precio?</Etiqueta>
+                      <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                        {(
+                          [
+                            ["viaje", "Del precio de un viaje", "Se toma de la tarifa del viaje y siempre está al día."],
+                            ["fijo", "Un valor fijo", "Lo escribes tú, en pesos o en dólares."],
+                          ] as const
+                        ).map(([id, titulo, ayuda]) => (
+                          <button
+                            key={id}
+                            type="button"
+                            disabled={id === "viaje" && viajes.length === 0}
+                            onClick={() => actPago({ fuente: id, ...(id === "viaje" && !cfg.pago.viajeSlug ? { viajeSlug: viajes[0]?.slug ?? "", viajePerfil: viajes[0]?.tarifas[0]?.perfil ?? "" } : {}) })}
+                            aria-pressed={cfg.pago.fuente === id}
+                            className={cn("rounded-xl border-2 p-3 text-left transition disabled:opacity-40", cfg.pago.fuente === id ? "border-verde-golf bg-verde-golf/[0.05]" : "border-arena bg-white hover:border-verde-golf/40")}
+                          >
+                            <span className="block text-sm font-semibold text-carbon">{titulo}</span>
+                            <span className="block text-xs text-niebla">{ayuda}</span>
+                          </button>
+                        ))}
+                      </div>
                     </div>
+
+                    {cfg.pago.fuente === "viaje" ? (
+                      <div className="space-y-3">
+                        <div className="grid gap-4 sm:grid-cols-2">
+                          <label className="block">
+                            <Etiqueta>Viaje (plan)</Etiqueta>
+                            <select
+                              value={cfg.pago.viajeSlug}
+                              onChange={(e) => actPago({ viajeSlug: e.target.value, viajePerfil: viajes.find((v) => v.slug === e.target.value)?.tarifas[0]?.perfil ?? "" })}
+                              className={cn(estiloInput, alturaInput, "mt-1.5")}
+                            >
+                              {viajes.map((v) => <option key={v.slug} value={v.slug}>{v.nombre}</option>)}
+                            </select>
+                          </label>
+                          <label className="block">
+                            <Etiqueta>Tarifa</Etiqueta>
+                            <select value={cfg.pago.viajePerfil} onChange={(e) => actPago({ viajePerfil: e.target.value })} className={cn(estiloInput, alturaInput, "mt-1.5")}>
+                              {(viajePago?.tarifas ?? []).map((t, i) => <option key={`${t.perfil}-${i}`} value={t.perfil}>{t.perfil}{t.detalle ? ` · ${t.detalle}` : ""} · {t.precio}</option>)}
+                            </select>
+                          </label>
+                        </div>
+                        <p className="rounded-xl bg-crema/60 px-3.5 py-2.5 text-xs text-niebla">
+                          Precio actual: <strong className="text-carbon">{tarifaPago?.precio ?? "—"}</strong> {tarifaPago?.unidad ? `(${tarifaPago.unidad})` : ""}. Si cambias la tarifa del viaje en Experiencias, el cobro de este formulario se actualiza solo.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <label className="block">
+                          <Etiqueta>Moneda de la tarifa</Etiqueta>
+                          <select value={cfg.pago.moneda} onChange={(e) => actPago({ moneda: e.target.value as "COP" | "USD" })} className={cn(estiloInput, alturaInput, "mt-1.5")}>
+                            <option value="COP">Pesos (COP)</option>
+                            <option value="USD">Dólares (USD)</option>
+                          </select>
+                        </label>
+                        <label className="block">
+                          <Etiqueta>Tarifa base {campoPersonas ? "por persona" : "total"}</Etiqueta>
+                          <input type="number" min={0} value={cfg.pago.base || ""} onChange={(e) => actPago({ base: Number(e.target.value) })} className={cn(estiloInput, alturaInput, "mt-1.5")} />
+                        </label>
+                      </div>
+                    )}
+
+                    {(pagoEfectivo.moneda === "USD") && (
+                      <div className="space-y-3 rounded-xl border border-champagne/40 bg-champagne/[0.08] p-4">
+                        <Interruptor valor={cfg.pago.trmAuto} onChange={(v) => actPago({ trmAuto: v })} titulo="Convertir a pesos con la TRM del día" ayuda="Cada inscripción se cobra con el dólar vigente ese día (Superfinanciera)." />
+                        {cfg.pago.trmAuto ? (
+                          <p className="text-sm text-carbon">
+                            TRM de hoy: <strong className="tabular-nums">{trmTexto(trm.valor)}</strong> <span className="text-xs text-niebla">· rige desde el {trm.fecha}</span>
+                          </p>
+                        ) : (
+                          <label className="block">
+                            <Etiqueta>Pesos por dólar (fijo)</Etiqueta>
+                            <input type="number" min={0} value={cfg.pago.tasaUsd || ""} onChange={(e) => actPago({ tasaUsd: Number(e.target.value) })} className={cn(estiloInput, alturaInput, "mt-1.5 sm:max-w-xs")} />
+                          </label>
+                        )}
+                      </div>
+                    )}
+
                     <label className="block">
                       <Etiqueta>Cobrar solo un anticipo (%)</Etiqueta>
                       <input type="number" min={1} max={99} placeholder="Vacío = cobrar el total" value={cfg.pago.anticipoPct ?? ""} onChange={(e) => actPago({ anticipoPct: e.target.value === "" ? null : Number(e.target.value) })} className={cn(estiloInput, alturaInput, "mt-1.5 sm:max-w-xs")} />
                     </label>
                     <p className="text-xs text-niebla">
-                      El total = tarifa base{campoPersonas ? " × número de personas" : ""} + los precios de las opciones elegidas. Define precios en las opciones desde la pestaña Campos.
+                      El total = tarifa{campoPersonas ? " × número de personas" : ""} + los precios de las opciones elegidas.
                       {!campoPersonas && " Para multiplicar por personas, marca un campo numérico como «Es el número de personas»."}
                     </p>
                   </section>
@@ -694,6 +770,9 @@ export function EditorFormulario({
                       </label>
                     )}
                     <dl className="text-sm">
+                      {pagoEfectivo.moneda === "USD" && (
+                        <div className="mb-1 flex justify-between text-xs"><dt className="text-niebla">{usd(pagoEfectivo.base)} × {campoPersonas ? personasSim : 1} × {trmTexto(pagoEfectivo.tasaUsd)}</dt><dd className="text-niebla">en pesos</dd></div>
+                      )}
                       <div className="flex justify-between"><dt className="text-niebla">Total</dt><dd className="font-medium text-carbon">{pesos(simulado.totalCop)}</dd></div>
                       <div className="mt-1 flex justify-between"><dt className="text-niebla">Se cobra ahora</dt><dd className="font-serif text-xl text-verde-golf">{pesos(simulado.cobrarCop)}</dd></div>
                     </dl>
