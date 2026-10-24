@@ -1,4 +1,6 @@
-import { BarChart3, ShieldCheck, Zap } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { ArrowLeft, BarChart3, ShieldCheck, Zap } from "lucide-react";
 import { Logo } from "@/components/site/logo";
 import { LoginForm } from "@/components/admin/login-form";
 import { signIn } from "./actions";
@@ -10,9 +12,9 @@ const MENSAJES_ERROR: Record<string, string> = {
 };
 
 const PUNTOS = [
-  { icono: BarChart3, texto: "Pipeline de leads y cotizaciones en vivo" },
-  { icono: Zap, texto: "Reservas y pagos en un solo lugar" },
-  { icono: ShieldCheck, texto: "Acceso seguro solo para el equipo" },
+  { icono: BarChart3, texto: "Leads del sitio ordenados por etapa del embudo" },
+  { icono: Zap, texto: "Reservas y estado de pago en un solo lugar" },
+  { icono: ShieldCheck, texto: "Acceso restringido al equipo de Clubhouse" },
 ];
 
 export default async function AdminLoginPage({
@@ -25,6 +27,18 @@ export default async function AdminLoginPage({
 
   return (
     <div className="admin-side min-h-screen">
+      <Image
+        src="/fotos/dubai-creek.webp"
+        alt=""
+        fill
+        priority
+        sizes="100vw"
+        className="-z-20 object-cover object-[center_60%] opacity-30"
+      />
+      <div
+        aria-hidden
+        className="absolute inset-0 -z-10 bg-gradient-to-br from-[#061a13]/90 via-[#0a241b]/80 to-[#0a241b]/60"
+      />
       <div
         aria-hidden
         className="absolute inset-0 -z-10 opacity-40"
@@ -40,11 +54,11 @@ export default async function AdminLoginPage({
         <div className="entra hidden lg:block">
           <Logo variante="claro" />
           <h1 className="mt-10 max-w-lg font-serif text-5xl leading-[1.08] text-white">
-            El panel que mueve cada reserva de golf.
+            Cada lead y cada reserva, <span className="texto-oro">bajo control.</span>
           </h1>
           <p className="mt-5 max-w-md text-lg text-crema/70">
-            Controla el catálogo, sigue cada lead y confirma pagos con el
-            equipo, desde cualquier dispositivo.
+            Panel interno del equipo Clubhouse: siga los contactos que llegan
+            del sitio y confirme las reservas.
           </p>
           <ul className="mt-10 space-y-4">
             {PUNTOS.map(({ icono: Icono, texto }, i) => (
@@ -76,6 +90,12 @@ export default async function AdminLoginPage({
             Entra con tu cuenta del equipo para ver el panel.
           </p>
           <LoginForm action={signIn} mensaje={mensaje} />
+          <Link
+            href="/"
+            className="mt-6 inline-flex items-center gap-2 text-sm text-crema/55 transition-colors hover:text-[#ecd396]"
+          >
+            <ArrowLeft size={15} /> Volver al sitio
+          </Link>
         </div>
       </div>
     </div>

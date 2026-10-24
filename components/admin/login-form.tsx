@@ -52,7 +52,8 @@ export function LoginForm({
             type="email"
             required
             autoComplete="email"
-            placeholder="tu@clubhouse.com"
+            autoFocus
+            placeholder="nombre@clubhousetravel.com.co"
             className={campo}
           />
         </span>
