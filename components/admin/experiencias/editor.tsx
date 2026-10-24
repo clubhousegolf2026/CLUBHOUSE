@@ -29,7 +29,7 @@ import {
 import { MapaMundoPicker, type CiudadMapa } from "@/components/admin/mapa-mundo-picker";
 import { CampoFoto, GaleriaFotos, Lineas, Lista } from "@/components/admin/experiencias/piezas";
 import { CosteoEditor } from "@/components/admin/experiencias/costeo-editor";
-import type { CostosExperiencia } from "@/lib/contenido/costeo";
+import { calcular, type CostosExperiencia } from "@/lib/contenido/costeo";
 import { eliminarExperiencia, guardarCostos, guardarExperiencia } from "@/app/admin/(panel)/experiencias/actions";
 import {
   escribirFechas,
@@ -72,11 +72,35 @@ const TITULOS_SECCIONES = [
   "Preguntas frecuentes",
 ];
 
+type NivelSeccion = "completa" | "parcial" | "vacia";
+
 const AcordeonCtx = createContext<{
   abiertas: Set<string>;
   alternar: (titulo: string) => void;
   resumenes: Record<string, string>;
+  niveles: Record<string, NivelSeccion>;
 } | null>(null);
+
+const ESTILO_NIVEL: Record<NivelSeccion, { tarjeta: string; icono: string; etiqueta: string; texto: string }> = {
+  completa: {
+    tarjeta: "border-exito/40 bg-exito/[0.07]",
+    icono: "bg-exito text-white",
+    etiqueta: "Completa",
+    texto: "text-exito",
+  },
+  parcial: {
+    tarjeta: "border-champagne/70 bg-champagne/[0.12]",
+    icono: "bg-champagne/30 text-[#8a6d1f]",
+    etiqueta: "Falta completar",
+    texto: "text-[#8a6d1f]",
+  },
+  vacia: {
+    tarjeta: "border-arena bg-blanco-roto",
+    icono: "bg-verde-golf/10 text-verde-golf",
+    etiqueta: "Sin empezar",
+    texto: "text-niebla",
+  },
+};
 
 /** Sección plegable: el contenido se monta la primera vez que se abre y luego
  *  solo se oculta, para no perder lo que se haya escrito ni recargar el mapa. */
@@ -95,22 +119,25 @@ function Seccion({
   const abierta = ctx.abiertas.has(titulo);
   const montada = useRef(abierta);
   if (abierta) montada.current = true;
+  const nivel = ctx.niveles[titulo] ?? "vacia";
+  const estilo = ESTILO_NIVEL[nivel];
 
   return (
-    <section className="overflow-hidden rounded-[var(--radius-panel)] border border-arena bg-blanco-roto shadow-[var(--shadow-suave)]">
+    <section className={`overflow-hidden rounded-[var(--radius-panel)] border shadow-[var(--shadow-suave)] transition-colors ${estilo.tarjeta}`}>
       <button
         type="button"
         onClick={() => ctx.alternar(titulo)}
         aria-expanded={abierta}
-        className="flex w-full items-center gap-3 p-4 text-left transition-colors hover:bg-arena/20 sm:p-5"
+        className="flex w-full items-center gap-3 p-4 text-left transition-colors hover:bg-black/[0.02] sm:p-5"
       >
-        {icono && (
-          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-verde-golf/10 text-verde-golf">{icono}</span>
-        )}
+        <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl ${estilo.icono}`}>
+          {nivel === "completa" ? <Check size={18} /> : icono}
+        </span>
         <span className="min-w-0 flex-1">
           <span className="block font-serif text-lg leading-tight text-carbon">{titulo}</span>
           {ctx.resumenes[titulo] && <span className="mt-0.5 block truncate text-sm text-niebla">{ctx.resumenes[titulo]}</span>}
         </span>
+        <span className={`hidden shrink-0 text-xs font-medium sm:block ${estilo.texto}`}>{estilo.etiqueta}</span>
         <ChevronDown size={20} className={`shrink-0 text-niebla transition-transform duration-200 ${abierta ? "rotate-180" : ""}`} />
       </button>
       {montada.current && (
@@ -141,7 +168,8 @@ export function ExperienciaEditor({
 }) {
   const router = useRouter();
   const [costos, setCostos] = useState<CostosExperiencia>(costosIniciales);
-  const [abiertas, setAbiertas] = useState<Set<string>>(() => new Set(["Información general"]));
+  const [ubicacionTocada, setUbicacionTocada] = useState(!esNueva);
+  const [abiertas, setAbiertas] = useState<Set<string>>(() => new Set());
   const alternar = (titulo: string) =>
     setAbiertas((prev) => {
       const nuevo = new Set(prev);
@@ -190,6 +218,45 @@ export function ExperienciaEditor({
     "Políticas y condiciones": plural(politicas.length, "política", "políticas"),
     "Preguntas frecuentes": plural(faq.length, "pregunta", "preguntas"),
   };
+
+  const lleno = (t: string | undefined) => Boolean(t && t.trim());
+  const nivelDe = (listo: boolean[], algo: boolean): NivelSeccion =>
+    listo.every(Boolean) ? "completa" : algo || listo.some(Boolean) ? "parcial" : "vacia";
+  const niveles: Record<string, NivelSeccion> = {
+    "Información general": nivelDe(
+      [lleno(e.nombre), lleno(e.pais), lleno(e.subtitulo), lleno(e.resumen), lleno(e.titularLargo), lleno(e.descripcionLarga)],
+      false,
+    ),
+    "Ubicación en el globo": ubicacionTocada && (lat !== 0 || lng !== 0) ? "completa" : "vacia",
+    "Fechas y salidas": nivelDe([lleno(e.fechas), lleno(e.duracion)], false),
+    "Costos y precio al público": costos.costeos.some((c) => calcular(c).valido)
+      ? "completa"
+      : costos.costeos.length > 0
+        ? "parcial"
+        : "vacia",
+    "Precios y tarifas": nivelDe(
+      [lleno(e.desde), e.tarifas.length > 0, e.tarifas.every((t) => lleno(t.perfil) && lleno(t.precio))],
+      e.tarifas.length > 0,
+    ),
+    "Programa día a día": nivelDe([e.programa.length > 0, e.programa.every((d) => lleno(d.titulo))], e.programa.length > 0),
+    "Campos de golf": nivelDe(
+      [e.rondas.length > 0, e.rondas.every((r) => lleno(r.nombre) && lleno(r.descripcion))],
+      e.rondas.length > 0,
+    ),
+    "Alojamiento": nivelDe([e.alojamiento.length > 0, e.alojamiento.every((a) => lleno(a.nombre))], e.alojamiento.length > 0),
+    "Destacados y más allá del golf": nivelDe(
+      [e.claves.length > 0, e.cifras.length > 0, e.masAllaDelGolf.length > 0],
+      false,
+    ),
+    "Qué incluye y qué no": nivelDe([lineasLlenas(e.incluye) > 0, lineasLlenas(e.noIncluye) > 0], false),
+    "Fotos": nivelDe([lleno(e.foto), lleno(e.fotoSecundaria)], galeria.length > 0),
+    "Políticas y condiciones": nivelDe(
+      [politicas.length > 0, politicas.every((p) => lleno(p.titulo) && lleno(p.texto))],
+      politicas.length > 0,
+    ),
+    "Preguntas frecuentes": nivelDe([faq.length > 0, faq.every((f) => lleno(f.q) && lleno(f.a))], faq.length > 0),
+  };
+  const completas = Object.values(niveles).filter((n) => n === "completa").length;
 
   function cambiarRango(nuevo: { inicio: string; fin: string }) {
     setRango(nuevo);
@@ -243,10 +310,25 @@ export function ExperienciaEditor({
   }
 
   return (
-    <AcordeonCtx.Provider value={{ abiertas, alternar, resumenes }}>
+    <AcordeonCtx.Provider value={{ abiertas, alternar, resumenes, niveles }}>
     <div className="max-w-6xl space-y-5">
       <div className="grid items-start gap-5 lg:grid-cols-[1fr_300px]">
         <div className="space-y-3">
+          <div className="rounded-2xl border border-arena bg-blanco-roto p-4">
+            <div className="flex items-center justify-between gap-3 text-sm">
+              <p className="font-medium text-carbon">
+                {completas} de {TITULOS_SECCIONES.length} secciones completas
+              </p>
+              <p className="hidden items-center gap-3 text-xs text-niebla sm:flex">
+                <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-exito" /> Completa</span>
+                <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-champagne" /> Falta completar</span>
+                <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-arena" /> Sin empezar</span>
+              </p>
+            </div>
+            <div className="mt-3 h-2 overflow-hidden rounded-full bg-arena/60">
+              <div className="h-full rounded-full bg-exito transition-all duration-500" style={{ width: `${(completas / TITULOS_SECCIONES.length) * 100}%` }} />
+            </div>
+          </div>
           <div className="flex items-center justify-between px-1">
             <p className="text-sm text-niebla">Abre cada sección para editarla.</p>
             <span className="flex items-center gap-4 text-sm">
@@ -302,14 +384,23 @@ export function ExperienciaEditor({
               lng={lng}
               nombre={e.nombre}
               ciudades={ciudades}
-              onCambiar={(a, o) => act({ coordenadas: [o, a] })}
+              onCambiar={(a, o) => {
+                setUbicacionTocada(true);
+                act({ coordenadas: [o, a] });
+              }}
             />
             <div className="grid gap-4 sm:grid-cols-2">
               <Campo label="Latitud">
-                <Entrada type="number" step="0.001" value={lat} onChange={(ev) => act({ coordenadas: [lng, Number(ev.target.value)] })} />
+                <Entrada type="number" step="0.001" value={lat} onChange={(ev) => {
+                    setUbicacionTocada(true);
+                    act({ coordenadas: [lng, Number(ev.target.value)] });
+                  }} />
               </Campo>
               <Campo label="Longitud">
-                <Entrada type="number" step="0.001" value={lng} onChange={(ev) => act({ coordenadas: [Number(ev.target.value), lat] })} />
+                <Entrada type="number" step="0.001" value={lng} onChange={(ev) => {
+                    setUbicacionTocada(true);
+                    act({ coordenadas: [Number(ev.target.value), lat] });
+                  }} />
               </Campo>
             </div>
             <p className="text-xs text-niebla">Acerca con + / − y arrastra el mapa para ubicar el punto con precisión.</p>
