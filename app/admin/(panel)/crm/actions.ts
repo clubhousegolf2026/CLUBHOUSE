@@ -66,6 +66,7 @@ export async function crearContacto(datos: {
   valorEstimadoCop?: number | null;
   notas?: string;
   fechaTentativa?: string | null;
+  etiquetas?: string[];
 }): Promise<Resultado<{ id: string }>> {
   const nombre = datos.nombre.trim();
   const email = datos.email.trim();
@@ -82,6 +83,7 @@ export async function crearContacto(datos: {
       valor_estimado_cop: datos.valorEstimadoCop ?? null,
       notas: datos.notas?.trim() || null,
       fecha_tentativa: datos.fechaTentativa || null,
+      ...(datos.etiquetas?.length ? { etiquetas: datos.etiquetas } : {}),
       origen: "contacto",
     })
     .select("id")

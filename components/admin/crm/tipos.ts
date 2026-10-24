@@ -88,3 +88,17 @@ export function iniciales(nombre: string): string {
       .join("") || "?"
   );
 }
+
+/** Experiencias reales por las que puede preguntar un lead. */
+export const INTERESES = [
+  { id: "tailandia", nombre: "Tailandia", pista: ["tailandia", "thailand", "bangkok", "pattaya"] },
+  { id: "utah", nombre: "Utah", pista: ["utah", "st. george", "st george", "black desert"] },
+] as const;
+
+/** Interés del lead: sale de las etiquetas y, si no, de lo que escribió o se anotó. */
+export function interesDe(l: Lead): string | null {
+  const texto = [l.etiquetas.join(" "), l.mensaje ?? "", l.notas ?? "", l.proxima_accion ?? ""]
+    .join(" ")
+    .toLowerCase();
+  return INTERESES.find((i) => i.pista.some((p) => texto.includes(p)))?.id ?? null;
+}

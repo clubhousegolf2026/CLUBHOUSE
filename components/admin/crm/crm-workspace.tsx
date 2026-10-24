@@ -26,8 +26,10 @@ import {
   ABIERTOS,
   COLOR_ESTADO,
   GANADOS,
+  INTERESES,
   diasDesde,
   enlaceWhatsApp,
+  interesDe,
   fechaCorta,
   iniciales,
   textoHace,
@@ -60,6 +62,7 @@ export function CrmWorkspace({
   const [filtroEstado, setFiltroEstado] = useState<Estado | "todos">("todos");
   const [filtroOrigen, setFiltroOrigen] = useState("todos");
   const [soloVencidos, setSoloVencidos] = useState(false);
+  const [filtroInteres, setFiltroInteres] = useState<string>("todos");
   const [orden, setOrden] = useState<Orden>("reciente");
   const [vista, setVista] = useState<"tablero" | "lista">("tablero");
   const [abierto, setAbierto] = useState<string | null>(null);
@@ -113,6 +116,7 @@ export function CrmWorkspace({
       (l) =>
         (filtroEstado === "todos" || l.estado === filtroEstado) &&
         (filtroOrigen === "todos" || l.origen === filtroOrigen) &&
+        (filtroInteres === "todos" || (filtroInteres === "sin" ? interesDe(l) === null : interesDe(l) === filtroInteres)) &&
         (!soloVencidos || (ABIERTOS.includes(l.estado) && (vencida(l.proxima_fecha) || (!l.proxima_fecha && diasDesde(l.updated_at) > 5)))) &&
         (!t ||
           [l.nombre, l.email, l.telefono ?? "", l.etiquetas.join(" "), l.proxima_accion ?? ""]
@@ -127,7 +131,7 @@ export function CrmWorkspace({
       nombre: (a, b) => a.nombre.localeCompare(b.nombre, "es"),
     };
     return lista.sort(cmp[orden]);
-  }, [leads, q, filtroEstado, filtroOrigen, soloVencidos, orden]);
+  }, [leads, q, filtroEstado, filtroOrigen, filtroInteres, soloVencidos, orden]);
 
   function parchar(id: string, patch: Partial<Lead>) {
     setLeads((ls) => ls.map((l) => (l.id === id ? { ...l, ...patch } : l)));
@@ -166,7 +170,7 @@ export function CrmWorkspace({
   }
 
   const leadAbierto = abierto ? leads.find((l) => l.id === abierto) ?? null : null;
-  const hayFiltros = q || filtroEstado !== "todos" || filtroOrigen !== "todos" || soloVencidos;
+  const hayFiltros = q || filtroEstado !== "todos" || filtroOrigen !== "todos" || filtroInteres !== "todos" || soloVencidos;
 
   return (
     <div className="space-y-6">
@@ -209,6 +213,27 @@ export function CrmWorkspace({
         />
       </div>
 
+      <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Experiencia de interés">
+        {([
+          ["todos", "Todas las experiencias", leads.length],
+          ...INTERESES.map((i) => [i.id, i.nombre, leads.filter((l) => interesDe(l) === i.id).length] as const),
+          ["sin", "Sin definir", leads.filter((l) => interesDe(l) === null).length],
+        ] as const).map(([id, nombre, n]) => (
+          <button
+            key={id}
+            onClick={() => setFiltroInteres(id)}
+            aria-pressed={filtroInteres === id}
+            className={`rounded-full border px-4 py-1.5 text-sm transition ${
+              filtroInteres === id
+                ? "border-verde-golf bg-verde-golf text-crema"
+                : "border-arena bg-white text-niebla hover:border-verde-golf/40 hover:text-carbon"
+            }`}
+          >
+            {nombre} <span className="ml-1 tabular-nums opacity-70">{n}</span>
+          </button>
+        ))}
+      </div>
+
       <div className="flex flex-wrap items-center gap-2.5">
         <div className="relative min-w-[220px] flex-1 sm:max-w-sm">
           <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-niebla" />
@@ -238,7 +263,7 @@ export function CrmWorkspace({
         </select>
         {hayFiltros && (
           <button
-            onClick={() => { setQ(""); setFiltroEstado("todos"); setFiltroOrigen("todos"); setSoloVencidos(false); }}
+            onClick={() => { setQ(""); setFiltroEstado("todos"); setFiltroOrigen("todos"); setFiltroInteres("todos"); setSoloVencidos(false); }}
             className="text-sm text-verde-golf hover:underline"
           >
             Limpiar

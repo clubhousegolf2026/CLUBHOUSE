@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { Loader2, X } from "lucide-react";
 import { crearContacto } from "@/app/admin/(panel)/crm/actions";
+import { INTERESES } from "./tipos";
 
 const campo =
   "w-full rounded-xl border border-arena bg-white px-3.5 py-2.5 text-sm text-carbon outline-none transition focus:border-verde-golf/60 focus:ring-4 focus:ring-verde-golf/10";
@@ -29,6 +30,7 @@ export function NuevoLeadModal({
         telefono: String(f.get("telefono") ?? ""),
         valorEstimadoCop: valor ? Number(valor) : null,
         notas: String(f.get("notas") ?? ""),
+        etiquetas: f.get("interes") ? [String(f.get("interes"))] : undefined,
         fechaTentativa: String(f.get("fecha") ?? "") || null,
       });
       if (!r.ok) return setError(r.error);
@@ -82,6 +84,15 @@ export function NuevoLeadModal({
           <label className="block">
             <span className="mb-1 block text-xs font-medium uppercase tracking-wider text-niebla">Fecha tentativa de viaje</span>
             <input name="fecha" type="date" className={campo} />
+          </label>
+          <label className="block sm:col-span-2">
+            <span className="mb-1 block text-xs font-medium uppercase tracking-wider text-niebla">Experiencia de interés</span>
+            <select name="interes" className={campo} defaultValue="">
+              <option value="">Aún no definida</option>
+              {INTERESES.map((i) => (
+                <option key={i.id} value={i.nombre}>{i.nombre}</option>
+              ))}
+            </select>
           </label>
           <label className="block sm:col-span-2">
             <span className="mb-1 block text-xs font-medium uppercase tracking-wider text-niebla">Notas</span>
