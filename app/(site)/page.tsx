@@ -1,6 +1,6 @@
 import { Hero } from "@/components/marketing/hero";
 import { MarquesinaCampos } from "@/components/marketing/marquesina-campos";
-import { PackageCard } from "@/components/marketing/package-card";
+import { FiltroPaquetes } from "@/components/marketing/filtro-paquetes";
 import { EncabezadoSeccion } from "@/components/marketing/encabezado-seccion";
 import { Oro } from "@/components/marketing/pagina-hero";
 import { SuenosScroll } from "@/components/marketing/suenos-scroll";
@@ -17,23 +17,7 @@ import type { PaquetePredefinido, Destino } from "@/lib/data/types";
 export const revalidate = 300;
 
 export default function HomePage() {
-  // Las dos experiencias firmadas también se marcan en el globo.
-  const destinosExperiencia: (Destino & { paquetes: PaquetePredefinido[] })[] = EXPERIENCIAS.map((e) => ({
-    id: `exp-${e.slug}`,
-    nombre: e.nombre,
-    region: e.subtitulo,
-    pais: e.pais,
-    coordenadas: e.coordenadas,
-    resumen: e.resumen,
-    campos: e.rondas.map((r) => r.nombre),
-    slugsPaquetes: [],
-    disponible: true,
-    foto: e.foto,
-    paquetes: [],
-    experiencia: { slug: e.slug, desde: e.desde, fechas: e.fechas, duracion: e.duracion },
-  }));
-  const destinos = destinosExperiencia;
-  // Las experiencias firmadas también salen como tarjetas junto a los paquetes.
+  // Las experiencias firmadas son los planes de la página.
   const tarjetasExperiencia: PaquetePredefinido[] = EXPERIENCIAS.map((e) => {
     const noches = Number(/(\d+)\s*noches/.exec(e.duracion)?.[1] ?? 0);
     return {
@@ -51,15 +35,35 @@ export default function HomePage() {
       destacado: false,
       href: `/experiencias/${e.slug}`,
       precioTexto: e.desde,
+      precioNumero: Number(e.desde.replace(/\D/g, "")),
+      moneda: "USD" as const,
       insignia: `${e.bandera} ${e.pais}`,
     };
   });
+  // Y las mismas dos se marcan en el globo.
+  const destinosExperiencia: (Destino & { paquetes: PaquetePredefinido[] })[] = EXPERIENCIAS.map((e) => ({
+    id: `exp-${e.slug}`,
+    nombre: e.nombre,
+    region: e.subtitulo,
+    pais: e.pais,
+    coordenadas: e.coordenadas,
+    resumen: e.resumen,
+    campos: e.rondas.map((r) => r.nombre),
+    slugsPaquetes: [],
+    disponible: true,
+    foto: e.foto,
+    paquetes: tarjetasExperiencia.filter((t) => t.slug === e.slug),
+    experiencia: { slug: e.slug, desde: e.desde, fechas: e.fechas, duracion: e.duracion },
+  }));
+  // El globo no lista paquetes (la ficha de experiencia ya enlaza al itinerario).
+  const destinosGlobo = destinosExperiencia.map((d) => ({ ...d, paquetes: [] }));
+  const destinos = destinosExperiencia;
   const campos = [...new Set(destinos.flatMap((d) => d.campos))];
 
   return (
     <>
       <div className="flex min-h-[calc(100dvh-4.75rem)] flex-col sm:min-h-[calc(100dvh-5rem)]">
-        <Hero destinos={destinos} />
+        <Hero destinos={destinosGlobo} />
         <MarquesinaCampos campos={campos} />
       </div>
 
@@ -78,11 +82,7 @@ export default function HomePage() {
               }
               descripcion="Dos itinerarios armados por nuestro equipo, listos para salir con su grupo."
             />
-            <div className="mx-auto grid max-w-5xl gap-6 sm:grid-cols-2 xl:gap-8">
-              {tarjetasExperiencia.map((p) => (
-                <PackageCard key={p.id} paquete={p} />
-              ))}
-            </div>
+            <FiltroPaquetes paquetes={tarjetasExperiencia} destinos={destinos} />
           </div>
         </section>
       </SuenosScroll>

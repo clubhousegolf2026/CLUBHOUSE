@@ -7,14 +7,18 @@ import type { PaquetePredefinido, Destino } from "@/lib/data/types";
 
 type DestinoConPaquetes = Destino & { paquetes: PaquetePredefinido[] };
 
-const PASO_PRESUPUESTO = 500_000;
 
-const fmtCop = (n: number) =>
-  new Intl.NumberFormat("es-CO", {
-    style: "currency",
-    currency: "COP",
-    maximumFractionDigits: 0,
-  }).format(n);
+const fmtMoneda = (n: number, moneda: "COP" | "USD") =>
+  moneda === "USD"
+    ? `USD ${new Intl.NumberFormat("es-CO", { maximumFractionDigits: 0 }).format(n)}`
+    : new Intl.NumberFormat("es-CO", {
+        style: "currency",
+        currency: "COP",
+        maximumFractionDigits: 0,
+      }).format(n);
+
+/** Precio numérico del plan en su propia moneda. */
+const precioDe = (p: PaquetePredefinido) => p.precioNumero ?? p.precioDesdeCop;
 
 const ORDENES = [
   { id: "destacados", etiqueta: "Más elegidos" },
@@ -57,13 +61,9 @@ function Selector({
 export function FiltroPaquetes({
   paquetes,
   destinos,
-  experiencias = [],
 }: {
   paquetes: PaquetePredefinido[];
   destinos: DestinoConPaquetes[];
-  /** Experiencias firmadas (Tailandia, Utah…): van primero y se ocultan al filtrar,
-   *  porque sus precios están en USD y no entran en los filtros en COP. */
-  experiencias?: PaquetePredefinido[];
 }) {
   const [destino, setDestino] = useState("todos");
   const [noches, setNoches] = useState("todas");
@@ -73,6 +73,8 @@ export function FiltroPaquetes({
   const [soloDestacados, setSoloDestacados] = useState(false);
   const resultadosRef = useRef<HTMLDivElement>(null);
 
+  const moneda: "COP" | "USD" = paquetes[0]?.moneda ?? "COP";
+  const paso = moneda === "USD" ? 500 : 500_000;
   const destinosConPlanes = destinos.filter((d) => d.paquetes.length > 0);
   // Las opciones salen de los planes reales: solo se ofrecen duraciones que
   // existen y topes de precio cercanos a lo que de verdad cuesta cada plan.
@@ -84,14 +86,14 @@ export function FiltroPaquetes({
     const techos = [
       ...new Set(
         paquetes.map(
-          (p) => Math.ceil(p.precioDesdeCop / PASO_PRESUPUESTO) * PASO_PRESUPUESTO,
+          (p) => Math.ceil(precioDe(p) / paso) * paso,
         ),
       ),
     ].sort((a, b) => a - b);
     return techos.length > 5
       ? techos.filter((_, i) => i % Math.ceil(techos.length / 5) === 0 || i === techos.length - 1)
       : techos;
-  }, [paquetes]);
+  }, [paquetes, paso]);
   const campos = useMemo(
     () => [...new Set(paquetes.flatMap((p) => p.camposIncluidos))].sort(),
     [paquetes],
@@ -111,15 +113,15 @@ export function FiltroPaquetes({
       (p) =>
         (!idsDestino || idsDestino.has(p.id)) &&
         (nochesElegidas === null || p.noches === nochesElegidas) &&
-        p.precioDesdeCop <= tope &&
+        precioDe(p) <= tope &&
         (campo === "todos" || p.camposIncluidos.includes(campo)) &&
         (!soloDestacados || p.destacado),
     );
 
     const ordenar: Record<string, (a: PaquetePredefinido, b: PaquetePredefinido) => number> = {
       destacados: (a, b) => Number(b.destacado) - Number(a.destacado),
-      "precio-asc": (a, b) => a.precioDesdeCop - b.precioDesdeCop,
-      "precio-desc": (a, b) => b.precioDesdeCop - a.precioDesdeCop,
+      "precio-asc": (a, b) => precioDe(a) - precioDe(b),
+      "precio-desc": (a, b) => precioDe(b) - precioDe(a),
       "noches-asc": (a, b) => a.noches - b.noches,
     };
     return filtrados.sort(ordenar[orden]);
@@ -132,8 +134,7 @@ export function FiltroPaquetes({
     campo !== "todos" ||
     soloDestacados;
 
-  const destacadas = hayFiltros ? [] : experiencias;
-  const total = resultados.length + destacadas.length;
+  const total = resultados.length;
 
   function limpiar() {
     setDestino("todos");
@@ -157,6 +158,7 @@ export function FiltroPaquetes({
             />
             <span className={!soloDestacados ? "font-medium" : ""}>Todos los planes</span>
           </label>
+          {paquetes.some((p) => p.destacado) && (
           <label className="flex cursor-pointer items-center gap-2">
             <input
               type="radio"
@@ -167,6 +169,7 @@ export function FiltroPaquetes({
             />
             <span className={soloDestacados ? "font-medium" : ""}>Más elegidos</span>
           </label>
+          )}
         </div>
 
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-[repeat(4,1fr)_auto]">
@@ -190,7 +193,7 @@ export function FiltroPaquetes({
             <option value="todos">Cualquier precio</option>
             {topesPresupuesto.map((t) => (
               <option key={t} value={t}>
-                Hasta {fmtCop(t)}
+                Hasta {fmtMoneda(t, moneda)}
               </option>
             ))}
           </Selector>

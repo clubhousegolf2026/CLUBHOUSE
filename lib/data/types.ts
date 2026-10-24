@@ -19,6 +19,9 @@ export interface PaquetePredefinido {
   /** Experiencia firmada: enlaza a su propia página y muestra el precio en texto (USD) */
   href?: string;
   precioTexto?: string;
+  /** Precio numérico y moneda cuando no es COP (para filtrar y ordenar) */
+  precioNumero?: number;
+  moneda?: "USD";
   insignia?: string;
 }
 
