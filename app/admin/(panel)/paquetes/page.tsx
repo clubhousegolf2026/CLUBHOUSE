@@ -3,13 +3,14 @@ import { Plus } from "lucide-react";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { cop } from "@/lib/format";
 import { ButtonLink } from "@/components/ui/button";
-import { EXPERIENCIAS } from "@/lib/contenido/experiencias";
+import { getExperiencias } from "@/lib/contenido/experiencias-editables";
 import { LimpiarDemo } from "@/components/admin/limpiar-demo";
 import { contarDatosDemo } from "./demo-actions";
 
 export const dynamic = "force-dynamic";
 
 export default async function PaquetesAdminPage() {
+  const EXPERIENCIAS = await getExperiencias();
   const supabase = await createServerSupabase();
   const conteosDemo = await contarDatosDemo();
   const { data: paquetes } = await supabase
@@ -37,7 +38,7 @@ export default async function PaquetesAdminPage() {
         <h2 className="font-serif text-lg text-carbon">Experiencias firmadas</h2>
         <p className="text-sm text-niebla">
           Los dos viajes que hoy se muestran en el inicio, en los planes y en el globo.
-          Su contenido vive en el código del sitio.
+          Puedes editar sus textos, fechas y precio.
         </p>
         <ul className="mt-3 divide-y divide-arena overflow-hidden rounded-[var(--radius-panel)] border border-arena bg-blanco-roto">
           {EXPERIENCIAS.map((e) => (
@@ -56,9 +57,12 @@ export default async function PaquetesAdminPage() {
                 <Link
                   href={`/experiencias/${e.slug}`}
                   target="_blank"
-                  className="text-verde-golf hover:underline"
+                  className="text-niebla hover:underline"
                 >
                   Ver en el sitio
+                </Link>
+                <Link href={`/admin/experiencias/${e.slug}`} className="text-verde-golf hover:underline">
+                  Editar
                 </Link>
               </span>
             </li>

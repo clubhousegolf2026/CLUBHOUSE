@@ -3,12 +3,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight, Check, X } from "lucide-react";
-import { EXPERIENCIAS, getExperiencia } from "@/lib/contenido/experiencias";
+import { EXPERIENCIAS } from "@/lib/contenido/experiencias";
+import { getExperiencias } from "@/lib/contenido/experiencias-editables";
 import { MARCA } from "@/lib/contenido/clubhouse";
 import { EncabezadoSeccion } from "@/components/marketing/encabezado-seccion";
 import { Oro } from "@/components/marketing/pagina-hero";
 import { JsonLd } from "@/components/site/json-ld";
 import { SITE_URL } from "@/lib/site";
+
+export const revalidate = 300;
 
 export function generateStaticParams() {
   return EXPERIENCIAS.map((e) => ({ slug: e.slug }));
@@ -20,7 +23,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const e = getExperiencia(slug);
+  const e = (await getExperiencias()).find((x) => x.slug === slug);
   if (!e) return { title: "Experiencia no encontrada" };
   return {
     title: e.nombre,
@@ -36,10 +39,11 @@ export default async function ExperienciaPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const e = getExperiencia(slug);
+  const todas = await getExperiencias();
+  const e = todas.find((x) => x.slug === slug);
   if (!e) notFound();
 
-  const otra = EXPERIENCIAS.find((x) => x.slug !== e.slug);
+  const otra = todas.find((x) => x.slug !== e.slug);
 
   return (
     <article>

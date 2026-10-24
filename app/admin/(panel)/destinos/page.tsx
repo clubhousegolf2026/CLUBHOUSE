@@ -2,11 +2,12 @@ import Link from "next/link";
 import { Plus } from "lucide-react";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { ButtonLink } from "@/components/ui/button";
-import { EXPERIENCIAS } from "@/lib/contenido/experiencias";
+import { getExperiencias } from "@/lib/contenido/experiencias-editables";
 
 export const dynamic = "force-dynamic";
 
 export default async function DestinosAdminPage() {
+  const EXPERIENCIAS = await getExperiencias();
   const supabase = await createServerSupabase();
   const { data: destinos } = await supabase
     .from("destinos")
@@ -30,7 +31,7 @@ export default async function DestinosAdminPage() {
       <section>
         <h2 className="font-serif text-lg text-carbon">Experiencias firmadas</h2>
         <p className="text-sm text-niebla">
-          Tailandia y Utah siempre aparecen en el globo. Su contenido vive en el código del sitio.
+          Tailandia y Utah siempre aparecen en el globo. Puedes editar sus textos, fechas y precio.
         </p>
         <ul className="mt-3 divide-y divide-arena overflow-hidden rounded-[var(--radius-panel)] border border-arena bg-blanco-roto">
           {EXPERIENCIAS.map((e) => (
@@ -47,8 +48,11 @@ export default async function DestinosAdminPage() {
                 <span className="rounded-full bg-verde-golf/10 px-2 py-0.5 text-xs font-medium text-verde-golf">
                   Disponible
                 </span>
-                <Link href={`/experiencias/${e.slug}`} target="_blank" className="text-verde-golf hover:underline">
+                <Link href={`/experiencias/${e.slug}`} target="_blank" className="text-niebla hover:underline">
                   Ver en el sitio
+                </Link>
+                <Link href={`/admin/experiencias/${e.slug}`} className="text-verde-golf hover:underline">
+                  Editar
                 </Link>
               </span>
             </li>

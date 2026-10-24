@@ -4,7 +4,7 @@ import { FiltroPaquetes } from "@/components/marketing/filtro-paquetes";
 import { EncabezadoSeccion } from "@/components/marketing/encabezado-seccion";
 import { Oro } from "@/components/marketing/pagina-hero";
 import { SuenosScroll } from "@/components/marketing/suenos-scroll";
-import { EXPERIENCIAS } from "@/lib/contenido/experiencias";
+import { getExperiencias } from "@/lib/contenido/experiencias-editables";
 import {
   SeccionContacto,
   SeccionDestinos,
@@ -18,6 +18,7 @@ import { getDestinos } from "@/lib/data";
 export const revalidate = 300;
 
 export default async function HomePage() {
+  const EXPERIENCIAS = await getExperiencias();
   // Las experiencias firmadas son los planes de la página.
   const tarjetasExperiencia: PaquetePredefinido[] = EXPERIENCIAS.map((e) => {
     const noches = Number(/(\d+)\s*noches/.exec(e.duracion)?.[1] ?? 0);
