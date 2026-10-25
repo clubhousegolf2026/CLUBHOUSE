@@ -24,6 +24,8 @@ import {
   Mail,
   Palette,
   Phone,
+  Plane,
+  Sparkles,
   Plus,
   Save,
   Settings2,
@@ -37,7 +39,8 @@ import { alturaInput, estiloInput } from "@/components/admin/form-ui";
 import { MiniaturaPlantilla } from "@/components/admin/formularios/miniaturas";
 import { VistaPrevia } from "@/components/admin/formularios/vista-previa";
 import { calcularCobro, pesos } from "@/lib/formularios/esquema";
-import { parsePrecio, trmTexto, usd, type ViajeTarifas } from "@/lib/precios";
+import { parsePrecio, salidasAbiertas, trmTexto, usd, type PlanInfo, type ViajeTarifas } from "@/lib/precios";
+import { aplicarPlan, configVivo, TODO_DEL_PLAN, type OpcionesPlan } from "@/lib/formularios/plan";
 import type { Trm } from "@/lib/trm";
 import {
   campoNuevo,
@@ -190,7 +193,19 @@ function FilaCampo({
             </label>
           )}
 
-          {conOpciones && (
+          {conOpciones && c.desdePlan && (
+            <div className="space-y-2 rounded-xl border border-verde-golf/30 bg-verde-golf/[0.05] p-3.5 text-sm">
+              <p className="font-medium text-carbon">
+                {c.desdePlan === "tarifas" ? "Las tarifas" : "Las salidas"} salen del plan y se mantienen al día solas.
+              </p>
+              <p className="text-xs text-niebla">Si cambias precios o fechas en Experiencias, el formulario se actualiza sin que hagas nada.</p>
+              <button type="button" onClick={() => onCambiar({ desdePlan: undefined })} className="text-xs font-medium text-verde-golf underline">
+                Dejar de sincronizar y editar las opciones a mano
+              </button>
+            </div>
+          )}
+
+          {conOpciones && !c.desdePlan && (
             <label className="block">
               <Etiqueta>Opciones (una por línea)</Etiqueta>
               <textarea
@@ -296,7 +311,7 @@ function FilaCampo({
 
 /* ───────────── Editor ───────────── */
 
-type Pestana = "campos" | "diseno" | "pago" | "ajustes";
+type Pestana = "campos" | "planes" | "diseno" | "pago" | "ajustes";
 
 export function EditorFormulario({
   inicial,
@@ -305,6 +320,7 @@ export function EditorFormulario({
   respuestas,
   origen,
   viajes,
+  planes,
   trm,
 }: {
   inicial: FormularioFila;
@@ -313,6 +329,7 @@ export function EditorFormulario({
   respuestas: number;
   origen: string;
   viajes: ViajeTarifas[];
+  planes: PlanInfo[];
   trm: Trm;
 }) {
   const router = useRouter();
@@ -329,6 +346,11 @@ export function EditorFormulario({
   const [sucio, setSucio] = useState(false);
   const [copiado, setCopiado] = useState<string | null>(null);
   const [personasSim, setPersonasSim] = useState(2);
+  const [arrastrando, setArrastrando] = useState(false);
+  const [sobreVista, setSobreVista] = useState(false);
+  const [planPendiente, setPlanPendiente] = useState<PlanInfo | null>(null);
+  const [opcionesPlan, setOpcionesPlan] = useState<OpcionesPlan>(TODO_DEL_PLAN);
+  const [avisoPlan, setAvisoPlan] = useState<string | null>(null);
   const [pendiente, empezar] = useTransition();
 
   const tocar = <T,>(f: (v: T) => void) => (v: T) => {
@@ -422,7 +444,6 @@ export function EditorFormulario({
     return () => window.removeEventListener("beforeunload", f);
   }, [sucio]);
 
-  const formularioVista: FormularioFila = { ...inicial, nombre, slug, plantilla, publicado, config: cfg };
   const enlace = `${origen}/f/${slug}`;
   const copiar = async (texto: string, clave: string) => {
     try {
@@ -436,16 +457,39 @@ export function EditorFormulario({
   const campoPersonas = campos.find((c) => c.personas && c.tipo === "numero");
   const viajePago = cfg.pago.fuente === "viaje" ? viajes.find((v) => v.slug === cfg.pago.viajeSlug) : undefined;
   const tarifaPago = viajePago?.tarifas.find((t) => t.perfil === cfg.pago.viajePerfil) ?? viajePago?.tarifas[0];
-  const precioViaje = tarifaPago ? parsePrecio(tarifaPago.precio) : null;
-  const pagoEfectivo = {
-    ...cfg.pago,
-    ...(precioViaje ? { base: precioViaje.valor, moneda: precioViaje.moneda } : {}),
-  };
-  if (pagoEfectivo.moneda === "USD" && pagoEfectivo.trmAuto) pagoEfectivo.tasaUsd = trm.valor;
-  const simulado = calcularCobro({ ...cfg, pago: pagoEfectivo }, campoPersonas ? { [campoPersonas.id]: String(personasSim) } : {});
+  const planVivo = planes.find((p) => p.slug === (cfg.experiencia || cfg.pago.viajeSlug));
+  const vivo = configVivo(cfg, planVivo, trm.valor);
+  const pagoEfectivo = vivo.config.pago;
+  const simulado = calcularCobro(vivo.config, campoPersonas ? { [campoPersonas.id]: String(personasSim) } : {});
+  const formularioVista: FormularioFila = { ...inicial, nombre, slug, plantilla, publicado, config: vivo.config };
+
+  /** Suelta un plan sobre el formulario: se abre el cuadro para elegir qué traer. */
+  function soltarPlan(slug: string) {
+    const p = planes.find((x) => x.slug === slug);
+    setArrastrando(false);
+    setSobreVista(false);
+    if (p) {
+      setOpcionesPlan({ ...TODO_DEL_PLAN, salidas: salidasAbiertas(p).length > 0, tarifas: p.tarifas.length > 0, incluye: p.incluye.length > 0, pago: p.tarifas.length > 0 });
+      setPlanPendiente(p);
+    }
+  }
+
+  function rellenarConPlan() {
+    const p = planPendiente;
+    if (!p) return;
+    setGuardado(false);
+    setSucio(true);
+    setCfg((prev) => aplicarPlan(prev, plantilla, p, opcionesPlan));
+    if (opcionesPlan.nombreForm) setNombre(`Inscripción · ${p.nombre}`);
+    setPlanPendiente(null);
+    setPestana("campos");
+    setAvisoPlan(`Formulario rellenado con «${p.nombre}». Revisa los campos y guarda.`);
+    setTimeout(() => setAvisoPlan(null), 6000);
+  }
 
   const pestanas: { id: Pestana; etiqueta: string; icono: React.ComponentType<{ size?: number }> }[] = [
     { id: "campos", etiqueta: "Campos", icono: List },
+    { id: "planes", etiqueta: "Planes", icono: Plane },
     { id: "diseno", etiqueta: "Diseño", icono: Palette },
     { id: "pago", etiqueta: "Pago", icono: CreditCard },
     { id: "ajustes", etiqueta: "Ajustes", icono: Settings2 },
@@ -493,6 +537,7 @@ export function EditorFormulario({
 
       {error && <p role="alert" className="rounded-xl border border-error/30 bg-error/10 px-4 py-2.5 text-sm text-error">{error}</p>}
       {guardado && !error && <p role="status" className="rounded-xl border border-exito/30 bg-exito/10 px-4 py-2.5 text-sm text-exito">Guardado.{publicado ? " Ya está publicado." : ""}</p>}
+      {avisoPlan && <p role="status" className="flex items-center gap-2 rounded-xl border border-champagne/50 bg-champagne/15 px-4 py-2.5 text-sm text-carbon"><Sparkles size={15} className="text-[#8a6d1f]" /> {avisoPlan}</p>}
       {sucio && !pendiente && !guardado && <p className="text-xs text-niebla">Tienes cambios sin guardar · Ctrl/⌘ + S para guardar.</p>}
 
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,560px)]">
@@ -567,6 +612,70 @@ export function EditorFormulario({
                   </div>
                 )}
               </div>
+            </div>
+          )}
+
+          {/* ── Planes ── */}
+          {pestana === "planes" && (
+            <div className="space-y-4">
+              <div
+                onDragOver={(e) => { e.preventDefault(); setSobreVista(true); }}
+                onDragLeave={() => setSobreVista(false)}
+                onDrop={(e) => { e.preventDefault(); soltarPlan(e.dataTransfer.getData("application/x-plan") || e.dataTransfer.getData("text/plain")); }}
+                className={cn("rounded-2xl border-2 border-dashed p-5 text-center transition", sobreVista ? "border-verde-golf bg-verde-golf/[0.07]" : "border-arena bg-blanco-roto")}
+              >
+                <Sparkles size={22} className="mx-auto text-verde-golf" />
+                <p className="mt-2 font-serif text-lg text-carbon">Arrastra un plan para rellenar el formulario</p>
+                <p className="text-sm text-niebla">Suéltalo aquí o sobre la vista previa de la derecha. Se trae el nombre, la foto, las salidas, las tarifas con su precio y el cobro.</p>
+              </div>
+
+              {planes.length === 0 ? (
+                <p className="rounded-2xl border border-dashed border-arena p-8 text-center text-sm text-niebla">Aún no tienes experiencias. Créalas en el menú Experiencias.</p>
+              ) : (
+                <ul className="grid gap-3 sm:grid-cols-2">
+                  {planes.map((p) => {
+                    const activo = (cfg.experiencia || cfg.pago.viajeSlug) === p.slug;
+                    return (
+                      <li
+                        key={p.slug}
+                        draggable
+                        onDragStart={(e) => {
+                          e.dataTransfer.setData("application/x-plan", p.slug);
+                          e.dataTransfer.setData("text/plain", p.slug);
+                          e.dataTransfer.effectAllowed = "copy";
+                          setArrastrando(true);
+                        }}
+                        onDragEnd={() => { setArrastrando(false); setSobreVista(false); }}
+                        className={cn("cursor-grab overflow-hidden rounded-2xl border-2 bg-white transition hover:-translate-y-0.5 hover:shadow-lg active:cursor-grabbing", activo ? "border-verde-golf" : "border-arena")}
+                      >
+                        <div className="relative aspect-[16/8] bg-arena">
+                          {p.foto && (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={p.foto} alt="" draggable={false} className="pointer-events-none h-full w-full object-cover" />
+                          )}
+                          <span className="absolute left-2.5 top-2.5 rounded-full bg-white/90 px-2.5 py-0.5 text-[11px] font-medium text-carbon">{p.bandera} {p.pais}</span>
+                          {!p.publicada && <span className="absolute right-2.5 top-2.5 rounded-full bg-carbon/80 px-2.5 py-0.5 text-[11px] font-medium text-crema">Borrador</span>}
+                          {activo && <span className="absolute bottom-2.5 left-2.5 rounded-full bg-verde-golf px-2.5 py-0.5 text-[11px] font-semibold text-crema">En este formulario</span>}
+                        </div>
+                        <div className="space-y-2 p-3">
+                          <div>
+                            <p className="font-serif text-base leading-tight text-carbon">{p.nombre}</p>
+                            <p className="text-xs text-niebla">{p.fechas || "Sin fechas"}{p.duracion ? ` · ${p.duracion}` : ""}</p>
+                          </div>
+                          <div className="flex flex-wrap gap-1.5 text-[11px] text-niebla">
+                            {p.desde && <span className="rounded-full bg-champagne/20 px-2 py-0.5 font-medium text-[#8a6d1f]">Desde {p.desde}</span>}
+                            <span className="rounded-full bg-arena/50 px-2 py-0.5">{p.tarifas.length} tarifas</span>
+                            <span className="rounded-full bg-arena/50 px-2 py-0.5">{salidasAbiertas(p).length} salidas</span>
+                          </div>
+                          <button type="button" onClick={() => soltarPlan(p.slug)} className="w-full rounded-lg border border-verde-golf/40 py-1.5 text-xs font-semibold text-verde-golf hover:bg-verde-golf/5">
+                            Usar este plan
+                          </button>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
             </div>
           )}
 
@@ -751,6 +860,16 @@ export function EditorFormulario({
                       </div>
                     )}
 
+                    {cfg.pago.fuente === "viaje" && campos.some((c) => c.tipo === "opciones" || c.tipo === "lista") && (
+                      <label className="block">
+                        <Etiqueta>La tarifa la decide la persona en…</Etiqueta>
+                        <select value={cfg.pago.perfilCampo} onChange={(e) => actPago({ perfilCampo: e.target.value })} className={cn(estiloInput, alturaInput, "mt-1.5")}>
+                          <option value="">Ninguna: se usa la tarifa fija de arriba</option>
+                          {campos.filter((c) => c.tipo === "opciones" || c.tipo === "lista").map((c) => <option key={c.id} value={c.id}>{c.etiqueta || c.id}</option>)}
+                        </select>
+                        <Ayuda>Si agregaste «Elige tu tarifa» desde un plan, queda conectado solo.</Ayuda>
+                      </label>
+                    )}
                     <label className="block">
                       <Etiqueta>Cobrar solo un anticipo (%)</Etiqueta>
                       <input type="number" min={1} max={99} placeholder="Vacío = cobrar el total" value={cfg.pago.anticipoPct ?? ""} onChange={(e) => actPago({ anticipoPct: e.target.value === "" ? null : Number(e.target.value) })} className={cn(estiloInput, alturaInput, "mt-1.5 sm:max-w-xs")} />
@@ -864,9 +983,75 @@ export function EditorFormulario({
 
         {/* Vista previa */}
         <aside className="xl:sticky xl:top-6">
-          <VistaPrevia formulario={formularioVista} />
+          <div
+            className="relative"
+            onDragOver={(e) => { if (arrastrando) { e.preventDefault(); setSobreVista(true); } }}
+            onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setSobreVista(false); }}
+            onDrop={(e) => { e.preventDefault(); soltarPlan(e.dataTransfer.getData("application/x-plan") || e.dataTransfer.getData("text/plain")); }}
+          >
+            <VistaPrevia formulario={formularioVista} />
+            {arrastrando && (
+              <div className={cn("absolute inset-0 z-20 grid place-items-center rounded-2xl border-4 border-dashed backdrop-blur-[2px] transition", sobreVista ? "border-verde-golf bg-verde-golf/25" : "border-verde-golf/50 bg-[#061a13]/40")}>
+                <p className="rounded-full bg-white px-5 py-2.5 font-serif text-lg text-carbon shadow-xl">Suelta aquí para rellenar el formulario</p>
+              </div>
+            )}
+          </div>
         </aside>
       </div>
+
+      {planPendiente && (
+        <div className="fixed inset-0 z-[130] grid place-items-center bg-[#04140e]/70 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Rellenar con un plan" onMouseDown={(e) => e.target === e.currentTarget && setPlanPendiente(null)}>
+          <div className="max-h-[90vh] w-full max-w-lg overflow-auto rounded-3xl bg-white p-6 shadow-2xl">
+            <div className="flex items-start gap-3">
+              {planPendiente.foto && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={planPendiente.foto} alt="" className="h-16 w-24 shrink-0 rounded-xl object-cover" />
+              )}
+              <div>
+                <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-niebla">Rellenar con el plan</p>
+                <h3 className="font-serif text-2xl leading-tight text-carbon">{planPendiente.nombre}</h3>
+                <p className="text-xs text-niebla">{planPendiente.fechas}{planPendiente.desde ? ` · Desde ${planPendiente.desde}` : ""}</p>
+              </div>
+            </div>
+            <p className="mt-4 text-sm text-niebla">Elige qué traer. Tus otros campos no se tocan, y si sueltas otro plan, estos se reemplazan solos.</p>
+            <ul className="mt-3 space-y-2">
+              {(
+                [
+                  ["textos", "Título, descripción y texto del botón", true],
+                  ["foto", "Foto de portada", Boolean(planPendiente.foto)],
+                  ["nombreForm", "Nombre del formulario", true],
+                  ["info", "Ficha del plan (fechas, duración, desde)", true],
+                  ["salidas", `Salidas como opciones (${salidasAbiertas(planPendiente).length})`, salidasAbiertas(planPendiente).length > 0],
+                  ["tarifas", `Tarifas como opciones, con precio actualizado (${planPendiente.tarifas.length})`, planPendiente.tarifas.length > 0],
+                  ["incluye", "Qué incluye", planPendiente.incluye.length > 0],
+                  ["condiciones", "Aceptación de las condiciones", true],
+                  ["pago", "Cobro con Wompi desde la tarifa elegida (TRM del día)", planPendiente.tarifas.length > 0],
+                ] as [keyof OpcionesPlan, string, boolean][]
+              ).map(([clave, etiqueta, disponible]) => (
+                <li key={clave}>
+                  <label className={cn("flex cursor-pointer items-center gap-3 rounded-xl border p-3 text-sm transition", disponible ? "border-arena hover:border-verde-golf/50" : "cursor-not-allowed border-arena/50 opacity-50")}>
+                    <input
+                      type="checkbox"
+                      disabled={!disponible}
+                      checked={disponible && opcionesPlan[clave]}
+                      onChange={(e) => setOpcionesPlan((o) => ({ ...o, [clave]: e.target.checked }))}
+                      className="h-4 w-4 accent-[var(--color-verde-golf)]"
+                    />
+                    <span className="text-carbon">{etiqueta}</span>
+                    {!disponible && <span className="ml-auto text-xs text-niebla">el plan no lo tiene</span>}
+                  </label>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-5 flex justify-end gap-2">
+              <button type="button" onClick={() => setPlanPendiente(null)} className="rounded-xl border border-arena px-4 py-2.5 text-sm text-carbon hover:border-verde-golf/40">Cancelar</button>
+              <button type="button" onClick={rellenarConPlan} className="inline-flex items-center gap-2 rounded-xl bg-verde-golf px-5 py-2.5 text-sm font-semibold text-crema hover:bg-verde-calle">
+                <Sparkles size={15} /> Rellenar formulario
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

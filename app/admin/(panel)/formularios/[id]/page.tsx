@@ -6,7 +6,7 @@ import { configWompi } from "@/lib/wompi";
 import { filaAFormulario } from "@/lib/formularios/servidor";
 import { getExperienciasAdmin } from "@/lib/contenido/experiencias-editables";
 import { obtenerTrm } from "@/lib/trm";
-import type { ViajeTarifas } from "@/lib/precios";
+import { planDeExperiencia, type ViajeTarifas } from "@/lib/precios";
 import { EditorFormulario } from "@/components/admin/formularios/editor-formulario";
 
 export const dynamic = "force-dynamic";
@@ -40,6 +40,7 @@ export default async function EditarFormularioPage({ params }: { params: Promise
       respuestas={count ?? 0}
       origen={SITE_URL}
       viajes={viajes}
+      planes={experiencias.map(planDeExperiencia)}
       trm={trm}
     />
   );

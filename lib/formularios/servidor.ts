@@ -5,7 +5,7 @@ import { leadApi } from "@/app/api/v1/_comun";
 import { nuevaReferencia } from "@/lib/wompi";
 import { calcularCobro, cobraAlgo, resumenTexto, validar, vacio, type Valores } from "./esquema";
 import { normalizarConfig, type ConfigFormulario, type FormularioFila } from "./tipos";
-import { resolverPago } from "./precios-servidor";
+import { resolverConfig } from "./precios-servidor";
 
 const ERRORES_TABLA = ["42P01", "PGRST205"];
 
@@ -42,9 +42,9 @@ export async function procesarInscripcion(slug: string, valores: Valores): Promi
   }
   if (!fila || !fila.publicado) return { ok: false, status: 404, error: "Este formulario no está disponible." };
   const f = filaAFormulario(fila);
-  // El cobro se calcula con los valores de HOY (tarifa actual del viaje y TRM del día).
-  const resuelto = await resolverPago(f.config);
-  const cfg: ConfigFormulario = { ...f.config, pago: resuelto.pago };
+  // Todo se calcula con los datos de HOY: tarifas y salidas del plan, y TRM del día.
+  const resuelto = await resolverConfig(f.config);
+  const cfg: ConfigFormulario = resuelto.config;
 
   if (cfg.cierre && new Date().toISOString().slice(0, 10) > cfg.cierre) {
     return { ok: false, status: 410, error: "Las inscripciones de este formulario ya cerraron." };
@@ -127,8 +127,11 @@ export async function procesarInscripcion(slug: string, valores: Valores): Promi
       origen: "inscripcion",
       origen_id: insc.id,
     };
+    const elegido = cfg.pago.perfilCampo ? limpio[cfg.pago.perfilCampo] : undefined;
     const detalle = {
       ...resuelto.detalle,
+      perfil: typeof elegido === "string" ? elegido : resuelto.detalle.perfil,
+      usd: cfg.pago.moneda === "USD" ? cobro.baseMoneda : null,
       personas: cobro.personas,
       totalCop: cobro.totalCop,
       anticipoPct: cfg.pago.anticipoPct,

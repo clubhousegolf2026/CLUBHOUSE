@@ -81,6 +81,8 @@ export interface Cobro {
   /** Lo que se cobra ahora (COP): el total o su anticipo. */
   cobrarCop: number;
   personas: number;
+  /** Tarifa aplicada (en la moneda del pago), ya con la opción elegida. */
+  baseMoneda: number;
 }
 
 /** Cuánto cuesta lo que eligió la persona: tarifa × personas + extras de las opciones. */
@@ -90,7 +92,11 @@ export function calcularCobro(config: ConfigFormulario, valores: Valores): Cobro
   const n = campoPersonas ? Math.floor(Number(valores[campoPersonas.id])) : 1;
   const personas = Number.isFinite(n) && n >= 1 ? n : 1;
 
-  const baseCop = p.moneda === "USD" ? p.base * (p.tasaUsd || 0) : p.base;
+  // Si una pregunta decide la tarifa («Elige tu tarifa»), se usa la de la opción elegida.
+  const elegida = p.perfilCampo ? valores[p.perfilCampo] : undefined;
+  const baseElegida = typeof elegida === "string" ? (p.tarifas ?? []).find((t) => t.etiqueta === elegida)?.base : undefined;
+  const base = baseElegida ?? p.base;
+  const baseCop = p.moneda === "USD" ? base * (p.tasaUsd || 0) : base;
   let total = Math.max(0, baseCop) * personas;
 
   for (const c of config.campos) {
@@ -103,7 +109,7 @@ export function calcularCobro(config: ConfigFormulario, valores: Valores): Cobro
 
   const pct = p.anticipoPct && p.anticipoPct > 0 && p.anticipoPct < 100 ? p.anticipoPct : null;
   const cobrar = pct ? Math.round((total * pct) / 100) : total;
-  return { totalCop: total, cobrarCop: cobrar, personas };
+  return { totalCop: total, cobrarCop: cobrar, personas, baseMoneda: base };
 }
 
 export const cobraAlgo = (config: ConfigFormulario, c: Cobro) => config.pago.activo && c.cobrarCop >= MIN_PAGO_COP;

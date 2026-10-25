@@ -57,6 +57,8 @@ export interface CampoFormulario {
   mapeo?: "nombre" | "email" | "telefono" | null;
   /** Número de personas: multiplica la tarifa base del pago. */
   personas?: boolean;
+  /** Las opciones salen del viaje relacionado y se mantienen al día solas. */
+  desdePlan?: "tarifas" | "salidas";
 }
 
 export type Plantilla = "clasico" | "pasos" | "portada" | "cristal" | "conversacional";
@@ -94,6 +96,10 @@ export interface ConfigPago {
   viajePerfil: string;
   /** Si la tarifa está en USD: convertir con la TRM del día en lugar de `tasaUsd`. */
   trmAuto: boolean;
+  /** Campo (id) cuya opción elegida decide la tarifa. Vacío = la tarifa fija de arriba. */
+  perfilCampo: string;
+  /** Tarifas del viaje con su valor (las completa el servidor con los precios de hoy). */
+  tarifas: { etiqueta: string; base: number }[];
 }
 
 export interface ConfigFormulario {
@@ -183,7 +189,7 @@ export function configPorDefecto(plantilla: Plantilla, nombre = "Inscripción"):
       mostrarMarca: true,
     },
     campos,
-    pago: { activo: false, concepto: nombre, moneda: "COP", base: 0, tasaUsd: 4000, anticipoPct: null, fuente: "fijo", viajeSlug: "", viajePerfil: "", trmAuto: true },
+    pago: { activo: false, concepto: nombre, moneda: "COP", base: 0, tasaUsd: 4000, anticipoPct: null, fuente: "fijo", viajeSlug: "", viajePerfil: "", trmAuto: true, perfilCampo: "", tarifas: [] },
     cupos: null,
     cierre: "",
     experiencia: "",
