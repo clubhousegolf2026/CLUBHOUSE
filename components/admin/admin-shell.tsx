@@ -8,9 +8,11 @@ import { ContenidoAdmin } from "@/components/admin/contenido-admin";
 
 export function AdminShell({
   nombre,
+  rol,
   children,
 }: {
   nombre: string;
+  rol?: string;
   children: React.ReactNode;
 }) {
   const iniciales = nombre
@@ -44,21 +46,21 @@ export function AdminShell({
             Panel de administración
           </p>
           <div className="mt-5 lg:mt-8">
-            <AdminNav />
+            <AdminNav rol={rol} />
           </div>
         </div>
 
         <div className="mt-8 hidden rounded-2xl border border-white/10 bg-white/[0.06] p-3.5 backdrop-blur lg:block">
-          <div className="flex items-center gap-3">
+          <Link href="/admin/cuenta" title="Mi cuenta" className="flex items-center gap-3 rounded-xl transition-colors hover:bg-white/5">
             <span className="relative grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gradient-to-br from-champagne to-[#7d6230] text-sm font-semibold text-white">
               {iniciales || "CH"}
               <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-[#10352a] bg-emerald-400" />
             </span>
             <div className="min-w-0">
               <p className="truncate text-sm font-medium text-white">{nombre}</p>
-              <p className="text-xs text-crema/50">En línea</p>
+              <p className="text-xs text-crema/50">Mi cuenta</p>
             </div>
-          </div>
+          </Link>
           <form action={signOut}>
             <button
               type="submit"

@@ -17,7 +17,7 @@ export default async function AdminLayout({
 
   const { data: staff } = await supabase
     .from("staff")
-    .select("nombre, activo")
+    .select("nombre, activo, rol")
     .eq("user_id", user.id)
     .maybeSingle();
 
@@ -27,7 +27,7 @@ export default async function AdminLayout({
   }
 
   return (
-    <AdminShell nombre={staff.nombre ?? user.email ?? "Staff"}>
+    <AdminShell nombre={staff.nombre ?? user.email ?? "Staff"} rol={staff.rol}>
       {children}
     </AdminShell>
   );

@@ -13,6 +13,7 @@ import {
   Webhook,
   FileInput,
   CreditCard,
+  UserCog,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 
@@ -26,18 +27,19 @@ export const NAV = [
   { href: "/admin/tarifas", label: "Tarifas", icon: Tag, grupo: "Catálogo" },
   { href: "/admin/calendario", label: "Calendario", icon: CalendarRange, grupo: "Catálogo" },
   { href: "/admin/integraciones", label: "APIs y webhooks", icon: Webhook, grupo: "Sistema" },
+  { href: "/admin/usuarios", label: "Usuarios", icon: UserCog, grupo: "Sistema", soloAdmin: true },
 ] as const;
 
 const esActivo = (pathname: string, href: string) =>
   href === "/admin" ? pathname === "/admin" : pathname.startsWith(href);
 
-export function AdminNav() {
+export function AdminNav({ rol }: { rol?: string }) {
   const pathname = usePathname();
   let grupoPrevio = "";
 
   return (
     <nav className="flex gap-1 overflow-x-auto [scrollbar-width:none] lg:flex-col lg:gap-0.5 lg:overflow-visible [&::-webkit-scrollbar]:hidden">
-      {NAV.map(({ href, label, icon: Icon, grupo }) => {
+      {NAV.filter((n) => !("soloAdmin" in n) || rol === "admin").map(({ href, label, icon: Icon, grupo }) => {
         const activo = esActivo(pathname, href);
         const mostrarGrupo = grupo !== grupoPrevio;
         grupoPrevio = grupo;

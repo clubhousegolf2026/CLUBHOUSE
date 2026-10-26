@@ -84,6 +84,10 @@ export function LoginForm({
         </span>
       </label>
 
+      <div className="-mt-1 text-right">
+        <a href="/admin/recuperar" className="text-xs text-crema/60 transition-colors hover:text-[#ecd396]">¿Olvidaste tu contraseña?</a>
+      </div>
+
       {mensaje && (
         <p
           role="alert"

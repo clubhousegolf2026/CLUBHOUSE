@@ -34,11 +34,17 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const { pathname } = request.nextUrl;
-  const esLogin = pathname === "/admin/login";
+  // Pantallas de acceso: se ven sin sesión (entrar, pedir enlace, crear contraseña).
+  const esPublica = ["/admin/login", "/admin/recuperar", "/admin/nueva-clave"].includes(pathname);
 
-  if (!user && !esLogin) {
+  if (!user && !esPublica) {
     const loginUrl = new URL("/admin/login", request.url);
     return NextResponse.redirect(loginUrl);
+  }
+
+  // Con contraseña temporal solo se puede ir a «Mi cuenta» a cambiarla.
+  if (user?.user_metadata?.debe_cambiar_clave === true && !esPublica && pathname !== "/admin/cuenta" && !request.headers.get("next-action")) {
+    return NextResponse.redirect(new URL("/admin/cuenta?cambiar=1", request.url));
   }
 
   return response;
