@@ -428,7 +428,7 @@ export function Globo3D({
   return (
     <div
       ref={contenedorRef}
-      className="pointer-events-none relative mx-auto"
+      className="pointer-events-none relative shrink-0"
       style={{ width: tamano, height: tamano }}
       onClickCapture={alClicContenedor}
     >
