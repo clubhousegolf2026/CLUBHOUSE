@@ -2,7 +2,7 @@
 // sitio "instalable" y para que quede algo usable offline (el shell de la
 // página + assets estáticos). No cachea rutas dinámicas ni /admin — ahí
 // los datos siempre deben venir frescos del servidor.
-const CACHE = "clubhouse-v1";
+const CACHE = "clubhouse-v2";
 const RUTAS_APP_SHELL = ["/", "/paquetes", "/cotizador", "/nosotros", "/contacto"];
 
 self.addEventListener("install", (event) => {
