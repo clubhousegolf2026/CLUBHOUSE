@@ -44,8 +44,8 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="es" className={`${fraunces.variable} ${inter.variable}`}>
-      <body className="flex min-h-dvh flex-col">
+    <html lang="es" className={`${fraunces.variable} ${inter.variable}`} suppressHydrationWarning>
+      <body className="flex min-h-dvh flex-col" suppressHydrationWarning>
         <JsonLd
           data={{
             "@context": "https://schema.org",
