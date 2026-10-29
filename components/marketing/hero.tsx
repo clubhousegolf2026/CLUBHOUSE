@@ -92,7 +92,7 @@ export function Hero({ destinos }: { destinos: DestinoConPaquetes[] }) {
               {MARCA.claim}
             </span>
 
-            <h1 className="mt-5 max-w-[15ch] font-serif text-[2.9rem] leading-[0.98] tracking-[-0.02em] sm:text-[3.6rem] xl:text-[3.9rem]">
+            <h1 className="mt-4 max-w-none font-serif text-[2.35rem] leading-[1] tracking-[-0.02em] sm:mt-5 sm:max-w-[15ch] sm:text-[3.6rem] xl:text-[3.9rem]">
               <span className="linea-mascara">
                 <span style={{ "--l": 0 } as React.CSSProperties}>Usted lo sueña,</span>
               </span>
@@ -115,21 +115,21 @@ export function Hero({ destinos }: { destinos: DestinoConPaquetes[] }) {
             </p>
 
             <div
-              className="entra-hero mt-6 flex flex-wrap gap-3"
+              className="entra-hero mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap"
               style={{ "--i": 3 } as React.CSSProperties}
             >
               <a
                 href={MARCA.whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="boton-oro group inline-flex min-h-13 items-center gap-2 rounded-full px-8 text-sm font-semibold"
+                className="boton-oro group inline-flex min-h-13 w-full items-center justify-center gap-2 rounded-full px-8 text-sm font-semibold sm:w-auto"
               >
                 Hablemos de su viaje
                 <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
               </a>
               <a
                 href="#planes"
-                className="boton-cristal inline-flex min-h-13 items-center gap-2 rounded-full px-8 text-sm font-medium"
+                className="boton-cristal inline-flex min-h-13 w-full items-center justify-center gap-2 rounded-full px-8 text-sm font-medium sm:w-auto"
               >
                 Ver experiencias
               </a>
@@ -150,9 +150,9 @@ export function Hero({ destinos }: { destinos: DestinoConPaquetes[] }) {
               onAbrirLista={abrirLista}
             />
             <div className="pointer-events-none absolute bottom-3 left-1/2 z-10 -translate-x-1/2 sm:bottom-5">
-              <span className="inline-flex items-center gap-2.5 rounded-full border border-white/15 bg-[#061a13]/60 px-4 py-2 text-xs text-crema/85 backdrop-blur-md">
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-[#061a13]/60 px-3.5 py-2 text-[11px] sm:gap-2.5 sm:px-4 sm:text-xs text-crema/85 backdrop-blur-md">
                 <span className="punto-vivo h-2 w-2 rounded-full bg-[#e8d3a0]" />
-                Toque un banderín para explorar
+                <span className="whitespace-nowrap">Toque un banderín<span className="hidden sm:inline"> para explorar</span></span>
                 <Sparkles size={13} className="text-[#e8d3a0]" />
               </span>
             </div>

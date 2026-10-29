@@ -8,14 +8,10 @@ import type { PaquetePredefinido, Destino } from "@/lib/data/types";
 type DestinoConPaquetes = Destino & { paquetes: PaquetePredefinido[] };
 
 
-const fmtMoneda = (n: number, moneda: "COP" | "USD") =>
-  moneda === "USD"
-    ? `USD ${new Intl.NumberFormat("es-CO", { maximumFractionDigits: 0 }).format(n)}`
-    : new Intl.NumberFormat("es-CO", {
-        style: "currency",
-        currency: "COP",
-        maximumFractionDigits: 0,
-      }).format(n);
+/** Miles con punto, escrito a mano: Intl da resultados distintos en servidor y navegador
+ *  y eso rompe la hidratación de React. */
+const miles = (n: number) => Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+const fmtMoneda = (n: number, moneda: "COP" | "USD") => (moneda === "USD" ? `USD ${miles(n)}` : `$${miles(n)}`);
 
 /** Precio numérico del plan en su propia moneda. */
 const precioDe = (p: PaquetePredefinido) => p.precioNumero ?? p.precioDesdeCop;
@@ -172,7 +168,7 @@ export function FiltroPaquetes({
           )}
         </div>
 
-        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-[repeat(4,1fr)_auto]">
+        <div className="mt-4 grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-[repeat(4,1fr)_auto]">
           <Selector icono={<MapPin size={18} />} etiqueta="Destino" valor={destino} onChange={setDestino}>
             <option value="todos">Todos los destinos</option>
             {destinosConPlanes.map((d) => (
@@ -210,7 +206,7 @@ export function FiltroPaquetes({
             onClick={() =>
               resultadosRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
             }
-            className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-verde-golf to-verde-calle px-8 text-sm font-semibold text-crema shadow-lg shadow-verde-calle/30 transition-all hover:-translate-y-0.5 hover:shadow-xl sm:col-span-2 lg:col-span-1"
+            className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-verde-golf to-verde-calle px-8 text-sm font-semibold text-crema shadow-lg shadow-verde-calle/30 transition-all hover:-translate-y-0.5 hover:shadow-xl col-span-2 lg:col-span-1"
           >
             <Search size={16} /> Buscar
           </button>

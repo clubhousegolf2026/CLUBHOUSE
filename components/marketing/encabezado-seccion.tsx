@@ -15,7 +15,7 @@ export function EncabezadoSeccion({
   centrado?: boolean;
 }) {
   return (
-    <header className={cn("revela mb-12 max-w-3xl", centrado && "mx-auto text-center")}>
+    <header className={cn("revela mb-8 max-w-3xl sm:mb-12", centrado && "mx-auto text-center")}>
       <span
         className={cn(
           "inline-flex items-center gap-3 text-xs font-medium uppercase tracking-[0.28em]",
@@ -28,14 +28,14 @@ export function EncabezadoSeccion({
       </span>
       <h2
         className={cn(
-          "mt-4 font-serif text-4xl leading-[1.08] sm:text-5xl",
+          "mt-3 font-serif text-[2rem] leading-[1.1] sm:mt-4 sm:text-5xl",
           oscuro ? "text-white" : "text-carbon",
         )}
       >
         {titulo}
       </h2>
       {descripcion && (
-        <p className={cn("mt-4 text-lg leading-relaxed", oscuro ? "text-crema/65" : "text-niebla")}>
+        <p className={cn("mt-3 text-base leading-relaxed sm:mt-4 sm:text-lg", oscuro ? "text-crema/65" : "text-niebla")}>
           {descripcion}
         </p>
       )}

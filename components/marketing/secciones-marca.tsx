@@ -75,7 +75,7 @@ export function SeccionSuenos() {
 /** Qué incluye un itinerario Clubhouse. */
 export function SeccionIncluye() {
   return (
-    <section className="perla px-6 py-24 sm:px-10 sm:py-28 lg:px-16 xl:px-24">
+    <section className="perla px-5 py-16 sm:px-10 sm:py-28 lg:px-16 xl:px-24">
       <div className="mx-auto max-w-[1400px]">
         <EncabezadoSeccion
           eyebrow="Qué incluye"
@@ -265,7 +265,7 @@ export function SeccionProceso() {
 /** Quién está detrás de Clubhouse. */
 export function SeccionDirector() {
   return (
-    <section className="perla px-6 py-24 sm:px-10 sm:py-28 lg:px-16 xl:px-24">
+    <section className="perla px-5 py-16 sm:px-10 sm:py-28 lg:px-16 xl:px-24">
       <div className="mx-auto grid max-w-[1300px] items-center gap-12 lg:grid-cols-[minmax(0,1fr)_1.15fr]">
         <div className="relative">
           <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] bg-arena shadow-[0_40px_90px_-40px_rgba(11,43,33,0.6)]">

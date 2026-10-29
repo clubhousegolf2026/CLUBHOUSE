@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowUp, MessageCircle } from "lucide-react";
+import { ArrowUp, Home, MessageCircle, Plane, UsersRound } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { MARCA } from "@/lib/contenido/clubhouse";
 
@@ -79,7 +80,7 @@ export function EfectosGlobales() {
       <div ref={anillo} className="cursor-oro-anillo" aria-hidden />
       <div ref={punto} className="cursor-oro-punto" aria-hidden />
 
-      <div className={cn("fixed bottom-5 right-5 z-[60] flex flex-col items-end gap-3 sm:bottom-7 sm:right-7", conBarra && "bottom-24 sm:bottom-24")}>
+      <div className={cn("fixed bottom-5 right-5 z-[60] hidden flex-col items-end gap-3 md:flex md:bottom-7 md:right-7", conBarra && "md:bottom-24")}>
         <button
           type="button"
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
@@ -104,6 +105,47 @@ export function EfectosGlobales() {
           </a>
         )}
       </div>
+
+      {/* Barra inferior para móvil: navegación al alcance del pulgar */}
+      {!conBarra && (
+        <nav
+          aria-label="Navegación rápida"
+          className="fixed inset-x-0 bottom-0 z-[60] px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:hidden"
+        >
+          <ul className="mx-auto flex max-w-sm items-center justify-between rounded-full border border-white/15 bg-[#0a2a20]/92 p-1.5 shadow-[0_18px_50px_-10px_rgba(0,0,0,0.7)] backdrop-blur-xl">
+            {[
+              { href: "/", etiqueta: "Inicio", Icono: Home, activo: pathname === "/" },
+              { href: "/#planes", etiqueta: "Viajes", Icono: Plane, activo: false },
+              { href: "/nosotros", etiqueta: "Nosotros", Icono: UsersRound, activo: pathname.startsWith("/nosotros") },
+            ].map(({ href, etiqueta, Icono, activo }) => (
+              <li key={href}>
+                <Link
+                  href={href}
+                  aria-current={activo ? "page" : undefined}
+                  className={cn(
+                    "flex min-w-[4.2rem] flex-col items-center gap-0.5 rounded-full px-3 py-2 text-[10px] font-medium transition-colors",
+                    activo ? "bg-white/12 text-[#ecd396]" : "text-crema/65 active:bg-white/10",
+                  )}
+                >
+                  <Icono size={19} />
+                  {etiqueta}
+                </Link>
+              </li>
+            ))}
+            <li>
+              <a
+                href={MARCA.whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Escribir por WhatsApp"
+                className="fab-pulso relative isolate grid h-12 w-12 place-items-center rounded-full bg-[#25d366] text-white shadow-[0_10px_24px_-6px_rgba(37,211,102,0.7)]"
+              >
+                <MessageCircle size={22} fill="currentColor" strokeWidth={1.5} />
+              </a>
+            </li>
+          </ul>
+        </nav>
+      )}
     </>
   );
 }

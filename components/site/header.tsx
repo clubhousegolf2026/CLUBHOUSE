@@ -4,7 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, LazyMotion, domAnimation, m } from "framer-motion";
-import { LayoutDashboard, Menu, X } from "lucide-react";
+import { ArrowRight, LayoutDashboard, Mail, Menu, X } from "lucide-react";
+import { MARCA } from "@/lib/contenido/clubhouse";
 import { cn } from "@/lib/cn";
 import { Logo } from "@/components/site/logo";
 
@@ -143,7 +144,7 @@ export function Header() {
               exit={{ opacity: 0, y: -10, scale: 0.96 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
               aria-label="Móvil"
-              className="mx-auto mt-2 max-w-[1600px] overflow-hidden rounded-3xl border border-white/10 bg-[#0a2a20]/95 p-2 shadow-[0_16px_40px_-16px_rgba(0,0,0,0.5)] backdrop-blur-xl md:hidden"
+              className="mx-auto mt-2 max-h-[calc(100dvh-6.5rem)] max-w-[1600px] overflow-y-auto rounded-[1.75rem] border border-white/10 bg-[#0a2a20]/97 p-3 shadow-[0_24px_60px_-16px_rgba(0,0,0,0.65)] backdrop-blur-xl md:hidden"
             >
               {NAV.map((item) => (
                 <Link
@@ -151,15 +152,30 @@ export function Header() {
                   href={item.href}
                   onClick={() => setAbierto(false)}
                   className={cn(
-                    "block rounded-2xl px-5 py-3.5 text-center text-lg font-medium transition-colors",
+                    "flex items-center justify-between rounded-2xl px-5 py-4 font-serif text-2xl transition-colors",
                     esActivo(pathname, item.href)
                       ? "bg-crema/10 text-champagne"
                       : "text-crema/85 hover:bg-crema/5",
                   )}
                 >
                   {item.label}
+                  <ArrowRight size={18} className="text-crema/30" />
                 </Link>
               ))}
+              <div className="mt-2 space-y-2 border-t border-white/10 pt-3">
+                <a
+                  href={MARCA.whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setAbierto(false)}
+                  className="boton-oro flex min-h-13 items-center justify-center gap-2 rounded-full px-6 text-sm font-semibold"
+                >
+                  Hablemos por WhatsApp
+                </a>
+                <a href={`mailto:${MARCA.email}`} className="flex items-center justify-center gap-2 py-2 text-xs text-crema/55">
+                  <Mail size={13} /> {MARCA.email}
+                </a>
+              </div>
               <Link
                 href="/admin/login"
                 onClick={() => setAbierto(false)}

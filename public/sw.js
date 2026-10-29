@@ -28,6 +28,8 @@ self.addEventListener("fetch", (event) => {
   if (request.method !== "GET") return;
 
   const url = new URL(request.url);
+  // Solo http(s) del mismo sitio: extensiones del navegador y otros orígenes no se tocan.
+  if (!/^https?:$/.test(url.protocol) || url.origin !== self.location.origin) return;
   // /admin y /api son siempre en vivo — nunca se sirven desde caché.
   if (url.pathname.startsWith("/admin") || url.pathname.startsWith("/api")) return;
 
@@ -37,7 +39,7 @@ self.addEventListener("fetch", (event) => {
         .then((respuesta) => {
           if (respuesta.ok) {
             const copia = respuesta.clone();
-            caches.open(CACHE).then((cache) => cache.put(request, copia));
+            caches.open(CACHE).then((cache) => cache.put(request, copia)).catch(() => {});
           }
           return respuesta;
         })

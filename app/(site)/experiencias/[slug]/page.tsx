@@ -142,7 +142,7 @@ export default async function ExperienciaPage({
       </header>
 
       {/* La propuesta */}
-      <section id="propuesta" className="perla px-6 py-20 sm:px-10 sm:py-24 lg:px-16 xl:px-24">
+      <section id="propuesta" className="perla px-6 py-14 sm:px-10 sm:py-24 lg:px-16 xl:px-24">
         <div className="mx-auto grid max-w-[1400px] gap-12 lg:grid-cols-[1.2fr_1fr]">
           <div>
             <span className="inline-flex items-center gap-3 text-[11px] font-medium uppercase tracking-[0.3em] text-champagne">
@@ -246,7 +246,7 @@ export default async function ExperienciaPage({
       </section>
 
       {/* Las rondas */}
-      <section id="rondas" className="perla px-6 py-24 sm:px-10 sm:py-28 lg:px-16 xl:px-24">
+      <section id="rondas" className="perla px-5 py-16 sm:px-10 sm:py-28 lg:px-16 xl:px-24">
         <div className="mx-auto max-w-[1400px]">
           <EncabezadoSeccion
             eyebrow="Las rondas"
@@ -299,7 +299,7 @@ export default async function ExperienciaPage({
       </section>
 
       {/* Alojamiento y más allá del golf */}
-      <section id="alojamiento" className="perla bg-blanco-roto px-6 py-24 sm:px-10 lg:px-16 xl:px-24">
+      <section id="alojamiento" className="perla bg-blanco-roto px-5 py-16 sm:px-10 sm:py-24 lg:px-16 xl:px-24">
         <div className="mx-auto grid max-w-[1400px] gap-12 lg:grid-cols-2">
           <div>
             <span className="inline-flex items-center gap-3 text-[11px] font-medium uppercase tracking-[0.3em] text-champagne">
@@ -351,7 +351,7 @@ export default async function ExperienciaPage({
       </section>
 
       {/* Tarifas */}
-      <section id="tarifas" className="perla px-6 py-24 sm:px-10 sm:py-28 lg:px-16 xl:px-24">
+      <section id="tarifas" className="perla px-5 py-16 sm:px-10 sm:py-28 lg:px-16 xl:px-24">
         <div className="mx-auto max-w-[1400px]">
           <EncabezadoSeccion
             eyebrow={`Tarifas · ${e.fechas}`}
@@ -469,7 +469,7 @@ export default async function ExperienciaPage({
 
       {/* Salidas */}
       {(e.salidas ?? []).length > 0 && (
-        <section id="salidas" className="perla bg-blanco-roto px-6 py-24 sm:px-10 lg:px-16 xl:px-24">
+        <section id="salidas" className="perla bg-blanco-roto px-5 py-16 sm:px-10 sm:py-24 lg:px-16 xl:px-24">
           <div className="mx-auto max-w-[1100px]">
             <EncabezadoSeccion
               eyebrow="Fechas de salida"
@@ -521,7 +521,7 @@ export default async function ExperienciaPage({
 
       {/* Galería */}
       {(e.galeria ?? []).length > 0 && (
-        <section id="galeria" className="perla px-6 py-24 sm:px-10 lg:px-16 xl:px-24">
+        <section id="galeria" className="perla px-5 py-16 sm:px-10 sm:py-24 lg:px-16 xl:px-24">
           <div className="mx-auto max-w-[1400px]">
             <EncabezadoSeccion
               eyebrow="Galería"
@@ -544,7 +544,7 @@ export default async function ExperienciaPage({
 
       {/* Políticas y preguntas */}
       {((e.politicas ?? []).length > 0 || (e.faq ?? []).length > 0) && (
-        <section id="condiciones" className="perla bg-blanco-roto px-6 py-24 sm:px-10 lg:px-16 xl:px-24">
+        <section id="condiciones" className="perla bg-blanco-roto px-5 py-16 sm:px-10 sm:py-24 lg:px-16 xl:px-24">
           <div className="mx-auto grid max-w-[1200px] gap-12 lg:grid-cols-2">
             {(e.politicas ?? []).length > 0 && (
               <div>

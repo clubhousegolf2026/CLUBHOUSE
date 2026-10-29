@@ -36,7 +36,7 @@ const enlace =
 
 export function Footer() {
   return (
-    <footer className="grano relative isolate overflow-hidden bg-gradient-to-b from-[#061a13] to-[#03100b] text-crema/80">
+    <footer className="grano relative isolate overflow-hidden pb-20 md:pb-0 bg-gradient-to-b from-[#061a13] to-[#03100b] text-crema/80">
       <div
         aria-hidden
         className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#c6a664]/70 to-transparent"
