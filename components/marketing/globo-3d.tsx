@@ -183,7 +183,7 @@ export function Globo3D({
       // (el hero recorta el desborde con overflow-hidden y flex lo centra),
       // porque el disco visible es bastante menor que el lienzo.
       if (!mqLg.matches) {
-        setTamano(Math.min(Math.round(window.innerWidth * 1.3), porAlto));
+        setTamano(Math.min(Math.round(window.innerWidth * 1.08), Math.round(window.innerHeight * 0.62)));
         return;
       }
       const padding = window.innerWidth < 640 ? 24 : 40;
