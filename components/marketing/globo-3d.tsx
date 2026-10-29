@@ -222,6 +222,10 @@ export function Globo3D({
     controls.enablePan = false;
     controls.minDistance = 190;
     controls.maxDistance = 420;
+    // Un dedo que sube o baja desplaza la página; solo el arrastre horizontal gira el globo.
+    try {
+      (g as unknown as { renderer: () => { domElement: HTMLElement } }).renderer().domElement.style.touchAction = "pan-y";
+    } catch {}
     setListo(true);
   }, [listo, tamano, Globe]);
 
@@ -424,7 +428,7 @@ export function Globo3D({
   return (
     <div
       ref={contenedorRef}
-      className="relative mx-auto"
+      className="pointer-events-none relative mx-auto"
       style={{ width: tamano, height: tamano }}
       onClickCapture={alClicContenedor}
     >
@@ -445,6 +449,9 @@ export function Globo3D({
         />
       )}
       {Globe && oceano && THREE && (
+        // Solo el disco del globo responde al tacto: el lienzo es más grande que la
+        // esfera y sus esquinas vacías no deben capturar gestos ni clics.
+        <div className="pointer-events-auto absolute inset-0" style={{ clipPath: "circle(42% at 50% 50%)" }}>
         <Globe
           ref={globoRef}
           width={tamano}
@@ -479,6 +486,7 @@ export function Globo3D({
           }
           onObjectClick={(_d, _evento, coords) => alClicarBandera(coords)}
         />
+        </div>
       )}
     </div>
   );
