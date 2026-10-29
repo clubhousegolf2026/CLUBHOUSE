@@ -449,9 +449,7 @@ export function Globo3D({
         />
       )}
       {Globe && oceano && THREE && (
-        // Solo el disco del globo responde al tacto: el lienzo es más grande que la
-        // esfera y sus esquinas vacías no deben capturar gestos ni clics.
-        <div className="pointer-events-auto absolute inset-0" style={{ clipPath: "circle(42% at 50% 50%)" }}>
+        <div className="pointer-events-auto absolute inset-0">
         <Globe
           ref={globoRef}
           width={tamano}
